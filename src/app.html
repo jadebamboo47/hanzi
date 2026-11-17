@@ -560,7 +560,7 @@ function completeCard(q,res){
   $('nextdue').textContent = msg;
   $('grade').classList.add('show');
   if(!S.settings.autoSay) say();
-  const my=seq; clearTimeout(autoT); autoT=setTimeout(()=>{ if(my===seq) advance(); }, 2600);
+  clearTimeout(autoT);
 }
 function advance(){
   clearTimeout(autoT);
