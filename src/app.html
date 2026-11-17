@@ -129,6 +129,18 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
 .sw{width:52px;height:32px;border-radius:999px;background:var(--line);position:relative;flex:0 0 auto;transition:background .2s}
 .sw::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .sw.on{background:var(--jade)}.sw.on::after{left:23px}
+.lessons{display:flex;flex-direction:column;gap:12px}
+.band{display:flex;flex-direction:column;gap:6px}
+.band .bh{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--ink2);font-weight:600}
+.band .bh button{font-size:12.5px;color:var(--ink3);text-decoration:underline;font-weight:500}
+.tiles{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.tile{border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:7px 4px 6px;text-align:center;line-height:1.1;position:relative}
+.tile b{display:block;font-size:16px;font-weight:600}
+.tile small{display:block;font-size:10.5px;color:var(--ink3);margin-top:2px}
+.tile.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.tile.on small{color:#cfc6b6}
+.tile.cur{background:var(--seal);border-color:var(--seal)}
+.tile.cur::after{content:"neu";position:absolute;top:-7px;right:-4px;background:var(--card);color:var(--seal);border:1px solid var(--seal);border-radius:6px;font-size:9px;font-weight:700;padding:0 4px;text-transform:uppercase}
 .stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-top:6px}
 .stats div{background:var(--paper);border-radius:10px;padding:10px;text-align:center;font-size:12px;color:var(--ink2)}
 .stats b{display:block;font-size:20px;color:var(--ink)}
@@ -141,18 +153,12 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
 <div class="app" id="app">
   <header>
     <div class="brand"><span class="seal">汉字</span><h1>Schreibkarten</h1></div>
-    <div class="chips">
-      <div class="chip due"><b id="cDue">0</b>fällig</div>
-      <div class="chip"><b id="cNew">0</b>neu heute</div>
-      <div class="chip"><b id="cKnown">0</b>gelernt</div>
-    </div>
     <div class="sync" id="sync"></div>
     <button class="icon-btn" id="btnSettings" aria-label="Einstellungen">⚙︎</button>
   </header>
 
   <main id="main">
     <section class="info" id="info">
-      <div class="meta"><span class="tag" id="tagLevel">HSK 1</span><span class="tag" id="tagState">Neu</span></div>
       <div class="pinyin"><span id="pinyin">—</span><button class="say" id="btnSay" aria-label="Aussprechen">🔊</button></div>
       <div class="meaning" id="meaning"></div>
       <div class="slots" id="slots"></div>
@@ -216,19 +222,18 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
   <div class="panel">
     <button class="btn close" id="btnClose">Fertig</button>
     <h3>Einstellungen</h3>
-    <div class="field"><div class="lbl">Aktuelle Lektion · neue Wörter kommen zuerst von hier</div><div class="seg" id="segCur"></div></div>
-    <div class="field"><div class="lbl">China entdecken · Band 2</div><div class="seg" id="segB2"></div></div>
-    <div class="field"><div class="lbl">China entdecken · Band 1</div><div class="seg" id="segLevels"></div></div>
-    <div class="toggle"><div><span>Zusatzwörter mitlernen</span><small>Band 1: auch die farbig markierten Wörter, die keine Lernwörter sind</small></div><button class="sw" id="swExtras"></button></div>
-    <div class="field"><div class="lbl">HSK (zusätzlich)</div><div class="seg" id="segHsk"></div></div>
+    <div class="field"><div class="lbl">Lektionen</div>
+      <div class="lessons" id="lessons"></div>
+      <div class="note" style="margin-top:8px">Tippe eine Lektion an, um sie dazuzunehmen – die neueste Lektion liefert die neuen Wörter, alle anderen werden wiederholt. Nochmal tippen nimmt sie wieder heraus.</div>
+    </div>
+    <div class="field"><div class="lbl">HSK (zusätzlich)</div><div class="lessons" id="segHsk"></div></div>
     <div class="field"><div class="lbl">Neue Wörter pro Tag</div><div class="seg" id="segNew"></div></div>
     <div class="toggle"><div><span>Pinyin abfragen</span><small>Erst das Pinyin zum deutschen Wort eintippen, dann das Zeichen schreiben</small></div><button class="sw" id="swPy"></button></div>
-    <div class="toggle"><div><span>Eigene Pinyin-Tastatur</span><small>Bleibt im Vollbild. Aus: iPad-Tastatur bzw. Pencil-Handschrift (beendet aber das Vollbild)</small></div><button class="sw" id="swKb"></button></div>
+    <div class="toggle"><div><span>Eigene Pinyin-Tastatur</span><small>Aus: iPad-Tastatur bzw. Pencil-Handschrift im Pinyin-Feld</small></div><button class="sw" id="swKb"></button></div>
     <div class="toggle"><div><span>Zufällige Reihenfolge</span><small>Wörter in zufälliger Reihenfolge abfragen (neue Wörter trotzdem zuerst aus der aktuellen Lektion)</small></div><button class="sw" id="swRnd"></button></div>
     <div class="toggle"><div><span>Vorlage immer zeigen</span><small>Graue Umrisse sofort einblenden, ohne „Zeichen unbekannt“</small></div><button class="sw" id="swOutline"></button></div>
     <div class="toggle"><div><span>Nur Apple Pencil</span><small>Finger und Handballen auf der Schreibfläche ignorieren</small></div><button class="sw" id="swPencil"></button></div>
     <div class="toggle"><div><span>Automatisch aussprechen</span><small>Wort bei jeder neuen Karte vorlesen</small></div><button class="sw" id="swAuto"></button></div>
-    <div class="field"><div class="lbl">Fortschritt</div><div class="stats" id="stats"></div></div>
     <button class="danger" id="btnReset">Fortschritt zurücksetzen</button>
     <div class="field"><div class="lbl">Fortschritt übertragen</div>
       <div class="seg"><button id="btnExport">Exportieren (kopieren)</button><button id="btnImportShow">Importieren …</button></div>
@@ -289,6 +294,7 @@ function fixSettings(){
   if(!Array.isArray(S.settings.decks)||!S.settings.decks.length) S.settings.decks=CE2.slice();
   if(!S.settings.b2){ S.settings.b2=true; if(S.settings.decks.join()===CE1.join()) S.settings.decks=CE2.slice(); }
   if(S.settings.askPinyin===undefined) S.settings.askPinyin=true;
+  S.settings.extras=true;
   if(!S.settings.courseV){ S.settings.courseV=1; S.settings.decks=['ce2-1','ce2-2']; S.settings.cur='ce2-2'; }
   delete S.settings.levels; }
 const local=lsLoad(); if(local) merge(local); fixSettings();
@@ -353,15 +359,16 @@ function rollDay(){const t=today();if(S.day!==t){S.day=t;S.newToday=0;}}
 function inLevels(x){const sel=S.settings.decks;return x.d.some(d=>sel.includes(d))||(S.settings.extras&&x.e.some(d=>sel.includes(d)));}
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 const RND=()=>S.settings.random!==false;
+function curDeck(){ const sel=S.settings.decks; const ce=DECKS.filter(d=>d.g!=='HSK'&&sel.includes(d.id)); return ce.length?ce[ce.length-1].id:''; }
 function freshList(){
-  const cur=S.settings.cur, sel=S.settings.decks;
+  const cur=curDeck(), sel=S.settings.decks;
   let f=WORDS.filter(x=>inLevels(x)&&!S.p[x.k]);
   if(RND()) f=shuffle(f);
   if(!cur||!sel.includes(cur)) return f;
   const inCur=x=>x.d.includes(cur)||(S.settings.extras&&x.e.includes(cur));
   return [...f.filter(inCur),...f.filter(x=>!inCur(x))];
 }
-function deckOf(x){const sel=S.settings.decks;const cur=S.settings.cur;const ex=!!S.settings.extras;
+function deckOf(x){const sel=S.settings.decks;const cur=curDeck();const ex=!!S.settings.extras;
   const id=(cur&&(x.d.includes(cur)||(ex&&x.e.includes(cur)))&&cur)||x.d.find(d=>sel.includes(d))||(ex&&x.e.find(d=>sel.includes(d)))||x.d[0]||x.e[0];return DECK[id];}
 function counts(){
   const now=Date.now();let due=0,known=0;
@@ -507,7 +514,7 @@ function renderSlots(){
     return `<div class="slot ${cls}"><div class="box">${cls==='done'?c:''}</div>${py}</div>`;
   }).join('');
 }
-function renderChips(){const c=counts();$('cDue').textContent=c.due;$('cNew').textContent=Math.max(0,S.settings.newPerDay-S.newToday);$('cKnown').textContent=c.known;}
+function renderChips(){}
 function requeue(c,pos){ queue=queue.filter(x=>x.k!==c.k); if(queue.length>=2) queue.splice(Math.min(pos,queue.length),0,c); else queue.push(c); }
 function next(){
   seq++; animBusy=false; resetTouch();
@@ -523,12 +530,6 @@ function next(){
   $('main').style.display=''; $('empty').classList.remove('show');
   charIdx=0; mistakes=0; strokeErr=0; helped=false; unknownChar=false; pyTries=0; pyNote=''; pyShown=false; lastTry='';
   const r=S.p[card.k];
-  {const dk=deckOf(card);$('tagLevel').textContent=dk?dk.t:'';}
-  const st=$('tagState');
-  if(cram){st.textContent='Übung';st.className='tag';}
-  else if(!r){st.textContent='Neu';st.className='tag new';}
-  else if(r.b===0){st.textContent='Lernen';st.className='tag new';}
-  else {st.textContent='Wiederholung';st.className='tag rev';}
   $('meaning').textContent=card.m;
   const ask=S.settings.askPinyin && card.num && !cram_skipPy();
   phase = ask ? 'pinyin' : 'write';
@@ -734,13 +735,13 @@ $('btnCram').onclick=()=>{cramRound();next();};
 // settings
 function renderSettings(){
   const sel=S.settings.decks;
-  const grp=g=>DECKS.filter(d=>d.g===g).map(d=>`<button data-d="${d.id}" class="${sel.includes(d.id)?'on':''}">${d.l}</button>`).join('');
-  const allBtn=g=>`<button data-all="${g}" class="${GROUPS[g].every(d=>sel.includes(d))?'on':''}">Alle</button>`;
-  $('segLevels').innerHTML=allBtn('ce1')+grp('China entdecken 1');
-  $('segB2').innerHTML=allBtn('ce2')+grp('China entdecken 2');
-  $('segHsk').innerHTML=grp('HSK');
-  $('segCur').innerHTML=`<button data-c="" class="${!S.settings.cur?'on':''}">Keine</button>`+DECKS.filter(d=>d.g!=='HSK'&&sel.includes(d.id)).map(d=>`<button data-c="${d.id}" class="${S.settings.cur===d.id?'on':''}">${d.id.startsWith('ce2')?'B2':'B1'} ${d.l}</button>`).join('');
-  $('swExtras').classList.toggle('on',!!S.settings.extras);
+  const cur=curDeck();
+  const prog=id=>{const all=WORDS.filter(x=>x.d.includes(id)||x.e.includes(id));const k=all.filter(x=>S.p[x.k]&&S.p[x.k].b>=3).length;return [k,all.length];};
+  const tile=d=>{const [k,n]=prog(d.id);const on=sel.includes(d.id);return `<button class="tile${on?' on':''}${d.id===cur?' cur':''}" data-d="${d.id}"><b>${d.l.replace('HSK ','')}</b><small>${k}/${n}</small></button>`;};
+  const band=(g,title,key)=>{const ds=DECKS.filter(d=>d.g===g);const allOn=ds.every(d=>sel.includes(d.id));
+    return `<div class="band"><div class="bh"><span>${title}</span><button data-all="${key}">${allOn?'alle abwählen':'alle wählen'}</button></div><div class="tiles">${ds.map(tile).join('')}</div></div>`;};
+  $('lessons').innerHTML=band('China entdecken 2','China entdecken · Band 2','ce2')+band('China entdecken 1','China entdecken · Band 1','ce1');
+  $('segHsk').innerHTML=`<div class="tiles">${DECKS.filter(d=>d.g==='HSK').map(tile).join('')}</div>`;
   $('segNew').innerHTML=[5,10,15,20,30].map(n=>`<button data-n="${n}" class="${S.settings.newPerDay===n?'on':''}">${n}</button>`).join('');
   $('swOutline').classList.toggle('on',S.settings.outlineReview);
   $('swPy').classList.toggle('on',S.settings.askPinyin);
@@ -749,8 +750,6 @@ function renderSettings(){
   applyKbMode();
   $('swPencil').classList.toggle('on',S.settings.pencilOnly);
   $('swAuto').classList.toggle('on',S.settings.autoSay);
-  const lv=DECKS.filter(d=>sel.includes(d.id)).map(d=>{const all=WORDS.filter(x=>x.d.includes(d.id)||(S.settings.extras&&x.e.includes(d.id)));const k=all.filter(x=>S.p[x.k]&&S.p[x.k].b>=3).length;const s=all.filter(x=>S.p[x.k]).length;return `<div>${d.g==='HSK'?d.l:(d.id.startsWith('ce2')?'B2 ':'B1 ')+d.l}<b>${k}/${all.length}</b>${s} begonnen</div>`;}).join('');
-  $('stats').innerHTML=lv;
   $('note').textContent = dbRef ? 'Dein Fortschritt wird in deinem Claude-Konto gespeichert und ist auf allen Geräten verfügbar, auf denen du diese Seite öffnest.' : 'Dein Fortschritt wird in diesem Browser gespeichert.';
   updatePencilNote();
   try{ const a=JSON.parse(localStorage.getItem('hanzi-errlog')||'[]'); $('errlog').textContent=a.length?'Fehlerprotokoll (für Claude):\n'+a.join('\n'):''; }catch(e){}
@@ -758,12 +757,10 @@ function renderSettings(){
 $('btnSettings').onclick=()=>{renderSettings();$('sheet').classList.add('show');};
 let settingsChanged=false;
 function toggleDeck(e){const b=e.target.closest('button');if(!b)return;let L=S.settings.decks.slice();
-  if(b.dataset.all){const G=GROUPS[b.dataset.all];const on=G.every(d=>L.includes(d));L=on?L.filter(d=>!G.includes(d)):[...new Set([...L,...G])]; if(!on&&S.settings.cur&&!G.includes(S.settings.cur)) S.settings.cur='';}
+  if(b.dataset.all){const G=GROUPS[b.dataset.all];const on=G.every(d=>L.includes(d));L=on?L.filter(d=>!G.includes(d)):[...new Set([...L,...G])];}
   else{const id=b.dataset.d;L=L.includes(id)?L.filter(x=>x!==id):[...L,id];}
   if(!L.length)return;S.settings.decks=DECKS.map(d=>d.id).filter(id=>L.includes(id));settingsChanged=true;S.settings._t=Date.now();persist();renderSettings();}
-$('segCur').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.settings.cur=b.dataset.c||'';settingsChanged=true;S.settings._t=Date.now();persist();renderSettings();};
-$('segLevels').onclick=toggleDeck;$('segB2').onclick=toggleDeck;$('segHsk').onclick=toggleDeck;
-$('swExtras').onclick=()=>{S.settings.extras=!S.settings.extras;settingsChanged=true;S.settings._t=Date.now();persist();renderSettings();};
+$('lessons').onclick=toggleDeck;$('segHsk').onclick=toggleDeck;
 $('segNew').onclick=e=>{const n=+e.target.dataset.n;if(!n)return;S.settings.newPerDay=n;settingsChanged=true;S.settings._t=Date.now();persist();renderSettings();};
 $('swKb').onclick=()=>{S.settings.ownKb=!ownKb();S.settings._t=Date.now();persist();applyKbMode();renderSettings();};
 $('swRnd').onclick=()=>{S.settings.random=!RND();settingsChanged=true;S.settings._t=Date.now();persist();renderSettings();};

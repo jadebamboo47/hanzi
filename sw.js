@@ -1,5 +1,5 @@
 // Offline support: keep the app and its fonts cached on the device.
-const VERSION = 'hanzi-v2';
+const VERSION = 'hanzi-v3';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
