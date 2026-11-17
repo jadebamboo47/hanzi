@@ -1,0 +1,17 @@
+{
+  "name": "汉字 Schreibkarten",
+  "short_name": "Hanzi",
+  "description": "Chinesische Schriftzeichen mit dem Apple Pencil lernen – China entdecken Band 1 & 2, HSK 1–4",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5efe3",
+  "theme_color": "#f5efe3",
+  "lang": "de",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
