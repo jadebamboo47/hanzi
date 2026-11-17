@@ -1,5 +1,5 @@
 // Offline support: keep the app and its fonts cached on the device.
-const VERSION = 'hanzi-v16';
+const VERSION = 'hanzi-v17';
 const AUDIO = 'hanzi-audio'; // kept across app updates
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 

@@ -526,7 +526,7 @@ function finishCard(){
     if(drill.round<drill.total){
       drill.round++; charIdx=0; strokeErr=0; unknownChar=false;
       const my=seq; writer.showCharacter(); flash('ok');
-      setTimeout(()=>{ if(my!==seq||!drill) return; renderSlots(); drillLabel(); startChar(); }, 700);
+      setTimeout(()=>{ if(my!==seq||!drill) return; renderSlots(); drillLabel(); startChar(); say(); }, 700);
       return;
     }
     const d=drill; drill=null; $('drillmsg').classList.remove('show');
@@ -538,7 +538,7 @@ function finishCard(){
   if(q===0 && N>0 && !cram){
     drill={q,res,round:1,total:N};
     const my=seq; writer.showCharacter();
-    setTimeout(()=>{ if(my!==seq||!drill) return; charIdx=0; strokeErr=0; unknownChar=false; renderSlots(); drillLabel(); startChar(); }, 1200);
+    setTimeout(()=>{ if(my!==seq||!drill) return; charIdx=0; strokeErr=0; unknownChar=false; renderSlots(); drillLabel(); startChar(); say(); }, 1200);
     return;
   }
   completeCard(q,res);
