@@ -239,6 +239,12 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
     <div class="toggle"><div><span>Vorlage immer zeigen</span><small>Graue Umrisse sofort einblenden, ohne „Zeichen unbekannt“</small></div><button class="sw" id="swOutline"></button></div>
     <div class="toggle"><div><span>Nur Apple Pencil</span><small>Finger und Handballen auf der Schreibfläche ignorieren</small></div><button class="sw" id="swPencil"></button></div>
     <div class="toggle"><div><span>Automatisch aussprechen</span><small>Wort bei jeder neuen Karte vorlesen</small></div><button class="sw" id="swAuto"></button></div>
+    <div class="field"><div class="lbl">Strichprüfung</div><div class="seg" id="segLen"></div>
+      <div class="note" style="margin-top:6px">Wie genau ein Strich passen muss. Reihenfolge und Richtung zählen immer.</div></div>
+    <div class="field"><div class="lbl">Stimme</div>
+      <select id="selVoice" style="width:100%;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--paper);font:15px Inter,sans-serif;padding:0 10px;color:var(--ink)"></select>
+      <div class="seg" style="margin-top:8px"><button id="btnVoiceTest">▶︎ Hörprobe: mā má mǎ mà</button></div>
+      <div class="note" id="voiceNote" style="margin-top:6px"></div></div>
     <button class="danger" id="btnReset">Fortschritt zurücksetzen</button>
     <div class="field"><div class="lbl">Fortschritt übertragen</div>
       <div class="seg"><button id="btnExport">Exportieren (kopieren)</button><button id="btnImportShow">Importieren …</button></div>
@@ -475,7 +481,7 @@ async function startChar(){
 function quiz(){
   quizzing=true;
   writer.quiz({
-    leniency:1.15,
+    leniency:({strict:1.0,normal:1.4,loose:1.8})[S.settings.strict||'normal']||1.4,
     showHintAfterMisses:outlineOn?1:3,
     highlightOnComplete:true,
     onMistake:()=>{mistakes++;strokeErr++;flash('err');},
@@ -650,9 +656,24 @@ function rebuildAfterSync(){ renderSettings(); renderChips();
 
 // ---------- speech ----------
 let zhVoice=null;
-function pickVoice(){try{const v=speechSynthesis.getVoices();zhVoice=v.find(x=>/zh[-_]CN/i.test(x.lang))||v.find(x=>/^zh/i.test(x.lang))||null;}catch(e){}}
+const isMainland=v=>/zh[-_](CN|Hans)|cmn/i.test(v.lang);
+function zhVoices(){ try{ return speechSynthesis.getVoices().filter(v=>/^(zh|cmn|yue)/i.test(v.lang)); }catch(e){ return []; } }
+function pickVoice(){
+  const vs=zhVoices(); const want=S.settings.voice;
+  zhVoice = (want && vs.find(v=>v.voiceURI===want)) || vs.find(v=>isMainland(v) && /premium|enhanced|erweitert/i.test(v.name)) || vs.find(isMainland) || null;
+}
+function voiceLabel(v){ const region=/HK|yue/i.test(v.lang)?'Kantonesisch (Hongkong)':/TW/i.test(v.lang)?'Mandarin (Taiwan)':isMainland(v)?'Mandarin (Festland)':v.lang; return `${v.name} – ${region}`; }
+function renderVoices(){
+  const vs=zhVoices(), sel=$('selVoice'); if(!sel) return;
+  sel.innerHTML = vs.length ? vs.map(v=>`<option value="${v.voiceURI}" ${zhVoice&&v.voiceURI===zhVoice.voiceURI?'selected':''}>${voiceLabel(v)}</option>`).join('') : '<option>Keine chinesische Stimme gefunden</option>';
+  const note = !vs.length ? 'Auf diesem Gerät ist keine chinesische Stimme installiert.' :
+    !vs.some(isMainland) ? 'Es gibt keine Stimme für Mandarin (Festland) – die vorhandene spricht die Töne evtl. falsch.' :
+    (zhVoice && !isMainland(zhVoice)) ? 'Achtung: Diese Stimme ist kein Festland-Mandarin.' : '';
+  $('voiceNote').textContent = note + (note?' ':'') + 'Bessere Stimmen: iPad-Einstellungen → Bedienungshilfen → Gesprochene Inhalte → Stimmen → Chinesisch (China Festland), z. B. eine „Premium“-Stimme laden.';
+}
 try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}catch(e){}
-function say(){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(card.w);u.lang='zh-CN';if(zhVoice)u.voice=zhVoice;u.rate=.8;speechSynthesis.speak(u);}catch(e){}}
+function speak(text){try{ if(!zhVoice) pickVoice(); speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=zhVoice?zhVoice.lang:'zh-CN';if(zhVoice)u.voice=zhVoice;u.rate=.75;speechSynthesis.speak(u);}catch(e){}}
+function say(){ if(card) speak(card.w.replace(/[…\.]/g,'')); }
 
 // ---------- pencil handling: convert touches to mouse events for the writer ----------
 let stylusSeen=false, activeId=null;
@@ -784,6 +805,8 @@ function renderSettings(){
   applyKbMode();
   $('swPencil').classList.toggle('on',S.settings.pencilOnly);
   $('swAuto').classList.toggle('on',S.settings.autoSay);
+  $('segLen').innerHTML=[['strict','Streng'],['normal','Normal'],['loose','Großzügig']].map(([k,l])=>`<button data-len="${k}" class="${(S.settings.strict||'normal')===k?'on':''}">${l}</button>`).join('');
+  pickVoice(); renderVoices();
   $('note').textContent = dbRef ? 'Dein Fortschritt wird in deinem Claude-Konto gespeichert und ist auf allen Geräten verfügbar, auf denen du diese Seite öffnest.' : 'Dein Fortschritt wird in diesem Browser gespeichert.';
   updatePencilNote();
   try{ const a=JSON.parse(localStorage.getItem('hanzi-errlog')||'[]'); $('errlog').textContent=a.length?'Fehlerprotokoll (für Claude):\n'+a.join('\n'):''; }catch(e){}
@@ -795,6 +818,9 @@ function toggleDeck(e){const b=e.target.closest('button');if(!b)return;let L=S.s
   else{const id=b.dataset.d;L=L.includes(id)?L.filter(x=>x!==id):[...L,id];}
   if(!L.length)return;S.settings.decks=DECKS.map(d=>d.id).filter(id=>L.includes(id));settingsChanged=true;S.settings._t=Date.now();persist();renderSettings();}
 $('lessons').onclick=toggleDeck;$('segHsk').onclick=toggleDeck;
+$('segLen').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.settings.strict=b.dataset.len;S.settings._t=Date.now();persist();renderSettings(); if(quizzing&&phase==='write'){ try{writer.cancelQuiz();}catch(_){} quiz(); }};
+$('selVoice').onchange=()=>{S.settings.voice=$('selVoice').value;S.settings._t=Date.now();persist();pickVoice();renderVoices();speak('妈麻马骂');};
+$('btnVoiceTest').onclick=()=>speak('妈，麻，马，骂');
 $('segNew').onclick=e=>{const n=+e.target.dataset.n;if(!n)return;S.settings.newPerDay=n;settingsChanged=true;S.settings._t=Date.now();persist();renderSettings();};
 $('swKb').onclick=()=>{S.settings.ownKb=!ownKb();S.settings._t=Date.now();persist();applyKbMode();renderSettings();};
 $('swRnd').onclick=()=>{S.settings.random=!RND();settingsChanged=true;S.settings._t=Date.now();persist();renderSettings();};
