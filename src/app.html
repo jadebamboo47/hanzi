@@ -48,7 +48,6 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
 .portrait .pinyin{font-size:44px}
 .say{width:46px;height:46px;border-radius:50%;background:var(--card);border:1px solid var(--line);font-size:20px;display:grid;place-items:center;flex:0 0 auto}
 .meaning{font-size:22px;line-height:1.35;color:var(--ink2);max-width:34ch}
-.ambig{font-size:14px;color:var(--seal);margin-top:-10px;min-height:18px}
 .portrait .meaning{font-size:19px;max-width:none}
 .slots{display:flex;gap:12px;flex-wrap:wrap}
 .slot{width:76px;display:flex;flex-direction:column;align-items:center;gap:6px}
@@ -162,7 +161,6 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
     <section class="info" id="info">
       <div class="pinyin"><span id="pinyin">—</span><button class="say" id="btnSay" aria-label="Aussprechen">🔊</button></div>
       <div class="meaning" id="meaning"></div>
-      <div class="ambig" id="ambig"></div>
       <div class="slots" id="slots"></div>
       <div class="pyask" id="pyask">
         <div class="pyrow"><input id="pyin" type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Pinyin …" enterkeyhint="done"><button class="btn primary" id="pyOk">Prüfen</button></div>
@@ -533,8 +531,6 @@ function next(){
   charIdx=0; mistakes=0; strokeErr=0; helped=false; unknownChar=false; pyTries=0; pyNote=''; pyShown=false; lastTry='';
   const r=S.p[card.k];
   $('meaning').textContent=card.m;
-  { const syn=synonymsOf(card), n=hzCount(card.w);
-    $('ambig').textContent = syn.length ? `Mehrere Wörter passen – gesucht: Wort mit ${n} Zeichen` : ''; }
   const ask=S.settings.askPinyin && card.num && !cram_skipPy();
   phase = ask ? 'pinyin' : 'write';
   showPinyin(!ask);
@@ -566,11 +562,6 @@ function parsePy(str){
   }
   return {letters,tones};
 }
-// words that share a German meaning (e.g. „anfangen“: 开始 / 起)
-const meaningKeys=m=>new Set(m.toLowerCase().replace(/\(.*?\)/g,'').split(/[;,/]/).map(t=>t.replace(/^[\s.…]+|[\s.…]+$/g,'')).filter(Boolean));
-const MEANIDX={}; WORDS.forEach(x=>{ if(!x.num) return; meaningKeys(x.m).forEach(k=>{(MEANIDX[k]=MEANIDX[k]||[]).push(x);}); });
-function synonymsOf(c){ const out=new Map(); meaningKeys(c.m).forEach(k=>(MEANIDX[k]||[]).forEach(x=>{ if(x.w!==c.w) out.set(x.w,x); })); return [...out.values()]; }
-const hzCount=w=>[...w].filter(ch=>/[\u4e00-\u9fff]/.test(ch)).length;
 function expectedPy(numStr){
   const syl=(numStr||card.num).toLowerCase().split(/\s+/);
   let letters='',tones=[];
@@ -589,11 +580,6 @@ function checkPinyin(){
   const bad=(msg)=>{ inp.classList.remove('bad'); void inp.offsetWidth; inp.classList.add('bad'); fb.textContent=msg; fb.className='pyfb bad'; };
   const lettersOk = u.letters===e.letters || u.letters.replace(/v/g,'u')===e.letters.replace(/v/g,'u');
   if(!lettersOk){
-    const same=(a,b)=>a===b||a.replace(/v/g,'u')===b.replace(/v/g,'u');
-    const syn=synonymsOf(card).find(x=>same(u.letters,expectedPy(x.num).letters));
-    if(syn){ const n=hzCount(card.w);
-      fb.textContent=`${syn.py} (${syn.w}) passt auch – gesucht ist aber ein anderes Wort mit ${n} Zeichen.`; fb.className='pyfb';
-      return; }
     pyTries++; if(pyTries<=3) mistakes++;
     bad(pyShown?'Noch nicht richtig – schau auf die Lösung oben.':'Nicht richtig, versuch es noch einmal. Mit „Weiß ich nicht“ siehst du die Lösung.');
     return;
