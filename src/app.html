@@ -78,11 +78,21 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
 .btn.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .btn.primary{background:var(--seal);color:#fff;border-color:var(--seal)}
 
-.grade{display:none;flex-direction:column;gap:12px;align-items:center}
+.grade{display:none;flex-direction:column;gap:8px;align-items:center;width:100%}
+.grade .resline{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:baseline}
+.grade .nextdue:not(:empty)::before{content:'· ';}
+.grade .grow{display:flex;gap:12px;align-items:center;justify-content:center;width:100%}
 .grade.show{display:flex}
 .grade .nextdue{font-size:14px;color:var(--ink3)}
 .grade .res{font-size:15px;color:var(--ink2)}
 .grade .row{display:flex;gap:10px}
+.sent{display:none;align-items:center;gap:12px;flex:1;min-width:0;padding:8px 14px;border-radius:14px;background:var(--paper2);text-align:left}
+.sent.show{display:flex}
+.sent .sz{font-size:20px;line-height:1.3;color:var(--ink)}
+.sent .sz b{color:var(--seal);font-weight:600}
+.sent .sp{font-size:13px;color:var(--ink2);margin-top:1px}
+.sent .sd{font-size:13px;color:var(--ink3);margin-top:1px}
+.sentplay{flex:none;width:40px;height:40px;border-radius:50%;border:0;background:var(--card);font-size:18px;box-shadow:0 1px 3px rgba(0,0,0,.15)}
 .g{min-width:120px;height:58px;border-radius:14px;font-weight:600;font-size:16px;border:1px solid var(--line);background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15}
 .g small{font-weight:400;font-size:12px;color:var(--ink3)}
 .g.sug{outline:3px solid var(--ink);outline-offset:2px}
@@ -206,9 +216,9 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
         <button class="btn" id="btnOther">↷ Anderes Wort</button>
       </div>
       <div class="grade" id="grade">
-        <div class="res" id="res"></div>
-        <div class="nextdue" id="nextdue"></div>
-        <button class="btn primary" id="btnNext">Weiter →</button>
+        <div class="resline"><span class="res" id="res"></span><span class="nextdue" id="nextdue"></span></div>
+        <div class="grow"><div class="sent" id="sent"><button class="sentplay" id="btnSent" aria-label="Satz vorlesen">🔊</button><div><div class="sz" id="sentZh"></div><div class="sp" id="sentPy"></div><div class="sd" id="sentDe"></div></div></div>
+        <button class="btn primary" id="btnNext">Weiter →</button></div>
       </div>
     </section>
   </main>
@@ -241,6 +251,7 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
     <div class="toggle"><div><span>Vorlage immer zeigen</span><small>Graue Umrisse sofort einblenden, ohne „Zeichen unbekannt“</small></div><button class="sw" id="swOutline"></button></div>
     <div class="toggle"><div><span>Nur Apple Pencil</span><small>Finger und Handballen auf der Schreibfläche ignorieren</small></div><button class="sw" id="swPencil"></button></div>
     <div class="toggle"><div><span>Automatisch aussprechen</span><small>Wort bei jeder neuen Karte vorlesen</small></div><button class="sw" id="swAuto"></button></div>
+    <div class="toggle"><div><span>Beispielsatz vorlesen</span><small>Nach jeder Vokabel den Beispielsatz automatisch vorlesen</small></div><button class="sw" id="swSent"></button></div>
     <div class="field"><div class="lbl">Nach Fehlern nochmal schreiben</div><div class="seg" id="segReps"></div>
       <div class="note" style="margin-top:6px">Wenn du ein Zeichen nicht wusstest: so oft direkt hintereinander schreiben – das erste Mal mit Vorlage, dann aus dem Gedächtnis.</div></div>
     <div class="field"><div class="lbl">Strichprüfung</div><div class="seg" id="segLen"></div>
@@ -278,6 +289,7 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
 <script>/*LIB*/</script>
 <script>/*DATA*/</script>
 <script>/*AUDIO*/</script>
+<script>/*SENT*/</script>
 <div id="toast" style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1f1b16;color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;display:none;z-index:20;max-width:90vw"></div>
 <script>
 (function(){
@@ -558,8 +570,11 @@ function completeCard(q,res){
   if(q===0) requeue(card,4);
   $('res').textContent = res;
   $('nextdue').textContent = msg;
+  showSentence();
   $('grade').classList.add('show');
-  if(!S.settings.autoSay) say();
+  const my=seq;
+  const after=()=>{ if(my===seq && sentFor(card) && S.settings.sayExample!==false) setTimeout(()=>{ if(my===seq) sayExample(); },350); };
+  if(!S.settings.autoSay) say().then(after); else after();
   clearTimeout(autoT);
 }
 function advance(){
@@ -743,7 +758,8 @@ async function playFiles(list, fallbackText){
       await new Promise((res,rej)=>{ player.onended=res; player.onerror=rej; player.src=u; const pr=player.play(); if(pr&&pr.catch) pr.catch(rej); });
       await new Promise(r=>setTimeout(r,110));
     }
-  }catch(e){ if(my===playSeq && fallbackText) speak(fallbackText); }
+  }catch(e){ if(my===playSeq && fallbackText){ speak(fallbackText); await new Promise(r=>setTimeout(r,500+400*fallbackText.length)); } }
+  return my===playSeq;
 }
 // keep the recordings of all chosen lessons on the device, so pronunciation works offline
 let prefetchRun=0, audioStat={have:0,total:0};
@@ -789,11 +805,25 @@ $('sugYes').onclick=()=>{ const id=$('suggest').dataset.next; if(!id) return;
   $('suggest').classList.remove('show'); buildQueue(); next(); prefetchAudio(); };
 $('sugLater').onclick=()=>{ S.settings.snoozeUntil=Date.now()+2*DAY; S.settings._t=Date.now(); persist(); $('suggest').classList.remove('show'); };
 function say(){
-  if(!card) return;
+  if(!card) return Promise.resolve();
   const text=card.w.replace(/[…\.]/g,'');
   const plan=audioPlan(card);
-  if(plan) playFiles(plan, text); else speak(text);
+  if(plan) return playFiles(plan, text);
+  speak(text); return new Promise(r=>setTimeout(r,500+400*text.length));
 }
+// ---------- example sentences ----------
+function sentFor(c){ return c && window.SENT && (SENT[c.k]||SENT[c.w]) || null; }
+function esc(t){ return t.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+function showSentence(){
+  const s=sentFor(card); const box=$('sent');
+  if(!s){ box.classList.remove('show'); return; }
+  const parts=card.w.split('…').filter(Boolean);
+  let h=esc(s[0]);
+  for(const p of parts){ const e=esc(p); const i=h.indexOf(e); if(i>=0) h=h.slice(0,i)+'<b>'+e+'</b>'+h.slice(i+e.length); }
+  $('sentZh').innerHTML=h; $('sentPy').textContent=s[1]; $('sentDe').textContent=s[2];
+  box.classList.add('show');
+}
+function sayExample(){ const s=sentFor(card); if(!s) return; playSeq++; try{player.pause();}catch(e){} speak(s[0]); }
 
 // ---------- pencil handling: convert touches to mouse events for the writer ----------
 let stylusSeen=false, activeId=null;
@@ -940,6 +970,7 @@ function renderSettings(){
   applyKbMode();
   $('swPencil').classList.toggle('on',S.settings.pencilOnly);
   $('swAuto').classList.toggle('on',S.settings.autoSay);
+  $('swSent').classList.toggle('on',S.settings.sayExample!==false);
   { const r=S.settings.reps===undefined?3:+S.settings.reps; $('segReps').innerHTML=[[0,'Aus'],[3,'3×'],[5,'5×'],[10,'10×']].map(([n,l])=>`<button data-reps="${n}" class="${r===n?'on':''}">${l}</button>`).join(''); }
   $('segLen').innerHTML=[['strict','Streng'],['normal','Normal'],['loose','Großzügig']].map(([k,l])=>`<button data-len="${k}" class="${(S.settings.strict||'normal')===k?'on':''}">${l}</button>`).join('');
   pickVoice(); renderVoices(); renderAudioStat();
@@ -965,6 +996,8 @@ $('swRnd').onclick=()=>{S.settings.random=!RND();settingsChanged=true;S.settings
 $('swPy').onclick=()=>{S.settings.askPinyin=!S.settings.askPinyin;S.settings._t=Date.now();persist();renderSettings();};
 $('swOutline').onclick=()=>{S.settings.outlineReview=!S.settings.outlineReview;S.settings._t=Date.now();persist();renderSettings();};
 $('swPencil').onclick=()=>{S.settings.pencilAsked=true;S.settings.pencilOnly=!S.settings.pencilOnly;S.settings._t=Date.now();persist();renderSettings();};
+$('swSent').onclick=()=>{S.settings.sayExample=S.settings.sayExample===false;S.settings._t=Date.now();persist();renderSettings();};
+$('btnSent').onclick=e=>{e.stopPropagation(); sayExample();};
 $('swAuto').onclick=()=>{S.settings.autoSay=!S.settings.autoSay;S.settings._t=Date.now();persist();renderSettings();};
 $('btnClose').onclick=()=>{$('sheet').classList.remove('show');if(settingsChanged){settingsChanged=false;buildQueue();next();prefetchAudio();}else renderChips();};
 $('btnExport').onclick=async()=>{
