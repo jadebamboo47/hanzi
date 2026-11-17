@@ -248,6 +248,7 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
       <div class="note" style="margin-top:6px">Wie genau ein Strich passen muss. Reihenfolge und Richtung zählen immer.</div></div>
     <div class="field"><div class="lbl">Aussprache</div>
       <div class="seg"><button id="btnVoiceTest">▶︎ Hörprobe: mā má mǎ mà</button></div>
+      <div class="note" id="audioStat" style="margin-top:6px"></div>
       <div class="note" style="margin-top:6px">Echte Aufnahmen von Muttersprachlern (audio-cmn: Chen Wang, Yue Tan · CC BY-SA). Nur wenn es für ein Wort keine Aufnahme gibt, spricht die iPad-Stimme.</div></div>
     <div class="field"><div class="lbl">Ersatzstimme (iPad)</div>
       <select id="selVoice" style="width:100%;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--paper);font:15px Inter,sans-serif;padding:0 10px;color:var(--ink)"></select>
@@ -747,6 +748,25 @@ async function playFiles(list, fallbackText){
     }
   }catch(e){ if(my===playSeq && fallbackText) speak(fallbackText); }
 }
+// keep the recordings of all chosen lessons on the device, so pronunciation works offline
+let prefetchRun=0, audioStat={have:0,total:0};
+async function prefetchAudio(){
+  if(!('caches' in window)) return;
+  const my=++prefetchRun;
+  const files=[...new Set(WORDS.filter(inLevels).flatMap(x=>audioPlan(x)||[]))];
+  audioStat={have:0,total:files.length}; renderAudioStat();
+  let cache; try{ cache=await caches.open('hanzi-audio'); }catch(e){ return; }
+  const todo=[];
+  for(const f of files){ if(await cache.match(f)) audioStat.have++; else todo.push(f); }
+  renderAudioStat();
+  if(!navigator.onLine) return;
+  let i=0;
+  const worker=async()=>{ while(i<todo.length && my===prefetchRun){ const f=todo[i++]; try{ const r=await fetch(f); if(r.ok){ await cache.put(f,r); audioStat.have++; if(audioStat.have%20===0) renderAudioStat(); } }catch(e){} } };
+  await Promise.all([worker(),worker(),worker(),worker()]);
+  renderAudioStat();
+}
+function renderAudioStat(){ const el=$('audioStat'); if(!el) return; const {have,total}=audioStat; el.textContent = total ? (have>=total ? `Offline verfügbar: alle ${total} Aufnahmen deiner Lektionen.` : `Offline verfügbar: ${have} von ${total} Aufnahmen – der Rest wird bei Internet nachgeladen.`) : ''; }
+window.addEventListener('online',()=>prefetchAudio());
 function say(){
   if(!card) return;
   const text=card.w.replace(/[…\.]/g,'');
@@ -886,7 +906,7 @@ function renderSettings(){
   $('swAuto').classList.toggle('on',S.settings.autoSay);
   { const r=S.settings.reps===undefined?3:+S.settings.reps; $('segReps').innerHTML=[[0,'Aus'],[3,'3×'],[5,'5×'],[10,'10×']].map(([n,l])=>`<button data-reps="${n}" class="${r===n?'on':''}">${l}</button>`).join(''); }
   $('segLen').innerHTML=[['strict','Streng'],['normal','Normal'],['loose','Großzügig']].map(([k,l])=>`<button data-len="${k}" class="${(S.settings.strict||'normal')===k?'on':''}">${l}</button>`).join('');
-  pickVoice(); renderVoices();
+  pickVoice(); renderVoices(); renderAudioStat();
   $('note').textContent = dbRef ? 'Dein Fortschritt wird in deinem Claude-Konto gespeichert und ist auf allen Geräten verfügbar, auf denen du diese Seite öffnest.' : 'Dein Fortschritt wird in diesem Browser gespeichert.';
   updatePencilNote();
   try{ const a=JSON.parse(localStorage.getItem('hanzi-errlog')||'[]'); $('errlog').textContent=a.length?'Fehlerprotokoll (für Claude):\n'+a.join('\n'):''; }catch(e){}
@@ -910,7 +930,7 @@ $('swPy').onclick=()=>{S.settings.askPinyin=!S.settings.askPinyin;S.settings._t=
 $('swOutline').onclick=()=>{S.settings.outlineReview=!S.settings.outlineReview;S.settings._t=Date.now();persist();renderSettings();};
 $('swPencil').onclick=()=>{S.settings.pencilAsked=true;S.settings.pencilOnly=!S.settings.pencilOnly;S.settings._t=Date.now();persist();renderSettings();};
 $('swAuto').onclick=()=>{S.settings.autoSay=!S.settings.autoSay;S.settings._t=Date.now();persist();renderSettings();};
-$('btnClose').onclick=()=>{$('sheet').classList.remove('show');if(settingsChanged){settingsChanged=false;buildQueue();next();}else renderChips();};
+$('btnClose').onclick=()=>{$('sheet').classList.remove('show');if(settingsChanged){settingsChanged=false;buildQueue();next();prefetchAudio();}else renderChips();};
 $('btnExport').onclick=async()=>{
   const txt='HANZI1:'+btoa(unescape(encodeURIComponent(JSON.stringify(S))));
   $('xferBox').style.display='block'; $('xfer').value=txt; $('btnImport').style.display='none';
@@ -933,6 +953,7 @@ $('cYes').onclick=()=>{S.p={};S.newToday=0;S.settings._t=Date.now();persist();$(
 let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(layout,120);});
 
 // ---------- go ----------
+setTimeout(()=>prefetchAudio(), 4000);
 applyKbMode();
 layout();
 buildQueue();

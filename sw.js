@@ -1,12 +1,13 @@
 // Offline support: keep the app and its fonts cached on the device.
-const VERSION = 'hanzi-v12';
+const VERSION = 'hanzi-v13';
+const AUDIO = 'hanzi-audio'; // kept across app updates
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== VERSION && k !== AUDIO).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
 self.addEventListener('fetch', e => {
   const req = e.request;
@@ -20,7 +21,10 @@ self.addEventListener('fetch', e => {
   }
   // Everything else (icons, fonts): cache first, then network, and remember it.
   e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(res => {
-    if (res && (res.ok || res.type === 'opaque')) { const copy = res.clone(); caches.open(VERSION).then(c => c.put(req, copy)); }
+    if (res && (res.ok || res.type === 'opaque')) {
+      const copy = res.clone(); const store = req.url.includes('/audio/') ? AUDIO : VERSION;
+      caches.open(store).then(c => c.put(req, copy));
+    }
     return res;
   })));
 });
