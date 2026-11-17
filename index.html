@@ -71,6 +71,8 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
 .pad.err .flash{box-shadow:inset 0 0 0 4px var(--seal)}
 .pad.ok .flash{box-shadow:inset 0 0 0 4px var(--jade)}
 .strokeinfo{position:absolute;right:12px;bottom:10px;font-size:12px;color:var(--ink3);pointer-events:none}
+.drillmsg{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;display:none;pointer-events:none;white-space:nowrap}
+.drillmsg.show{display:block}
 .pencilnote{position:absolute;left:12px;bottom:10px;font-size:12px;color:var(--ink3);pointer-events:none}
 
 .tools{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
@@ -195,6 +197,7 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
         <div class="flash"></div>
         <div class="pencilnote" id="pencilnote"></div>
         <div class="strokeinfo" id="strokeinfo"></div>
+        <div class="drillmsg" id="drillmsg"></div>
         <div class="lockmsg">Erst das Pinyin eingeben,<br>dann das Zeichen schreiben</div>
       </div>
       <div class="tools" id="tools">
@@ -239,6 +242,8 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
     <div class="toggle"><div><span>Vorlage immer zeigen</span><small>Graue Umrisse sofort einblenden, ohne „Zeichen unbekannt“</small></div><button class="sw" id="swOutline"></button></div>
     <div class="toggle"><div><span>Nur Apple Pencil</span><small>Finger und Handballen auf der Schreibfläche ignorieren</small></div><button class="sw" id="swPencil"></button></div>
     <div class="toggle"><div><span>Automatisch aussprechen</span><small>Wort bei jeder neuen Karte vorlesen</small></div><button class="sw" id="swAuto"></button></div>
+    <div class="field"><div class="lbl">Nach Fehlern nochmal schreiben</div><div class="seg" id="segReps"></div>
+      <div class="note" style="margin-top:6px">Wenn du ein Zeichen nicht wusstest: so oft direkt hintereinander schreiben – das erste Mal mit Vorlage, dann aus dem Gedächtnis.</div></div>
     <div class="field"><div class="lbl">Strichprüfung</div><div class="seg" id="segLen"></div>
       <div class="note" style="margin-top:6px">Wie genau ein Strich passen muss. Reihenfolge und Richtung zählen immer.</div></div>
     <div class="field"><div class="lbl">Aussprache</div>
@@ -438,7 +443,7 @@ function cramRound(){
 
 // ---------- writer ----------
 let seq=0, animBusy=false, strokeErr=0, phase='write', unknownChar=false, pyTries=0, pyNote='';
-let charHelp=false, autoT=null;
+let charHelp=false, autoT=null, drill=null;
 let writer=null, size=400, charIdx=0, mistakes=0, helped=false, outlineOn=false, quizzing=false, totalStrokes=0, doneStrokes=0;
 function layout(){
   const vw=window.innerWidth, vh=window.innerHeight;
@@ -479,7 +484,7 @@ async function startChar(){
   if(my!==seq) return;
   writer.hideCharacter();
   totalStrokes=(window.CHARS[ch]||{strokes:[]}).strokes.length; doneStrokes=0; strokeInfo();
-  setOutline(unknownChar||S.settings.outlineReview);
+  setOutline(drill ? (drill.round===1 || unknownChar) : (unknownChar||S.settings.outlineReview));
   quiz();
 }
 function quiz(){
@@ -521,11 +526,35 @@ function schedule(r,q,now){
   r.b = r.iv>=7 ? 3 : r.iv>=3 ? 2 : 1;   // legacy field
 }
 function fmtDays(d){ return d<=0?'gleich nochmal':d===1?'morgen':d<7?`in ${d} Tagen`:d<14?'in 1 Woche':d<30?`in ${Math.round(d/7)} Wochen`:d<60?'in 1 Monat':`in ${Math.round(d/30)} Monaten`; }
+// after a character that wasn't known: write it again a few times (first with outline, then from memory)
+function drillLabel(){ $('drillmsg').textContent = `Nochmal schreiben ${drill.round} / ${drill.total}` + (drill.round===1 ? ' · mit Vorlage' : ' · aus dem Gedächtnis'); $('drillmsg').classList.add('show'); }
 function finishCard(){
+  if(drill){
+    if(drill.round<drill.total){
+      drill.round++; charIdx=0; strokeErr=0; unknownChar=false;
+      const my=seq; writer.showCharacter(); flash('ok');
+      setTimeout(()=>{ if(my!==seq||!drill) return; renderSlots(); drillLabel(); startChar(); }, 700);
+      return;
+    }
+    const d=drill; drill=null; $('drillmsg').classList.remove('show');
+    return completeCard(d.q, d.res);
+  }
+  const q=quality();
+  const res=(pyNote?pyNote+' · ':'') + (charHelp ? 'Zeichen mit Hilfe' : strokeErr===0 ? 'Zeichen fehlerfrei' : `${strokeErr} Fehlstrich${strokeErr>1?'e':''}`);
+  const N=S.settings.reps===undefined ? 3 : +S.settings.reps;
+  if(q===0 && N>0 && !cram){
+    drill={q,res,round:1,total:N};
+    const my=seq; writer.showCharacter();
+    setTimeout(()=>{ if(my!==seq||!drill) return; charIdx=0; strokeErr=0; unknownChar=false; renderSlots(); drillLabel(); startChar(); }, 1200);
+    return;
+  }
+  completeCard(q,res);
+}
+function completeCard(q,res){
   renderSlots();
   writer.showCharacter();
   $('tools').style.display='none';
-  const now=Date.now(), q=quality();
+  const now=Date.now();
   let msg='';
   if(!cram){
     rollDay(); if(!S.p[card.k]) S.newToday++;
@@ -534,7 +563,7 @@ function finishCard(){
     msg = 'Nächste Abfrage: '+fmtDays(r.iv);
   }
   if(q===0) requeue(card,4);
-  $('res').textContent = (pyNote?pyNote+' · ':'') + (charHelp ? 'Zeichen mit Hilfe' : strokeErr===0 ? 'Zeichen fehlerfrei' : `${strokeErr} Fehlstrich${strokeErr>1?'e':''}`);
+  $('res').textContent = res;
   $('nextdue').textContent = msg;
   $('grade').classList.add('show');
   if(!S.settings.autoSay) say();
@@ -561,7 +590,7 @@ function renderSlots(){
 function renderChips(){}
 function requeue(c,pos){ queue=queue.filter(x=>x.k!==c.k); if(queue.length>=2) queue.splice(Math.min(pos,queue.length),0,c); else queue.push(c); }
 function next(){
-  seq++; animBusy=false; resetTouch();
+  seq++; animBusy=false; resetTouch(); drill=null; $('drillmsg').classList.remove('show');
   try{ writer&&writer.cancelQuiz(); }catch(e){} quizzing=false;
   renderChips();
   $('grade').classList.remove('show'); $('tools').style.display='';
@@ -855,6 +884,7 @@ function renderSettings(){
   applyKbMode();
   $('swPencil').classList.toggle('on',S.settings.pencilOnly);
   $('swAuto').classList.toggle('on',S.settings.autoSay);
+  { const r=S.settings.reps===undefined?3:+S.settings.reps; $('segReps').innerHTML=[[0,'Aus'],[3,'3×'],[5,'5×'],[10,'10×']].map(([n,l])=>`<button data-reps="${n}" class="${r===n?'on':''}">${l}</button>`).join(''); }
   $('segLen').innerHTML=[['strict','Streng'],['normal','Normal'],['loose','Großzügig']].map(([k,l])=>`<button data-len="${k}" class="${(S.settings.strict||'normal')===k?'on':''}">${l}</button>`).join('');
   pickVoice(); renderVoices();
   $('note').textContent = dbRef ? 'Dein Fortschritt wird in deinem Claude-Konto gespeichert und ist auf allen Geräten verfügbar, auf denen du diese Seite öffnest.' : 'Dein Fortschritt wird in diesem Browser gespeichert.';
@@ -868,6 +898,7 @@ function toggleDeck(e){const b=e.target.closest('button');if(!b)return;let L=S.s
   else{const id=b.dataset.d;L=L.includes(id)?L.filter(x=>x!==id):[...L,id];}
   if(!L.length)return;S.settings.decks=DECKS.map(d=>d.id).filter(id=>L.includes(id));settingsChanged=true;S.settings._t=Date.now();persist();renderSettings();}
 $('lessons').onclick=toggleDeck;$('segHsk').onclick=toggleDeck;
+$('segReps').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.settings.reps=+b.dataset.reps;S.settings._t=Date.now();persist();renderSettings();};
 $('segLen').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.settings.strict=b.dataset.len;S.settings._t=Date.now();persist();renderSettings(); if(quizzing&&phase==='write'){ try{writer.cancelQuiz();}catch(_){} quiz(); }};
 $('selVoice').onchange=()=>{S.settings.voice=$('selVoice').value;S.settings._t=Date.now();persist();pickVoice();renderVoices();speak('妈，麻，马，骂');};
 $('btnVoiceTest').onclick=()=>playFiles(['audio/s/ma1.mp3','audio/s/ma2.mp3','audio/s/ma3.mp3','audio/s/ma4.mp3'],'妈，麻，马，骂');
