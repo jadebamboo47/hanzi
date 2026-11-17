@@ -82,7 +82,7 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
 .g.sug{outline:3px solid var(--ink);outline-offset:2px}
 .g.again{color:var(--seal)}.g.good{color:var(--ink)}.g.easy{color:var(--jade)}
 
-.pyask{display:none;flex-direction:column;gap:10px;max-width:520px}
+.pyask{display:none;flex-direction:column;gap:10px;max-width:640px}
 .pyask.show{display:flex}
 .pyask.done .tones,.pyask.done .kb,.pyask.done #pyOk,.pyask.done #pyDunno,.pyask.done #pySkip,.pyask.done .pyhint{opacity:.3;pointer-events:none}
 .pyask.done #pyin{border-color:var(--jade);color:var(--jade)}
@@ -91,18 +91,18 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
 .pyrow input:focus{border-color:var(--ink)}
 .pyrow input.bad{border-color:var(--seal);animation:shake .3s}
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-.kb{display:none;flex-direction:column;gap:6px;max-width:560px}
+.kb{display:none;flex-direction:column;gap:7px;max-width:640px}
 .ownkb .kb{display:flex}
-.kb .r{display:flex;gap:5px;justify-content:center}
-.kb button{flex:1;max-width:50px;height:46px;border-radius:9px;border:1px solid var(--line);background:var(--card);font:500 19px Inter,sans-serif;color:var(--ink);box-shadow:0 1px 0 var(--line)}
-.kb button:active{background:var(--paper2)}
-.kb button.wide{max-width:90px;flex:1.6;font-size:16px}
+.kb .r{display:flex;gap:6px;justify-content:center}
+.kb button{flex:1;max-width:62px;height:58px;border-radius:10px;touch-action:manipulation;border:1px solid var(--line);background:var(--card);font:500 23px Inter,sans-serif;color:var(--ink);box-shadow:0 1px 0 var(--line)}
+.kb button:active,.kb button.hit{background:var(--paper2);transform:translateY(1px)}
+.kb button.wide{max-width:110px;flex:1.6;font-size:20px}
 .ownkb .pyhint{display:none}
 .ownkb #pyin{caret-color:transparent}
 .tones{display:flex;gap:8px;flex-wrap:wrap}
-.tones button{width:58px;height:50px;border-radius:12px;border:1px solid var(--line);background:var(--card);font:600 22px Fraunces,serif;line-height:1}
+.tones button{width:66px;height:58px;border-radius:12px;touch-action:manipulation;border:1px solid var(--line);background:var(--card);font:600 22px Fraunces,serif;line-height:1}
 .tones button small{display:block;font:500 10px Inter,sans-serif;color:var(--ink3);margin-top:2px}
-.tones button:active{background:var(--paper2)}
+.tones button:active,.tones button.hit{background:var(--paper2)}
 .pyfb{font-size:15px;min-height:20px;color:var(--ink2)}
 .pyfb.ok{color:var(--jade)}.pyfb.bad{color:var(--seal)}
 .pyhint{font-size:12.5px;color:var(--ink3)}
@@ -434,7 +434,7 @@ function layout(){
   const head=70, tools=140;
   let s;
   if(portrait){ const infoH=$('info').offsetHeight||260; s=Math.min(vw-40, vh-head-infoH-tools-30); }
-  else { s=Math.min(vh-head-tools-20, vw*0.55); }
+  else { s=Math.min(vh-head-tools-20, vw*0.46); }
   s=Math.max(240,Math.floor(s));
   size=s;
   const pad=$('pad'); pad.style.width=s+'px'; pad.style.height=s+'px'; $('padcol').style.width=s+'px';
@@ -795,7 +795,8 @@ function applyKbMode(){
 document.querySelectorAll('#kb .r').forEach(r=>{
   r.innerHTML=[...r.dataset.k].map(c=>`<button data-c="${c}">${c}</button>`).join('')+(r.dataset.k==='yxcvbnm'?'<button class="wide" data-c="del">⌫</button>':'');
 });
-$('kb').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b||phase!=='pinyin')return; const inp=$('pyin');
+function hit(b){ b.classList.add('hit'); setTimeout(()=>b.classList.remove('hit'),120); }
+$('kb').addEventListener('pointerdown',e=>{ const b=e.target.closest('button'); if(!b||phase!=='pinyin')return; e.preventDefault(); hit(b); const inp=$('pyin');
   if(b.dataset.c==='del') inp.value=[...inp.value].slice(0,-1).join(''); else inp.value+=b.dataset.c; inp.classList.remove('bad'); });
 // hardware keyboard while using own keyboard
 document.addEventListener('keydown',e=>{
@@ -805,8 +806,7 @@ document.addEventListener('keydown',e=>{
   else if(k==='Backspace'){ e.preventDefault(); inp.value=[...inp.value].slice(0,-1).join(''); }
   else if(/^[a-zA-Z0-9 üÜ]$/.test(k)){ e.preventDefault(); inp.value+=k.toLowerCase(); inp.classList.remove('bad'); }
 });
-$('tones').addEventListener('pointerdown',e=>{ if(!ownKb()&&e.target.closest('button')) e.preventDefault(); });
-$('tones').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b||phase!=='pinyin')return; applyTone(b.dataset.t); $('pyin').classList.remove('bad'); });
+$('tones').addEventListener('pointerdown',e=>{ const b=e.target.closest('button'); if(!b||phase!=='pinyin')return; e.preventDefault(); hit(b); applyTone(b.dataset.t); $('pyin').classList.remove('bad'); });
 $('pyin').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();checkPinyin();}});
 $('pyDunno').onclick=()=>{ if(phase==='pinyin') revealPy(); };
 $('btnOutline').onclick=()=>{ if(!writer||phase!=='write')return; unknownChar=!unknownChar; if(unknownChar){ helped=true; charHelp=true; } setOutline(unknownChar); if(quizzing){writer.cancelQuiz();quiz();} };
