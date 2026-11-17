@@ -74,6 +74,7 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
 
 .grade{display:none;flex-direction:column;gap:12px;align-items:center}
 .grade.show{display:flex}
+.grade .nextdue{font-size:14px;color:var(--ink3)}
 .grade .res{font-size:15px;color:var(--ink2)}
 .grade .row{display:flex;gap:10px}
 .g{min-width:120px;height:58px;border-radius:14px;font-weight:600;font-size:16px;border:1px solid var(--line);background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15}
@@ -198,11 +199,8 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
       </div>
       <div class="grade" id="grade">
         <div class="res" id="res"></div>
-        <div class="row">
-          <button class="g again" data-g="0">Nochmal<small id="ivA">gleich</small></button>
-          <button class="g good" data-g="1">Gut<small id="ivG"></small></button>
-          <button class="g easy" data-g="2">Leicht<small id="ivE"></small></button>
-        </div>
+        <div class="nextdue" id="nextdue"></div>
+        <button class="btn primary" id="btnNext">Weiter →</button>
       </div>
     </section>
   </main>
@@ -372,7 +370,7 @@ function deckOf(x){const sel=S.settings.decks;const cur=curDeck();const ex=!!S.s
   const id=(cur&&(x.d.includes(cur)||(ex&&x.e.includes(cur)))&&cur)||x.d.find(d=>sel.includes(d))||(ex&&x.e.find(d=>sel.includes(d)))||x.d[0]||x.e[0];return DECK[id];}
 function counts(){
   const now=Date.now();let due=0,known=0;
-  for(const k in S.p){const r=S.p[k];const x=BYW[k];if(!x)continue;if(r.b>=3)known++;if(inLevels(x)&&r.d<=now)due++;}
+  for(const k in S.p){const r=S.p[k];const x=BYW[k];if(!x)continue;if(isKnown(r))known++;if(inLevels(x)&&r.d<=now)due++;}
   return {due,known};
 }
 
@@ -416,6 +414,7 @@ function cramRound(){
 
 // ---------- writer ----------
 let seq=0, animBusy=false, strokeErr=0, phase='write', unknownChar=false, pyTries=0, pyNote='';
+let charHelp=false, autoT=null;
 let writer=null, size=400, charIdx=0, mistakes=0, helped=false, outlineOn=false, quizzing=false, totalStrokes=0, doneStrokes=0;
 function layout(){
   const vw=window.innerWidth, vh=window.innerHeight;
@@ -474,32 +473,53 @@ function nextChar(){
   charIdx++;
   if(charIdx<card.w.length) startChar(); else finishCard();
 }
+// ---------- automatic scheduling (SM-2 style, as used by Anki) ----------
+// quality 0 = again, 1 = hard, 2 = good, 3 = easy — derived from how the card went
+function quality(){
+  if(pyShown || charHelp || strokeErr>=4) return 0;
+  let q = (pyTries>=2 || strokeErr>=2) ? 1 : (pyTries===1 || strokeErr===1) ? 2 : 3;
+  if(S.settings.outlineReview) q=Math.min(q,1);   // writing with the outline always visible is easier
+  return q;
+}
+function migrate(r){ if(r.ef===undefined){ r.ef=2.5; r.iv=IV[Math.min(r.b||0,IV.length-1)]||0; r.reps=r.b||0; r.lapses=r.lapses||0; } return r; }
+const isKnown=r=>r && (r.iv!==undefined ? r.iv>=7 : (r.b||0)>=3);
+function schedule(r,q,now){
+  migrate(r);
+  if(q===0){ r.lapses++; r.reps=0; r.ef=Math.max(1.3,r.ef-0.2); r.iv=0; r.d=now+10*60e3; r.b=0; return; }
+  r.reps++;
+  if(r.reps===1) r.iv = q===3 ? 3 : 1;
+  else if(r.reps===2) r.iv = q===1 ? 2 : q===2 ? 3 : 6;
+  else r.iv = Math.max(r.iv+1, Math.round(r.iv * (q===1 ? 1.2 : q===2 ? r.ef : r.ef*1.15)));
+  r.ef = Math.min(3.0, Math.max(1.3, r.ef + (q===1 ? -0.15 : q===3 ? 0.1 : 0)));
+  r.iv = Math.min(365, r.iv);
+  const fuzz = r.iv>=3 ? Math.round(r.iv*0.05*(Math.random()*2-1)) : 0;   // spread reviews a little
+  r.d = now + (r.iv+fuzz)*DAY - 36e5;
+  r.b = r.iv>=7 ? 3 : r.iv>=3 ? 2 : 1;   // legacy field
+}
+function fmtDays(d){ return d<=0?'gleich nochmal':d===1?'morgen':d<7?`in ${d} Tagen`:d<14?'in 1 Woche':d<30?`in ${Math.round(d/7)} Wochen`:d<60?'in 1 Monat':`in ${Math.round(d/30)} Monaten`; }
 function finishCard(){
   renderSlots();
   writer.showCharacter();
   $('tools').style.display='none';
-  const g=$('grade'); g.classList.add('show');
-  const r=S.p[card.k];
-  const sug = helped||mistakes>=4 ? 0 : mistakes===0 ? 2 : 1;
-  const b=r?r.b:0;
-  $('ivG').textContent=fmtIv(Math.max(1,b+1)); $('ivE').textContent=fmtIv(Math.max(2,b+2));
-  document.querySelectorAll('.g').forEach(el=>el.classList.toggle('sug',+el.dataset.g===sug));
-  $('res').textContent = (pyNote?pyNote+' · ':'') + (helped ? 'mit Hilfe geschrieben' : strokeErr===0 ? 'Zeichen fehlerfrei' : `${strokeErr} Fehlstrich${strokeErr>1?'e':''}`);
+  const now=Date.now(), q=quality();
+  let msg='';
+  if(!cram){
+    rollDay(); if(!S.p[card.k]) S.newToday++;
+    const r=S.p[card.k]||{b:0,d:0,n:0}; schedule(r,q,now);
+    r.n=(r.n||0)+1; r.t=now; S.p[card.k]=r; persist();
+    msg = 'Nächste Abfrage: '+fmtDays(r.iv);
+  }
+  if(q===0) requeue(card,4);
+  $('res').textContent = (pyNote?pyNote+' · ':'') + (charHelp ? 'Zeichen mit Hilfe' : strokeErr===0 ? 'Zeichen fehlerfrei' : `${strokeErr} Fehlstrich${strokeErr>1?'e':''}`);
+  $('nextdue').textContent = msg;
+  $('grade').classList.add('show');
   if(!S.settings.autoSay) say();
+  const my=seq; clearTimeout(autoT); autoT=setTimeout(()=>{ if(my===seq) advance(); }, 2600);
 }
-function fmtIv(b){const d=IV[Math.min(b,IV.length-1)];return d===1?'1 Tag':d<30?d+' Tage':d<60?'1 Monat':Math.round(d/30)+' Monate';}
-function grade(g){
+function advance(){
+  clearTimeout(autoT);
   if(!$('grade').classList.contains('show')) return;
   $('grade').classList.remove('show');
-  const now=Date.now();
-  const wasNew=!S.p[card.k];
-  if(!cram){
-    rollDay(); if(wasNew) S.newToday++;
-    let r=S.p[card.k]||{b:0,d:0,n:0};
-    if(g===0){ r.b=0; r.d=now+10*60e3; requeue(card,4); }
-    else { r.b=Math.max(g===2?2:1, r.b+(g===2?2:1)); r.b=Math.min(r.b,IV.length-1); r.d=now+IV[r.b]*DAY-36e5; }
-    r.n=(r.n||0)+1; r.t=Date.now(); S.p[card.k]=r; persist();
-  } else if(g===0){ requeue(card,4); }
   next();
 }
 
@@ -528,7 +548,7 @@ function next(){
   if(card && card.k===prevK && queue.length){ const alt=queue.findIndex(x=>x.k!==prevK); if(alt>=0){ const c=queue.splice(alt,1)[0]; queue.unshift(card); card=c; } }
   if(!card){ showEmpty(); return; }
   $('main').style.display=''; $('empty').classList.remove('show');
-  charIdx=0; mistakes=0; strokeErr=0; helped=false; unknownChar=false; pyTries=0; pyNote=''; pyShown=false; lastTry='';
+  charIdx=0; mistakes=0; strokeErr=0; helped=false; charHelp=false; unknownChar=false; pyTries=0; pyNote=''; pyShown=false; lastTry='';
   const r=S.p[card.k];
   $('meaning').textContent=card.m;
   const ask=S.settings.askPinyin && card.num && !cram_skipPy();
@@ -718,17 +738,17 @@ $('tones').addEventListener('pointerdown',e=>{ if(!ownKb()&&e.target.closest('bu
 $('tones').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b||phase!=='pinyin')return; applyTone(b.dataset.t); $('pyin').classList.remove('bad'); });
 $('pyin').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();checkPinyin();}});
 $('pyDunno').onclick=()=>{ if(phase==='pinyin') revealPy(); };
-$('btnOutline').onclick=()=>{ if(!writer||phase!=='write')return; unknownChar=!unknownChar; if(unknownChar) helped=true; setOutline(unknownChar); if(quizzing){writer.cancelQuiz();quiz();} };
+$('btnOutline').onclick=()=>{ if(!writer||phase!=='write')return; unknownChar=!unknownChar; if(unknownChar){ helped=true; charHelp=true; } setOutline(unknownChar); if(quizzing){writer.cancelQuiz();quiz();} };
 $('btnShow').onclick=async()=>{
-  if(!writer) return; helped=true; writer.cancelQuiz(); quizzing=false; doneStrokes=0; strokeInfo();
+  if(!writer) return; helped=true; charHelp=true; writer.cancelQuiz(); quizzing=false; doneStrokes=0; strokeInfo();
   if(animBusy) return; animBusy=true; const my=seq;
   try{ await writer.animateCharacter(); }catch(e){}
   animBusy=false; if(my!==seq||phase!=='write') return;
   writer.hideCharacter(); unknownChar=true; setOutline(true); quiz();
 };
 $('btnRestart').onclick=()=>{ if(!writer)return; writer.cancelQuiz(); writer.hideCharacter(); doneStrokes=0; strokeInfo(); setOutline(outlineOn); quiz(); };
-$('btnSkip').onclick=()=>{ if(!writer||phase!=='write'||animBusy)return; helped=true; mistakes+=4; writer.cancelQuiz(); quizzing=false; writer.showCharacter(); const my=seq,ci=charIdx; setTimeout(()=>{if(my===seq&&ci===charIdx)nextChar();},700); };
-document.querySelectorAll('.g').forEach(b=>b.onclick=()=>grade(+b.dataset.g));
+$('btnSkip').onclick=()=>{ if(!writer||phase!=='write'||animBusy)return; helped=true; charHelp=true; mistakes+=4; writer.cancelQuiz(); quizzing=false; writer.showCharacter(); const my=seq,ci=charIdx; setTimeout(()=>{if(my===seq&&ci===charIdx)nextChar();},700); };
+$('btnNext').onclick=()=>advance();
 $('btnMore').onclick=()=>{cram=false;addNew(5);next();};
 $('btnCram').onclick=()=>{cramRound();next();};
 
@@ -736,7 +756,7 @@ $('btnCram').onclick=()=>{cramRound();next();};
 function renderSettings(){
   const sel=S.settings.decks;
   const cur=curDeck();
-  const prog=id=>{const all=WORDS.filter(x=>x.d.includes(id)||x.e.includes(id));const k=all.filter(x=>S.p[x.k]&&S.p[x.k].b>=3).length;return [k,all.length];};
+  const prog=id=>{const all=WORDS.filter(x=>x.d.includes(id)||x.e.includes(id));const k=all.filter(x=>isKnown(S.p[x.k])).length;return [k,all.length];};
   const tile=d=>{const [k,n]=prog(d.id);const on=sel.includes(d.id);return `<button class="tile${on?' on':''}${d.id===cur?' cur':''}" data-d="${d.id}"><b>${d.l.replace('HSK ','')}</b><small>${k}/${n}</small></button>`;};
   const band=(g,title,key)=>{const ds=DECKS.filter(d=>d.g===g);const allOn=ds.every(d=>sel.includes(d.id));
     return `<div class="band"><div class="bh"><span>${title}</span><button data-all="${key}">${allOn?'alle abwählen':'alle wählen'}</button></div><div class="tiles">${ds.map(tile).join('')}</div></div>`;};
