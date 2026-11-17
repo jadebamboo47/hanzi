@@ -234,9 +234,12 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
     <div class="toggle"><div><span>Automatisch aussprechen</span><small>Wort bei jeder neuen Karte vorlesen</small></div><button class="sw" id="swAuto"></button></div>
     <div class="field"><div class="lbl">Strichprüfung</div><div class="seg" id="segLen"></div>
       <div class="note" style="margin-top:6px">Wie genau ein Strich passen muss. Reihenfolge und Richtung zählen immer.</div></div>
-    <div class="field"><div class="lbl">Stimme</div>
+    <div class="field"><div class="lbl">Aussprache</div>
+      <div class="seg"><button id="btnVoiceTest">▶︎ Hörprobe: mā má mǎ mà</button></div>
+      <div class="note" style="margin-top:6px">Echte Aufnahmen von Muttersprachlern (audio-cmn: Chen Wang, Yue Tan · CC BY-SA). Nur wenn es für ein Wort keine Aufnahme gibt, spricht die iPad-Stimme.</div></div>
+    <div class="field"><div class="lbl">Ersatzstimme (iPad)</div>
       <select id="selVoice" style="width:100%;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--paper);font:15px Inter,sans-serif;padding:0 10px;color:var(--ink)"></select>
-      <div class="seg" style="margin-top:8px"><button id="btnVoiceTest">▶︎ Hörprobe: mā má mǎ mà</button></div>
+      <div class="seg" style="margin-top:8px"><button id="btnTtsTest">▶︎ Ersatzstimme testen</button></div>
       <div class="note" id="voiceNote" style="margin-top:6px"></div></div>
     <button class="danger" id="btnReset">Fortschritt zurücksetzen</button>
     <div class="field"><div class="lbl">Fortschritt übertragen</div>
@@ -262,6 +265,7 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
 
 <script>/*LIB*/</script>
 <script>/*DATA*/</script>
+<script>/*AUDIO*/</script>
 <div id="toast" style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1f1b16;color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;display:none;z-index:20;max-width:90vw"></div>
 <script>
 (function(){
@@ -659,7 +663,53 @@ function renderVoices(){
 }
 try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}catch(e){}
 function speak(text){try{ if(!zhVoice) pickVoice(); speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=zhVoice?zhVoice.lang:'zh-CN';if(zhVoice)u.voice=zhVoice;u.rate=.75;speechSynthesis.speak(u);}catch(e){}}
-function say(){ if(card) speak(card.w.replace(/[…\.]/g,'')); }
+// ---- native-speaker recordings (audio-cmn, CC BY-SA); device voice only as fallback ----
+const AW=new Set(window.AUD_W||[]), AS=new Set(window.AUD_S||[]);
+const player=new Audio(); player.preload='auto';
+let playSeq=0;
+function sylKey(x){ const m=String(x).toLowerCase().match(/^([a-zü:v]+)([1-5])$/); return m ? m[1].replace('u:','v').replace('ü','v')+m[2] : null; }
+function audioPlan(c){
+  if(!c) return null;
+  const n=[...c.w].filter(ch=>/[\u4e00-\u9fff]/.test(ch)).length;
+  const syl=(c.num||'').split(/\s+/).filter(Boolean).map(sylKey);
+  const sylOk=syl.length && syl.every(k=>k&&AS.has(k));
+  const files=list=>list.map(f=>'audio/'+f+'.mp3');
+  if(n===1 && sylOk) return files(syl.map(k=>'s/'+k));              // single character: exact reading shown
+  if(n===1 && syl.some(k=>k&&k.endsWith('5')) && '了过得着地'.includes(c.w)) return null;   // neutral-tone reading of a polyphone: recording would be the other reading
+  if(n>1 && AW.has(c.w)) return files(['w/'+encodeURIComponent(c.w)]);
+  if(sylOk) return files(syl.map(k=>'s/'+k));
+  if(AW.has(c.w)) return files(['w/'+encodeURIComponent(c.w)]);
+  return null;
+}
+const blobUrls=new Map();
+async function urlFor(f){
+  if(blobUrls.has(f)) return blobUrls.get(f);
+  const r=await fetch(f); if(!r.ok) throw new Error('audio '+r.status);
+  const u=URL.createObjectURL(await r.blob()); blobUrls.set(f,u); return u;
+}
+// iOS only lets a page play sound after a touch: unlock the player on the first one
+const SILENT='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+let unlocked=false;
+function unlockAudio(){ if(unlocked) return; unlocked=true; try{ player.src=SILENT; const pr=player.play(); if(pr&&pr.catch) pr.catch(()=>{ unlocked=false; }); }catch(e){ unlocked=false; } }
+['touchend','pointerup','click','keydown'].forEach(ev=>document.addEventListener(ev,unlockAudio,{capture:true,passive:true}));
+async function playFiles(list, fallbackText){
+  const my=++playSeq;
+  try{ speechSynthesis.cancel(); }catch(e){}
+  try{
+    const urls=await Promise.all(list.map(urlFor));
+    for(const u of urls){
+      if(my!==playSeq) return;
+      await new Promise((res,rej)=>{ player.onended=res; player.onerror=rej; player.src=u; const pr=player.play(); if(pr&&pr.catch) pr.catch(rej); });
+      await new Promise(r=>setTimeout(r,110));
+    }
+  }catch(e){ if(my===playSeq && fallbackText) speak(fallbackText); }
+}
+function say(){
+  if(!card) return;
+  const text=card.w.replace(/[…\.]/g,'');
+  const plan=audioPlan(card);
+  if(plan) playFiles(plan, text); else speak(text);
+}
 
 // ---------- pencil handling: convert touches to mouse events for the writer ----------
 let stylusSeen=false, activeId=null;
@@ -805,8 +855,9 @@ function toggleDeck(e){const b=e.target.closest('button');if(!b)return;let L=S.s
   if(!L.length)return;S.settings.decks=DECKS.map(d=>d.id).filter(id=>L.includes(id));settingsChanged=true;S.settings._t=Date.now();persist();renderSettings();}
 $('lessons').onclick=toggleDeck;$('segHsk').onclick=toggleDeck;
 $('segLen').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.settings.strict=b.dataset.len;S.settings._t=Date.now();persist();renderSettings(); if(quizzing&&phase==='write'){ try{writer.cancelQuiz();}catch(_){} quiz(); }};
-$('selVoice').onchange=()=>{S.settings.voice=$('selVoice').value;S.settings._t=Date.now();persist();pickVoice();renderVoices();speak('妈麻马骂');};
-$('btnVoiceTest').onclick=()=>speak('妈，麻，马，骂');
+$('selVoice').onchange=()=>{S.settings.voice=$('selVoice').value;S.settings._t=Date.now();persist();pickVoice();renderVoices();speak('妈，麻，马，骂');};
+$('btnVoiceTest').onclick=()=>playFiles(['audio/s/ma1.mp3','audio/s/ma2.mp3','audio/s/ma3.mp3','audio/s/ma4.mp3'],'妈，麻，马，骂');
+$('btnTtsTest').onclick=()=>speak('妈，麻，马，骂');
 $('segNew').onclick=e=>{const n=+e.target.dataset.n;if(!n)return;S.settings.newPerDay=n;settingsChanged=true;S.settings._t=Date.now();persist();renderSettings();};
 $('swKb').onclick=()=>{S.settings.ownKb=!ownKb();S.settings._t=Date.now();persist();applyKbMode();renderSettings();};
 $('swRnd').onclick=()=>{S.settings.random=!RND();settingsChanged=true;S.settings._t=Date.now();persist();renderSettings();};

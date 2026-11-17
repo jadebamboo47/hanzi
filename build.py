@@ -5,7 +5,8 @@ R = Path(__file__).parent
 s = (R/'src/app.html').read_text()
 lib = (R/'src/hanzi-writer.min.js').read_text().replace('</script', '<\\/script')
 data = (R/'src/data.js').read_text()
-s = s.replace('/*LIB*/', lib).replace('/*DATA*/', data)
+audio = (R/'src/audio.js').read_text()
+s = s.replace('/*LIB*/', lib).replace('/*DATA*/', data).replace('/*AUDIO*/', audio)
 s = s.replace('<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">',
  '''<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <link rel="manifest" href="manifest.webmanifest">

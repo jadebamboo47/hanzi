@@ -16,3 +16,7 @@ Strichdaten: [Hanzi Writer](https://hanziwriter.org) / [Make Me a Hanzi](https:/
 - `src/vokabeln_band*.txt` – Vokabellisten (Wort | Pinyin | Lektion | … | Bedeutung)
 - `build.py` – baut daraus `index.html` (`python3 build.py`)
 - `sw.js`, `manifest.webmanifest`, Icons – Installierbarkeit und Offline-Betrieb
+
+## Aussprache
+
+Aufnahmen aus [audio-cmn](https://github.com/hugolpz/audio-cmn) – Silben: Chen Wang, Wörter: Yue Tan, Lizenz [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Dateien unverändert in `audio/` (umbenannt).
