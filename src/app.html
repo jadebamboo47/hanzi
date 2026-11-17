@@ -107,6 +107,7 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
 .pyhint{font-size:12.5px;color:var(--ink3)}
 .pinyin .hid{color:var(--line);letter-spacing:6px}
 .pad.locked #hw{opacity:.15;pointer-events:none}
+.pad.locked .strokeinfo{visibility:hidden}
 .pad .lockmsg{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;color:var(--ink3);font-size:17px;padding:30px;pointer-events:none}
 .pad.locked .lockmsg{display:flex}
 .empty{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:16px}
@@ -586,7 +587,7 @@ function checkPinyin(){
   }
   const ut=u.tones.filter(t=>t!==5), et=e.tones.filter(t=>t!==5);
   const et2=card.alt?expectedPy(card.alt).tones.filter(t=>t!==5):null;
-  if(ut.length===0){ bad('Silben richtig – jetzt noch die Töne dazu.'); return; }
+  if(ut.length===0 && et.length>0){ bad('Silben richtig – jetzt noch die Töne dazu.'); return; }
   if(ut.join()!==et.join() && !(et2 && ut.join()===et2.join())){
     pyTries++; if(pyTries<=3) mistakes++;
     bad('Silben richtig, Töne noch nicht.');
