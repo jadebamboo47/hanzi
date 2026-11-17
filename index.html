@@ -106,13 +106,13 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 .kb{display:none;flex-direction:column;gap:7px;max-width:640px}
 .ownkb .kb{display:flex}
-.kb .r{display:flex;gap:6px;justify-content:center}
+.kb .r{display:flex;gap:6px;justify-content:center;touch-action:manipulation}
 .kb button{flex:1;max-width:62px;height:58px;border-radius:10px;touch-action:manipulation;border:1px solid var(--line);background:var(--card);font:500 23px Inter,sans-serif;color:var(--ink);box-shadow:0 1px 0 var(--line)}
-.kb button:active,.kb button.hit{background:var(--paper2);transform:translateY(1px)}
+.kb button:active,.kb button.hit{background:var(--ink);color:var(--paper);transform:translateY(1px)}
 .kb button.wide{max-width:110px;flex:1.6;font-size:20px}
 .ownkb .pyhint{display:none}
-.ownkb #pyin{caret-color:transparent}
-.tones{display:flex;gap:8px;flex-wrap:wrap}
+.ownkb #pyin{caret-color:transparent;pointer-events:none;opacity:1;-webkit-text-fill-color:currentColor}
+.tones{display:flex;gap:8px;flex-wrap:wrap;padding:2px 0}
 .tones button{width:66px;height:58px;border-radius:12px;touch-action:manipulation;border:1px solid var(--line);background:var(--card);font:600 22px Fraunces,serif;line-height:1}
 .tones button small{display:block;font:500 10px Inter,sans-serif;color:var(--ink3);margin-top:2px}
 .tones button:active,.tones button.hit{background:var(--paper2)}
@@ -887,14 +887,21 @@ const ownKb=()=>S.settings.ownKb!==false;
 function applyKbMode(){
   const on=ownKb(), inp=$('pyin');
   document.body.classList.toggle('ownkb',on);
-  inp.readOnly=on; inp.setAttribute('inputmode',on?'none':'text'); inp.tabIndex=on?-1:0;
+  inp.readOnly=on; inp.disabled=on; inp.setAttribute('inputmode',on?'none':'text'); inp.tabIndex=on?-1:0;
   if(on) try{inp.blur();}catch(e){}
 }
 document.querySelectorAll('#kb .r').forEach(r=>{
   r.innerHTML=[...r.dataset.k].map(c=>`<button data-c="${c}">${c}</button>`).join('')+(r.dataset.k==='yxcvbnm'?'<button class="wide" data-c="del">⌫</button>':'');
 });
-function hit(b){ b.classList.add('hit'); setTimeout(()=>b.classList.remove('hit'),120); }
-$('kb').addEventListener('pointerdown',e=>{ const b=e.target.closest('button'); if(!b||phase!=='pinyin')return; e.preventDefault(); hit(b); const inp=$('pyin');
+function hit(b){ b.classList.add('hit'); clearTimeout(b._h); b._h=setTimeout(()=>b.classList.remove('hit'),140); }
+// a tap that lands between keys counts for the nearest key
+function keyAt(e,root){
+  const b=e.target.closest('button'); if(b&&root.contains(b)) return b;
+  let best=null,bd=1e9;
+  root.querySelectorAll('button').forEach(k=>{ const r=k.getBoundingClientRect(); const dx=Math.max(r.left-e.clientX,0,e.clientX-r.right), dy=Math.max(r.top-e.clientY,0,e.clientY-r.bottom); const d=dx*dx+dy*dy; if(d<bd){bd=d;best=k;} });
+  return bd<=22*22 ? best : null;
+}
+$('kb').addEventListener('pointerdown',e=>{ const b=keyAt(e,$('kb')); if(!b||phase!=='pinyin')return; e.preventDefault(); hit(b); const inp=$('pyin');
   if(b.dataset.c==='del') inp.value=[...inp.value].slice(0,-1).join(''); else inp.value+=b.dataset.c; inp.classList.remove('bad'); });
 // hardware keyboard while using own keyboard
 document.addEventListener('keydown',e=>{
@@ -904,7 +911,7 @@ document.addEventListener('keydown',e=>{
   else if(k==='Backspace'){ e.preventDefault(); inp.value=[...inp.value].slice(0,-1).join(''); }
   else if(/^[a-zA-Z0-9 üÜ]$/.test(k)){ e.preventDefault(); inp.value+=k.toLowerCase(); inp.classList.remove('bad'); }
 });
-$('tones').addEventListener('pointerdown',e=>{ const b=e.target.closest('button'); if(!b||phase!=='pinyin')return; e.preventDefault(); hit(b); applyTone(b.dataset.t); $('pyin').classList.remove('bad'); });
+$('tones').addEventListener('pointerdown',e=>{ const b=keyAt(e,$('tones')); if(!b||phase!=='pinyin')return; e.preventDefault(); hit(b); applyTone(b.dataset.t); $('pyin').classList.remove('bad'); });
 $('pyin').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();checkPinyin();}});
 $('pyDunno').onclick=()=>{ if(phase==='pinyin') revealPy(); };
 $('btnOutline').onclick=()=>{ if(!writer||phase!=='write')return; unknownChar=!unknownChar; if(unknownChar){ helped=true; charHelp=true; } setOutline(unknownChar); if(quizzing){writer.cancelQuiz();quiz();} };
