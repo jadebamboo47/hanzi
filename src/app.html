@@ -66,6 +66,10 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
 .strokeinfo{position:absolute;right:12px;bottom:10px;font-size:12px;color:var(--ink3);pointer-events:none}
 .drillmsg{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;display:none;pointer-events:none;white-space:nowrap}
 .drillmsg.show{display:block}
+.suggest{display:none;align-items:center;gap:10px;flex-wrap:wrap;background:var(--jade-soft);border:1px solid #b9d9c7;border-radius:14px;padding:10px 12px;font-size:14.5px;color:#1f4d3a}
+.suggest.show{display:flex}
+.suggest span{flex:1;min-width:200px;line-height:1.35}
+.suggest .btn{height:38px;font-size:14px;padding:0 12px}
 .pencilnote{position:absolute;left:12px;bottom:10px;font-size:12px;color:var(--ink3);pointer-events:none}
 
 .tools{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
@@ -163,6 +167,7 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
 
   <main id="main">
     <section class="info" id="info">
+      <div class="suggest" id="suggest"><span id="suggestText"></span><button class="btn primary" id="sugYes">Dazunehmen</button><button class="btn" id="sugLater">Später</button></div>
       <div class="pinyin"><span id="pinyin">—</span><button class="say" id="btnSay" aria-label="Aussprechen">🔊</button></div>
       <div class="meaning" id="meaning"></div>
       <div class="slots" id="slots"></div>
@@ -213,6 +218,7 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
     <h2>Für heute geschafft</h2>
     <p id="emptyText">Alle fälligen Karten sind wiederholt. Morgen stehen neue Wiederholungen an.</p>
     <div class="tools">
+      <button class="btn primary" id="btnNextLesson" style="display:none"></button>
       <button class="btn primary" id="btnMore">+ 5 neue Wörter</button>
       <button class="btn" id="btnCram">Zufällige Übungsrunde</button>
     </div>
@@ -587,7 +593,7 @@ function next(){
   // avoid the same word twice in a row if anything else is available
   if(card && card.k===prevK && queue.length){ const alt=queue.findIndex(x=>x.k!==prevK); if(alt>=0){ const c=queue.splice(alt,1)[0]; queue.unshift(card); card=c; } }
   if(!card){ showEmpty(); return; }
-  $('main').style.display=''; $('empty').classList.remove('show');
+  $('main').style.display=''; $('empty').classList.remove('show'); renderSuggest();
   charIdx=0; mistakes=0; strokeErr=0; helped=false; charHelp=false; unknownChar=false; pyTries=0; pyNote=''; pyShown=false; lastTry='';
   const r=S.p[card.k];
   $('meaning').textContent=card.m;
@@ -667,9 +673,14 @@ function revealPy(){
 function showEmpty(){
   $('main').style.display='none'; $('empty').classList.add('show');
   const left=WORDS.filter(x=>inLevels(x)&&!S.p[x.k]).length;
-  $('emptyText').textContent= cram ? 'Übungsrunde beendet.' : `Alle fälligen Karten sind wiederholt. In deinen Lektionen warten noch ${left} neue Wörter.`;
+  $('emptyText').textContent= cram ? 'Übungsrunde beendet.' : (left ? `Alle fälligen Karten sind wiederholt. In deinen Lektionen warten noch ${left} neue Wörter.` : 'Alle fälligen Karten sind wiederholt, und alle Wörter deiner Lektionen hast du schon kennengelernt.');
   $('btnMore').style.display=left?'':'none';
+  const r=readiness(), ok=!cram && r && r.next && r.unseen===0 && r.pct>=0.8;
+  const b=$('btnNextLesson'); b.style.display=ok?'':'none';
+  if(ok){ b.textContent=`${r.next.id.startsWith('ce2')?'Band 2':'Band 1'}, Lektion ${r.next.l.slice(1)} dazunehmen`; b.dataset.next=r.next.id;
+    $('emptyText').textContent+=` ${Math.round(r.pct*100)} % deiner Wörter sitzen gefestigt – du bist bereit für die nächste Lektion.`; }
 }
+$('btnNextLesson').onclick=()=>{ $('suggest').dataset.next=$('btnNextLesson').dataset.next; $('sugYes').click(); };
 function rebuildAfterSync(){ renderSettings(); renderChips();
   const untouched = !card || (phase==='pinyin' && !$('pyin').value) || (!cram&&!inLevels(card));
   if(untouched){ buildQueue(); next(); } else { const cur=card; buildQueue(); queue=queue.filter(x=>x.k!==cur.k); renderChips(); } }
@@ -753,6 +764,30 @@ async function prefetchAudio(){
 }
 function renderAudioStat(){ const el=$('audioStat'); if(!el) return; const {have,total}=audioStat; el.textContent = total ? (have>=total ? `Offline verfügbar: alle ${total} Aufnahmen deiner Lektionen.` : `Offline verfügbar: ${have} von ${total} Aufnahmen – der Rest wird bei Internet nachgeladen.`) : ''; }
 window.addEventListener('online',()=>prefetchAudio());
+// suggest the next lesson once the chosen ones are known well enough
+function readiness(){
+  const sel=S.settings.decks, active=DECKS.filter(d=>d.g!=='HSK'&&sel.includes(d.id));
+  if(!active.length) return null;
+  const ids=new Set(active.map(d=>d.id));
+  const words=WORDS.filter(x=>x.d.some(d=>ids.has(d))||x.e.some(d=>ids.has(d)));
+  const cur=curDeck(), order=DECKS.filter(d=>d.g!=='HSK').map(d=>d.id);
+  const nextId=order.slice(order.indexOf(cur)+1).find(id=>!sel.includes(id));
+  const unseen=words.filter(x=>!S.p[x.k]).length;
+  const firm=words.filter(x=>{const r=S.p[x.k]; return r && (r.iv!==undefined ? r.iv>=3 : (r.b||0)>=2);}).length;
+  return {total:words.length, unseen, firm, pct:words.length?firm/words.length:0, next:nextId?DECK[nextId]:null};
+}
+function renderSuggest(){
+  const r=readiness(), el=$('suggest');
+  const show = r && r.next && r.unseen===0 && r.pct>=0.8 && !(S.settings.snoozeUntil>Date.now());
+  el.classList.toggle('show',!!show);
+  if(show){ const nm=r.next.id.startsWith('ce2')?'Band 2':'Band 1';
+    $('suggestText').textContent=`${Math.round(r.pct*100)} % deiner Wörter sitzen gefestigt. Bereit für ${nm}, Lektion ${r.next.l.slice(1)}?`;
+    el.dataset.next=r.next.id; }
+}
+$('sugYes').onclick=()=>{ const id=$('suggest').dataset.next; if(!id) return;
+  S.settings.decks=DECKS.map(d=>d.id).filter(x=>S.settings.decks.includes(x)||x===id); S.settings._t=Date.now(); persist();
+  $('suggest').classList.remove('show'); buildQueue(); next(); prefetchAudio(); };
+$('sugLater').onclick=()=>{ S.settings.snoozeUntil=Date.now()+2*DAY; S.settings._t=Date.now(); persist(); $('suggest').classList.remove('show'); };
 function say(){
   if(!card) return;
   const text=card.w.replace(/[…\.]/g,'');
