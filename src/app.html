@@ -28,6 +28,36 @@ header{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;color:var(--ink2);white-space:nowrap}
 .chip b{color:var(--ink);font-weight:600;margin-right:3px}
 .chip.due b{color:var(--seal)}
+.today{display:flex;align-items:center;gap:6px;height:42px;padding:0 12px 0 6px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-weight:600;font-size:15px;color:var(--ink2)}
+.today svg{width:30px;height:30px;transform:rotate(-90deg)}
+.today .tr{fill:none;stroke:var(--paper2);stroke-width:4}
+.today .tp{fill:none;stroke:var(--seal);stroke-width:4;stroke-linecap:round;stroke-dasharray:94.25;stroke-dashoffset:94.25;transition:stroke-dashoffset .6s ease}
+.today.done .tp{stroke:var(--jade)}
+.today.hide{display:none}
+.today.bump{animation:bump .5s}
+@keyframes bump{40%{transform:scale(1.12)}}
+.stamp{position:absolute;right:7%;top:7%;padding:8px 10px;border:4px solid var(--seal);border-radius:10px;color:var(--seal);font:700 34px/1 "Noto Serif SC",serif;writing-mode:vertical-rl;letter-spacing:4px;transform:rotate(12deg) scale(2.4);opacity:0;pointer-events:none;mix-blend-mode:multiply;background:rgba(243,217,210,.35)}
+.stamp.go{animation:stamp .45s cubic-bezier(.2,.9,.3,1.2) forwards}
+.stamp.q3{color:var(--seal);border-color:var(--seal)}
+.stamp.q2{color:#c2571a;border-color:#c2571a}
+.stamp.q1{color:var(--jade);border-color:var(--jade);background:rgba(214,234,223,.4)}
+.stamp.q0{color:var(--ink2);border-color:var(--ink3);background:rgba(236,228,211,.5)}
+@keyframes stamp{0%{opacity:0;transform:rotate(12deg) scale(2.4)}70%{opacity:.95;transform:rotate(-6deg) scale(.95)}100%{opacity:.9;transform:rotate(-6deg) scale(1)}}
+.combo{display:inline-block;margin-left:8px;padding:2px 9px;border-radius:999px;background:var(--seal-soft);color:var(--seal);font-weight:600;font-size:14px;animation:bump .5s}
+.stats{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.stats>div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 16px;min-width:110px;text-align:center}
+.stats b{display:block;font:600 26px Fraunces,serif;color:var(--ink)}
+.stats span{font-size:12.5px;color:var(--ink3)}
+.todaywords{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:640px;max-height:30vh;overflow:auto}
+.todaywords button{font:500 26px "Noto Serif SC",serif;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 10px;min-width:48px}
+.todaywords button.f{border-color:var(--jade);box-shadow:0 0 0 2px var(--jade-soft)}
+.daypanel{text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center}
+.daypanel .big{font-family:"Noto Serif SC",serif;font-size:96px;color:var(--seal);line-height:1;animation:stamp .5s cubic-bezier(.2,.9,.3,1.2)}
+.daypanel h3{margin:0}
+.daypanel .stats{width:100%;flex-direction:row}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:30;overflow:hidden}
+.confetti i{position:absolute;top:-40px;font-style:normal;font-family:"Noto Serif SC",serif;font-weight:700;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(115vh) rotate(var(--r))}}
 .icon-btn{width:42px;height:42px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;font-size:19px}
 .sync{font-size:12px;color:var(--ink3);min-width:70px;text-align:right}
 
@@ -172,6 +202,7 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
   <header>
     <div class="brand"><span class="seal">汉字</span><h1>Schreibkarten</h1></div>
     <div class="sync" id="sync"></div>
+    <button class="today" id="today" aria-label="Heute"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" class="tr"/><circle cx="18" cy="18" r="15" class="tp" id="ring"/></svg><span id="streak"></span></button>
     <button class="icon-btn" id="btnSettings" aria-label="Einstellungen">⚙︎</button>
   </header>
 
@@ -206,6 +237,7 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
         <div class="pencilnote" id="pencilnote"></div>
         <div class="strokeinfo" id="strokeinfo"></div>
         <div class="drillmsg" id="drillmsg"></div>
+        <div class="stamp" id="stamp"></div>
         <div class="lockmsg">Erst das Pinyin eingeben,<br>dann das Zeichen schreiben</div>
       </div>
       <div class="tools" id="tools">
@@ -224,8 +256,10 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
   </main>
 
   <section class="empty" id="empty">
-    <div class="big">好</div>
-    <h2>Für heute geschafft</h2>
+    <div class="big" id="emptyBig">好</div>
+    <h2 id="emptyH">Für heute geschafft</h2>
+    <div class="stats" id="stats"></div>
+    <div class="todaywords" id="todayWords"></div>
     <p id="emptyText">Alle fälligen Karten sind wiederholt. Morgen stehen neue Wiederholungen an.</p>
     <div class="tools">
       <button class="btn primary" id="btnNextLesson" style="display:none"></button>
@@ -252,6 +286,8 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
     <div class="toggle"><div><span>Nur Apple Pencil</span><small>Finger und Handballen auf der Schreibfläche ignorieren</small></div><button class="sw" id="swPencil"></button></div>
     <div class="toggle"><div><span>Automatisch aussprechen</span><small>Wort bei jeder neuen Karte vorlesen</small></div><button class="sw" id="swAuto"></button></div>
     <div class="toggle"><div><span>Beispielsatz vorlesen</span><small>Nach jeder Vokabel den Beispielsatz automatisch vorlesen</small></div><button class="sw" id="swSent"></button></div>
+    <div class="field"><div class="lbl">Tagesziel (Karten pro Tag)</div><div class="seg" id="segGoal"></div>
+      <div class="note" style="margin-top:6px">Der Ring oben rechts füllt sich mit jeder Karte. Die Flamme zählt die Tage in Folge, an denen du dein Ziel erreicht hast.</div></div>
     <div class="field"><div class="lbl">Nach Fehlern nochmal schreiben</div><div class="seg" id="segReps"></div>
       <div class="note" style="margin-top:6px">Wenn du ein Zeichen nicht wusstest: so oft direkt hintereinander schreiben – das erste Mal mit Vorlage, dann aus dem Gedächtnis.</div></div>
     <div class="field"><div class="lbl">Strichprüfung</div><div class="seg" id="segLen"></div>
@@ -290,6 +326,8 @@ main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stret
 <script>/*DATA*/</script>
 <script>/*AUDIO*/</script>
 <script>/*SENT*/</script>
+<div class="confetti" id="confetti"></div>
+<div class="sheet" id="daySheet"><div class="panel daypanel"><div class="big" id="dayBig">棒</div><h3 id="dayH"></h3><div class="stats" id="dayStats"></div><div class="todaywords" id="dayWords"></div><button class="btn primary" id="dayClose">Weiter üben</button></div></div>
 <div id="toast" style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1f1b16;color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;display:none;z-index:20;max-width:90vw"></div>
 <script>
 (function(){
@@ -357,6 +395,7 @@ function mergeStates(a,b){
   out.settings = ((sb._t||0) >= (sa._t||0)) ? {...sa,...sb} : {...sb,...sa};
   if(a.day===b.day) out.newToday=Math.max(a.newToday||0,b.newToday||0);
   else { const t=today(); const src=b.day===t?b:a; out.day=src.day; out.newToday=src.newToday||0; }
+  out.log={...(a.log||{})}; for(const [k,v] of Object.entries(b.log||{})){ const o=out.log[k]; out.log[k]=(!o||(v.n||0)>(o.n||0))?v:o; }
   out.updated=Math.max(a.updated||0,b.updated||0);
   return out;
 }
@@ -388,6 +427,67 @@ const WORDS=window.WORDS.map(w=>({w:w[0],py:w[1],num:w[2],m:w[3],d:w[4],e:w[5],k
 const BYW={};WORDS.forEach(x=>BYW[x.k]=x);
 
 function rollDay(){const t=today();if(S.day!==t){S.day=t;S.newToday=0;}}
+// ---------- daily log, goal, streak ----------
+function dayKey(off){const d=new Date(Date.now()-off*DAY);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+function goal(){ const g=S.settings.goal; return g===undefined?20:+g; }
+function dayLog(k){ S.log=S.log||{}; return S.log[k]||{n:0,f:0,w:[]}; }
+function streak(){
+  const g=goal()||1; let n=0;
+  const hit=k=>(dayLog(k).n||0)>=g;
+  let off=hit(dayKey(0))?0:1;
+  while(hit(dayKey(off))){ n++; off++; }
+  return n;
+}
+function logCard(k,q){
+  S.log=S.log||{}; const t=dayKey(0); const d=dayLog(t);
+  d.n=(d.n||0)+1; if(q===3) d.f=(d.f||0)+1;
+  d.w=(d.w||[]).filter(x=>x[0]!==k); d.w.push([k,q]);
+  S.log[t]=d;
+  const keys=Object.keys(S.log); if(keys.length>90){ keys.sort((a,b)=>new Date(a)-new Date(b)).slice(0,keys.length-90).forEach(x=>delete S.log[x]); }
+  return d;
+}
+function renderToday(bump){
+  const el=$('today'), g=goal();
+  el.classList.toggle('hide',!g);
+  if(!g) return;
+  const d=dayLog(dayKey(0)), frac=Math.min(1,(d.n||0)/g);
+  $('ring').style.strokeDashoffset=(94.25*(1-frac)).toFixed(2);
+  el.classList.toggle('done',frac>=1);
+  const st=streak(); $('streak').textContent=st?('🔥 '+st):(d.n||0)+'/'+g;
+  if(bump){ el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+}
+function statsHTML(d){
+  const st=streak(), pct=d.n?Math.round(100*(d.f||0)/d.n):0;
+  return `<div><b>${d.n||0}</b><span>Karten heute</span></div><div><b>${pct} %</b><span>fehlerfrei</span></div><div><b>${st?'🔥 '+st:'–'}</b><span>${st===1?'Tag':'Tage'} in Folge</span></div>`;
+}
+function wordsHTML(d){
+  return (d.w||[]).map(([k,q])=>{const x=BYW[k]; if(!x) return ''; return `<button data-k="${k}" class="${q===3?'f':''}" title="${x.m}">${x.w.replace('…','…')}</button>`;}).join('');
+}
+function sayWord(k){ const x=BYW[k]; if(!x) return; const plan=audioPlan(x); const t=x.w.replace(/[…\.]/g,''); if(plan) playFiles(plan,t); else speak(t); }
+const STAMPS={3:['完美','perfekt'],2:['很好','sehr gut'],1:['不错','nicht schlecht'],0:['加油','weiter so']};
+function showStamp(q){
+  const el=$('stamp'); el.className='stamp'; el.textContent=STAMPS[q][0]; void el.offsetWidth; el.className='stamp go q'+q;
+}
+function hideStamp(){ $('stamp').className='stamp'; }
+function confetti(){
+  const box=$('confetti'); box.innerHTML='';
+  const glyphs=['福','好','棒','喜','✦','●','■'], cols=['#b8321f','#d6332a','#e0a526','#2f7a5b','#c2571a'];
+  for(let i=0;i<46;i++){
+    const e=document.createElement('i'); e.textContent=glyphs[i%glyphs.length];
+    e.style.left=(Math.random()*100)+'vw'; e.style.color=cols[i%cols.length];
+    e.style.fontSize=(14+Math.random()*22)+'px'; e.style.setProperty('--r',(Math.random()*720-360)+'deg');
+    e.style.animationDuration=(2.2+Math.random()*1.8)+'s'; e.style.animationDelay=(Math.random()*.6)+'s';
+    box.appendChild(e);
+  }
+  setTimeout(()=>box.innerHTML='',4800);
+}
+function goalReached(){
+  const d=dayLog(dayKey(0)), st=streak();
+  $('dayBig').textContent=['棒','好','赞'][st%3];
+  $('dayH').textContent= st>1 ? `Tagesziel erreicht – ${st} Tage in Folge!` : 'Tagesziel erreicht!';
+  $('dayStats').innerHTML=statsHTML(d); $('dayWords').innerHTML=wordsHTML(d);
+  $('daySheet').classList.add('show'); confetti();
+}
 function inLevels(x){const sel=S.settings.decks;return x.d.some(d=>sel.includes(d))||(S.settings.extras&&x.e.some(d=>sel.includes(d)));}
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 const RND=()=>S.settings.random!==false;
@@ -447,6 +547,7 @@ function cramRound(){
 }
 
 // ---------- writer ----------
+let combo=0;
 let seq=0, animBusy=false, strokeErr=0, phase='write', unknownChar=false, pyTries=0, pyNote='';
 let charHelp=false, autoT=null, drill=null;
 let writer=null, size=400, charIdx=0, mistakes=0, helped=false, outlineOn=false, quizzing=false, totalStrokes=0, doneStrokes=0;
@@ -568,7 +669,13 @@ function completeCard(q,res){
     msg = 'Nächste Abfrage: '+fmtDays(r.iv);
   }
   if(q===0) requeue(card,4);
-  $('res').textContent = res;
+  const g=goal(), before=dayLog(dayKey(0)).n||0;
+  const dl=logCard(card.k,q); persist();
+  combo = q===3 ? combo+1 : 0;
+  showStamp(q);
+  $('res').innerHTML = esc(res) + (combo>=3 ? `<span class="combo">🔥 ${combo} fehlerfrei in Folge</span>` : '');
+  renderToday(true);
+  if(g && before<g && dl.n>=g) setTimeout(()=>{ if($('grade').classList.contains('show')) goalReached(); },900);
   $('nextdue').textContent = msg;
   showSentence();
   $('grade').classList.add('show');
@@ -601,7 +708,7 @@ function next(){
   seq++; animBusy=false; resetTouch(); drill=null; $('drillmsg').classList.remove('show');
   try{ writer&&writer.cancelQuiz(); }catch(e){} quizzing=false;
   renderChips();
-  $('grade').classList.remove('show'); $('tools').style.display='';
+  $('grade').classList.remove('show'); $('tools').style.display=''; hideStamp();
   const prevK=card&&card.k;
   card=queue.shift();
   while(card && !cram && !inLevels(card)) card=queue.shift();
@@ -687,6 +794,9 @@ function revealPy(){
 }
 function showEmpty(){
   $('main').style.display='none'; $('empty').classList.add('show');
+  { const d=dayLog(dayKey(0)); $('stats').innerHTML=d.n?statsHTML(d):''; $('todayWords').innerHTML=wordsHTML(d);
+    $('emptyBig').textContent = d.n ? (d.n>=goal()&&goal() ? '棒' : '好') : '好';
+    $('emptyH').textContent = cram ? 'Übungsrunde beendet' : 'Für heute geschafft'; }
   const left=WORDS.filter(x=>inLevels(x)&&!S.p[x.k]).length;
   $('emptyText').textContent= cram ? 'Übungsrunde beendet.' : (left ? `Alle fälligen Karten sind wiederholt. In deinen Lektionen warten noch ${left} neue Wörter.` : 'Alle fälligen Karten sind wiederholt, und alle Wörter deiner Lektionen hast du schon kennengelernt.');
   $('btnMore').style.display=left?'':'none';
@@ -971,6 +1081,8 @@ function renderSettings(){
   $('swPencil').classList.toggle('on',S.settings.pencilOnly);
   $('swAuto').classList.toggle('on',S.settings.autoSay);
   $('swSent').classList.toggle('on',S.settings.sayExample!==false);
+  { const g=goal(); $('segGoal').innerHTML=[[0,'Aus'],[10,'10'],[20,'20'],[30,'30'],[50,'50']].map(([n,l])=>`<button data-goal="${n}" class="${g===n?'on':''}">${l}</button>`).join(''); }
+  renderToday();
   { const r=S.settings.reps===undefined?3:+S.settings.reps; $('segReps').innerHTML=[[0,'Aus'],[3,'3×'],[5,'5×'],[10,'10×']].map(([n,l])=>`<button data-reps="${n}" class="${r===n?'on':''}">${l}</button>`).join(''); }
   $('segLen').innerHTML=[['strict','Streng'],['normal','Normal'],['loose','Großzügig']].map(([k,l])=>`<button data-len="${k}" class="${(S.settings.strict||'normal')===k?'on':''}">${l}</button>`).join('');
   pickVoice(); renderVoices(); renderAudioStat();
@@ -985,6 +1097,11 @@ function toggleDeck(e){const b=e.target.closest('button');if(!b)return;let L=S.s
   else{const id=b.dataset.d;L=L.includes(id)?L.filter(x=>x!==id):[...L,id];}
   if(!L.length)return;S.settings.decks=DECKS.map(d=>d.id).filter(id=>L.includes(id));settingsChanged=true;S.settings._t=Date.now();persist();renderSettings();}
 $('lessons').onclick=toggleDeck;$('segHsk').onclick=toggleDeck;
+$('segGoal').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.settings.goal=+b.dataset.goal;S.settings._t=Date.now();persist();renderSettings();};
+$('dayClose').onclick=()=>$('daySheet').classList.remove('show');
+$('daySheet').onclick=e=>{ if(e.target.id==='daySheet') $('daySheet').classList.remove('show'); };
+for(const id of ['todayWords','dayWords']) $(id).onclick=e=>{const b=e.target.closest('button[data-k]'); if(b) sayWord(b.dataset.k);};
+$('today').onclick=()=>{ const d=dayLog(dayKey(0)); $('dayBig').textContent=d.n>=goal()?'棒':'加油'; $('dayH').textContent=d.n>=goal()?'Tagesziel erreicht':`Heute ${d.n||0} von ${goal()} Karten`; $('dayStats').innerHTML=statsHTML(d); $('dayWords').innerHTML=wordsHTML(d); $('daySheet').classList.add('show'); };
 $('segReps').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.settings.reps=+b.dataset.reps;S.settings._t=Date.now();persist();renderSettings();};
 $('segLen').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.settings.strict=b.dataset.len;S.settings._t=Date.now();persist();renderSettings(); if(quizzing&&phase==='write'){ try{writer.cancelQuiz();}catch(_){} quiz(); }};
 $('selVoice').onchange=()=>{S.settings.voice=$('selVoice').value;S.settings._t=Date.now();persist();pickVoice();renderVoices();speak('妈，麻，马，骂');};
