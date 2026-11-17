@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>汉字 Schreibkarten</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f5efe3; --paper2:#ece4d3; --card:#fffdf8; --ink:#1f1b16; --ink2:#5b5248; --ink3:#9a8f80;
+  --seal:#b8321f; --seal-soft:#f3d9d2; --jade:#2f7a5b; --jade-soft:#d6eadf; --line:#d9cfbd;
+  --t1:#d6332a; --t2:#2f8a3a; --t3:#2b5fc7; --t4:#8a3fb8; --t5:#8a8a8a;
+  --r:18px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--paper);color:var(--ink);font-family:Inter,-apple-system,system-ui,sans-serif;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
+body{background:radial-gradient(1200px 600px at 10% -10%,#fbf7ee 0,transparent 60%),var(--paper)}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+.app{height:100%;display:flex;flex-direction:column;max-width:1400px;margin:0 auto;padding:14px 20px 18px}
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:10px;margin-right:auto}
+.brand .seal{font-family:"Noto Serif SC",serif;font-weight:700;background:var(--seal);color:#fff;border-radius:8px;padding:3px 8px;font-size:20px;letter-spacing:2px}
+.brand h1{font-family:Fraunces,serif;font-weight:600;font-size:22px;margin:0}
+.chips{display:flex;gap:8px}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;color:var(--ink2);white-space:nowrap}
+.chip b{color:var(--ink);font-weight:600;margin-right:3px}
+.chip.due b{color:var(--seal)}
+.icon-btn{width:42px;height:42px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;font-size:19px}
+.sync{font-size:12px;color:var(--ink3);min-width:70px;text-align:right}
+
+main{flex:1;display:flex;gap:28px;min-height:0;margin-top:16px;align-items:stretch}
+.info{flex:1;min-width:0;display:flex;flex-direction:column;gap:18px;justify-content:flex-start;padding-top:8px}
+.padcol{display:flex;flex-direction:column;align-items:center;gap:14px;justify-content:flex-start}
+.portrait main{flex-direction:column;gap:14px}
+.portrait .padcol{align-self:center}
+.portrait .pad.locked,.portrait .pad.locked~.tools{display:none!important}
+.padcol .tools{width:100%}
+.portrait .info{flex:0 0 auto}
+
+.meta{display:flex;gap:8px;align-items:center}
+.tag{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:7px;background:var(--paper2);color:var(--ink2)}
+.tag.new{background:var(--seal-soft);color:var(--seal)}
+.tag.rev{background:var(--jade-soft);color:var(--jade)}
+.pinyin{font-family:Fraunces,serif;font-size:56px;line-height:1;font-weight:600;display:flex;align-items:center;gap:14px}
+.portrait .pinyin{font-size:44px}
+.say{width:46px;height:46px;border-radius:50%;background:var(--card);border:1px solid var(--line);font-size:20px;display:grid;place-items:center;flex:0 0 auto}
+.meaning{font-size:22px;line-height:1.35;color:var(--ink2);max-width:34ch}
+.portrait .meaning{font-size:19px;max-width:none}
+.slots{display:flex;gap:12px;flex-wrap:wrap}
+.slot{width:76px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.slot .box{width:76px;height:76px;border-radius:14px;background:var(--card);border:1.5px dashed var(--line);display:grid;place-items:center;font-family:"Noto Serif SC",serif;font-size:48px;font-weight:500}
+.slot.cur .box{border:2px solid var(--seal);box-shadow:0 0 0 4px var(--seal-soft)}
+.slot.done .box{border-style:solid;border-color:var(--jade);color:var(--ink)}
+.slot .py{font-size:15px;font-weight:600}
+.portrait .slot,.portrait .slot .box{width:60px}.portrait .slot .box{height:60px;font-size:38px}
+
+.pad{position:relative;background:var(--card);border-radius:var(--r);box-shadow:0 1px 0 #fff inset,0 18px 40px -22px rgba(60,40,10,.35),0 0 0 1px var(--line);touch-action:none;overflow:hidden}
+.pad svg.grid{position:absolute;inset:0;pointer-events:none}
+.pad #hw{position:absolute;inset:0}
+.pad .flash{position:absolute;inset:0;pointer-events:none;border-radius:var(--r);transition:box-shadow .25s}
+.pad.err .flash{box-shadow:inset 0 0 0 4px var(--seal)}
+.pad.ok .flash{box-shadow:inset 0 0 0 4px var(--jade)}
+.strokeinfo{position:absolute;right:12px;bottom:10px;font-size:12px;color:var(--ink3);pointer-events:none}
+.pencilnote{position:absolute;left:12px;bottom:10px;font-size:12px;color:var(--ink3);pointer-events:none}
+
+.tools{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.btn{height:46px;padding:0 18px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-weight:500;font-size:15px;display:inline-flex;align-items:center;gap:8px}
+.btn:active{transform:translateY(1px)}
+.btn.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.primary{background:var(--seal);color:#fff;border-color:var(--seal)}
+
+.grade{display:none;flex-direction:column;gap:12px;align-items:center}
+.grade.show{display:flex}
+.grade .res{font-size:15px;color:var(--ink2)}
+.grade .row{display:flex;gap:10px}
+.g{min-width:120px;height:58px;border-radius:14px;font-weight:600;font-size:16px;border:1px solid var(--line);background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15}
+.g small{font-weight:400;font-size:12px;color:var(--ink3)}
+.g.sug{outline:3px solid var(--ink);outline-offset:2px}
+.g.again{color:var(--seal)}.g.good{color:var(--ink)}.g.easy{color:var(--jade)}
+
+.pyask{display:none;flex-direction:column;gap:10px;max-width:520px}
+.pyask.show{display:flex}
+.pyask.done .tones,.pyask.done .kb,.pyask.done #pyOk,.pyask.done #pyDunno,.pyask.done #pySkip,.pyask.done .pyhint{opacity:.3;pointer-events:none}
+.pyask.done #pyin{border-color:var(--jade);color:var(--jade)}
+.pyrow{display:flex;gap:10px;flex-wrap:wrap}
+.pyrow input{flex:1;min-width:200px;height:56px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);padding:0 16px;font:600 24px Fraunces,serif;color:var(--ink);-webkit-user-select:text;user-select:text;outline:none}
+.pyrow input:focus{border-color:var(--ink)}
+.pyrow input.bad{border-color:var(--seal);animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.kb{display:none;flex-direction:column;gap:6px;max-width:560px}
+.ownkb .kb{display:flex}
+.kb .r{display:flex;gap:5px;justify-content:center}
+.kb button{flex:1;max-width:50px;height:46px;border-radius:9px;border:1px solid var(--line);background:var(--card);font:500 19px Inter,sans-serif;color:var(--ink);box-shadow:0 1px 0 var(--line)}
+.kb button:active{background:var(--paper2)}
+.kb button.wide{max-width:90px;flex:1.6;font-size:16px}
+.ownkb .pyhint{display:none}
+.ownkb #pyin{caret-color:transparent}
+.tones{display:flex;gap:8px;flex-wrap:wrap}
+.tones button{width:58px;height:50px;border-radius:12px;border:1px solid var(--line);background:var(--card);font:600 22px Fraunces,serif;line-height:1}
+.tones button small{display:block;font:500 10px Inter,sans-serif;color:var(--ink3);margin-top:2px}
+.tones button:active{background:var(--paper2)}
+.pyfb{font-size:15px;min-height:20px;color:var(--ink2)}
+.pyfb.ok{color:var(--jade)}.pyfb.bad{color:var(--seal)}
+.pyhint{font-size:12.5px;color:var(--ink3)}
+.pinyin .hid{color:var(--line);letter-spacing:6px}
+.pad.locked #hw{opacity:.15;pointer-events:none}
+.pad .lockmsg{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;color:var(--ink3);font-size:17px;padding:30px;pointer-events:none}
+.pad.locked .lockmsg{display:flex}
+.empty{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:16px}
+.empty.show{display:flex}
+.empty .big{font-family:"Noto Serif SC",serif;font-size:120px;color:var(--seal);line-height:1}
+.empty h2{font-family:Fraunces,serif;margin:0;font-size:30px}
+.empty p{color:var(--ink2);margin:0;max-width:44ch;line-height:1.5}
+
+.sheet{position:fixed;inset:0;background:rgba(31,27,22,.35);display:none;align-items:center;justify-content:center;z-index:10;padding:20px}
+.sheet.show{display:flex}
+.panel{background:var(--card);border-radius:22px;max-width:520px;width:100%;padding:24px 26px;box-shadow:0 30px 80px -20px rgba(0,0,0,.4);max-height:90vh;overflow:auto}
+.panel h3{font-family:Fraunces,serif;font-size:24px;margin:0 0 16px}
+.field{margin:18px 0}
+.field .lbl{font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg button{height:42px;min-width:56px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--paper)}
+.seg button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 0;border-top:1px solid var(--paper2)}
+.toggle span{font-size:15px}.toggle small{display:block;color:var(--ink3);font-size:12.5px;margin-top:2px}
+.sw{width:52px;height:32px;border-radius:999px;background:var(--line);position:relative;flex:0 0 auto;transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.sw.on{background:var(--jade)}.sw.on::after{left:23px}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-top:6px}
+.stats div{background:var(--paper);border-radius:10px;padding:10px;text-align:center;font-size:12px;color:var(--ink2)}
+.stats b{display:block;font-size:20px;color:var(--ink)}
+.danger{color:var(--seal);font-size:14px;margin-top:10px;text-decoration:underline}
+.close{float:right;margin-top:-4px}
+.note{font-size:12.5px;color:var(--ink3);line-height:1.45;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header>
+    <div class="brand"><span class="seal">汉字</span><h1>Schreibkarten</h1></div>
+    <div class="chips">
+      <div class="chip due"><b id="cDue">0</b>fällig</div>
+      <div class="chip"><b id="cNew">0</b>neu heute</div>
+      <div class="chip"><b id="cKnown">0</b>gelernt</div>
+    </div>
+    <div class="sync" id="sync"></div>
+    <button class="icon-btn" id="btnSettings" aria-label="Einstellungen">⚙︎</button>
+  </header>
+
+  <main id="main">
+    <section class="info" id="info">
+      <div class="meta"><span class="tag" id="tagLevel">HSK 1</span><span class="tag" id="tagState">Neu</span></div>
+      <div class="pinyin"><span id="pinyin">—</span><button class="say" id="btnSay" aria-label="Aussprechen">🔊</button></div>
+      <div class="meaning" id="meaning"></div>
+      <div class="slots" id="slots"></div>
+      <div class="pyask" id="pyask">
+        <div class="pyrow"><input id="pyin" type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Pinyin …" enterkeyhint="done"><button class="btn primary" id="pyOk">Prüfen</button></div>
+        <div class="pyrow"><div class="tones" id="tones">
+          <button data-t="1" style="color:var(--t1)">ā<small>1</small></button>
+          <button data-t="2" style="color:var(--t2)">á<small>2</small></button>
+          <button data-t="3" style="color:var(--t3)">ǎ<small>3</small></button>
+          <button data-t="4" style="color:var(--t4)">à<small>4</small></button>
+          <button data-t="u">ü<small>&nbsp;</small></button>
+          <button data-t="del">⌫<small>&nbsp;</small></button>
+        </div></div>
+        <div class="kb" id="kb">
+          <div class="r" data-k="qwertzuiop"></div><div class="r" data-k="asdfghjkl"></div><div class="r" data-k="yxcvbnm"></div>
+        </div>
+        <div class="pyrow"><button class="btn" id="pyDunno">Weiß ich nicht</button><button class="btn" id="pySkip">↷ Anderes Wort</button></div>
+        <div class="pyfb" id="pyfb"></div>
+        <div class="pyhint">Silbe tippen, dann Ton-Knopf: „duan“ + ǎ → duǎn. Zahlen gehen auch (duan3ku4). Weiter geht es erst, wenn Silben und Töne stimmen.</div>
+      </div>
+    </section>
+    <section class="padcol" id="padcol">
+      <div class="pad" id="pad">
+        <svg class="grid" id="grid"></svg>
+        <div id="hw"></div>
+        <div class="flash"></div>
+        <div class="pencilnote" id="pencilnote"></div>
+        <div class="strokeinfo" id="strokeinfo"></div>
+        <div class="lockmsg">Erst das Pinyin eingeben,<br>dann das Zeichen schreiben</div>
+      </div>
+      <div class="tools" id="tools">
+        <button class="btn" id="btnOutline">? Zeichen unbekannt</button>
+        <button class="btn" id="btnShow">▶︎ Vorführen</button>
+        <button class="btn" id="btnRestart">↺ Neu schreiben</button>
+        <button class="btn" id="btnSkip">Aufdecken</button>
+        <button class="btn" id="btnOther">↷ Anderes Wort</button>
+      </div>
+      <div class="grade" id="grade">
+        <div class="res" id="res"></div>
+        <div class="row">
+          <button class="g again" data-g="0">Nochmal<small id="ivA">gleich</small></button>
+          <button class="g good" data-g="1">Gut<small id="ivG"></small></button>
+          <button class="g easy" data-g="2">Leicht<small id="ivE"></small></button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <section class="empty" id="empty">
+    <div class="big">好</div>
+    <h2>Für heute geschafft</h2>
+    <p id="emptyText">Alle fälligen Karten sind wiederholt. Morgen stehen neue Wiederholungen an.</p>
+    <div class="tools">
+      <button class="btn primary" id="btnMore">+ 5 neue Wörter</button>
+      <button class="btn" id="btnCram">Zufällige Übungsrunde</button>
+    </div>
+  </section>
+</div>
+
+<div class="sheet" id="sheet">
+  <div class="panel">
+    <button class="btn close" id="btnClose">Fertig</button>
+    <h3>Einstellungen</h3>
+    <div class="field"><div class="lbl">Aktuelle Lektion · neue Wörter kommen zuerst von hier</div><div class="seg" id="segCur"></div></div>
+    <div class="field"><div class="lbl">China entdecken · Band 2</div><div class="seg" id="segB2"></div></div>
+    <div class="field"><div class="lbl">China entdecken · Band 1</div><div class="seg" id="segLevels"></div></div>
+    <div class="toggle"><div><span>Zusatzwörter mitlernen</span><small>Band 1: auch die farbig markierten Wörter, die keine Lernwörter sind</small></div><button class="sw" id="swExtras"></button></div>
+    <div class="field"><div class="lbl">HSK (zusätzlich)</div><div class="seg" id="segHsk"></div></div>
+    <div class="field"><div class="lbl">Neue Wörter pro Tag</div><div class="seg" id="segNew"></div></div>
+    <div class="toggle"><div><span>Pinyin abfragen</span><small>Erst das Pinyin zum deutschen Wort eintippen, dann das Zeichen schreiben</small></div><button class="sw" id="swPy"></button></div>
+    <div class="toggle"><div><span>Eigene Pinyin-Tastatur</span><small>Bleibt im Vollbild. Aus: iPad-Tastatur bzw. Pencil-Handschrift (beendet aber das Vollbild)</small></div><button class="sw" id="swKb"></button></div>
+    <div class="toggle"><div><span>Zufällige Reihenfolge</span><small>Wörter in zufälliger Reihenfolge abfragen (neue Wörter trotzdem zuerst aus der aktuellen Lektion)</small></div><button class="sw" id="swRnd"></button></div>
+    <div class="toggle"><div><span>Vorlage immer zeigen</span><small>Graue Umrisse sofort einblenden, ohne „Zeichen unbekannt“</small></div><button class="sw" id="swOutline"></button></div>
+    <div class="toggle"><div><span>Nur Apple Pencil</span><small>Finger und Handballen auf der Schreibfläche ignorieren</small></div><button class="sw" id="swPencil"></button></div>
+    <div class="toggle"><div><span>Automatisch aussprechen</span><small>Wort bei jeder neuen Karte vorlesen</small></div><button class="sw" id="swAuto"></button></div>
+    <div class="field"><div class="lbl">Fortschritt</div><div class="stats" id="stats"></div></div>
+    <button class="danger" id="btnReset">Fortschritt zurücksetzen</button>
+    <div class="field"><div class="lbl">Fortschritt übertragen</div>
+      <div class="seg"><button id="btnExport">Exportieren (kopieren)</button><button id="btnImportShow">Importieren …</button></div>
+      <div id="xferBox" style="display:none;margin-top:10px">
+        <textarea id="xfer" style="width:100%;height:90px;border-radius:10px;border:1px solid var(--line);padding:8px;font:12px ui-monospace,monospace;-webkit-user-select:text;user-select:text" placeholder="Exportierten Text hier einfügen"></textarea>
+        <div class="seg" style="margin-top:8px"><button id="btnImport">Übernehmen</button></div>
+      </div>
+      <div class="note" id="xferMsg" style="margin-top:6px"></div>
+    </div>
+    <div class="note" id="note"></div>
+    <div class="note" id="errlog" style="white-space:pre-wrap;font-family:ui-monospace,monospace;font-size:11px"></div>
+  </div>
+</div>
+
+<div class="sheet" id="confirm">
+  <div class="panel">
+    <h3>Wirklich zurücksetzen?</h3>
+    <p style="color:var(--ink2);line-height:1.5;margin:0 0 18px">Alle Lernstände werden gelöscht. Das lässt sich nicht rückgängig machen.</p>
+    <div class="tools" style="justify-content:flex-end"><button class="btn" id="cNo">Abbrechen</button><button class="btn primary" id="cYes">Zurücksetzen</button></div>
+  </div>
+</div>
+
+<script>/*LIB*/</script>
+<script>/*DATA*/</script>
+<div id="toast" style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1f1b16;color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;display:none;z-index:20;max-width:90vw"></div>
+<script>
+(function(){
+  const KEY='hanzi-errlog';
+  function log(msg){ try{ const a=JSON.parse(localStorage.getItem(KEY)||'[]'); a.push(new Date().toISOString().slice(5,16).replace('T',' ')+' '+String(msg).slice(0,200)); localStorage.setItem(KEY,JSON.stringify(a.slice(-8))); }catch(e){} }
+  function toast(t){ const el=document.getElementById('toast'); if(!el)return; el.textContent=t; el.style.display='block'; clearTimeout(el._t); el._t=setTimeout(()=>el.style.display='none',3500); }
+  window.__hzlog=log; window.__hztoast=toast;
+  window.addEventListener('error',e=>{ log((e.message||'Fehler')+' @'+(e.lineno||'')); toast('Fehler: '+(e.message||'')); });
+  window.addEventListener('unhandledrejection',e=>{ log('Promise: '+((e.reason&&(e.reason.message||e.reason.code))||e.reason)); });
+})();
+</script>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const DAY=864e5;
+const IV=[0,1,3,7,14,30,60,120,240]; // days per box
+const LS_KEY='hanzi-cards-v1';
+
+// ---------- state ----------
+let S={p:{},settings:{newPerDay:10,extras:false,askPinyin:true,outlineReview:false,pencilOnly:false,autoSay:false},day:'',newToday:0,updated:0};
+function today(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+function lsLoad(){try{const r=localStorage.getItem(LS_KEY);if(r){const o=JSON.parse(r);if(o&&o.p)return o;}}catch(e){}return null;}
+function lsSave(){try{localStorage.setItem(LS_KEY,JSON.stringify(S));}catch(e){}}
+function merge(o){if(!o||!o.p)return;S={...S,...o,settings:{...S.settings,...(o.settings||{})}};}
+const CE1=Array.from({length:12},(_,i)=>'ce1-'+(i+1));
+const CE2=Array.from({length:12},(_,i)=>'ce2-'+(i+1));
+const GROUPS={ce1:CE1,ce2:CE2};
+const DECKS=[...CE1.map((id,i)=>({id,g:'China entdecken 1',l:'L'+(i+1),t:'Band 1 · Lektion '+(i+1)})),
+  ...CE2.map((id,i)=>({id,g:'China entdecken 2',l:'L'+(i+1),t:'Band 2 · Lektion '+(i+1)})),
+  ...[1,2,3,4].map(n=>({id:'hsk'+n,g:'HSK',l:'HSK '+n,t:'HSK '+n}))];
+const DECK=Object.fromEntries(DECKS.map(d=>[d.id,d]));
+function fixSettings(){
+  if(!Array.isArray(S.settings.decks)||!S.settings.decks.length) S.settings.decks=CE2.slice();
+  if(!S.settings.b2){ S.settings.b2=true; if(S.settings.decks.join()===CE1.join()) S.settings.decks=CE2.slice(); }
+  if(S.settings.askPinyin===undefined) S.settings.askPinyin=true;
+  if(!S.settings.courseV){ S.settings.courseV=1; S.settings.decks=['ce2-1','ce2-2']; S.settings.cur='ce2-2'; }
+  delete S.settings.levels; }
+const local=lsLoad(); if(local) merge(local); fixSettings();
+
+// ---------- cloud sync (artifact db) ----------
+let dbRef=null, loaded=false, writing=false, dirty=false, saveTimer=null;
+function setSync(t){$('sync').textContent=t;}
+function persist(){
+  S.updated=Date.now(); lsSave();
+  if(!dbRef||!loaded) return;          // never write to the cloud before the cloud state has been read
+  dirty=true; clearTimeout(saveTimer); saveTimer=setTimeout(flush,1200);
+}
+async function flush(){
+  if(!dbRef||!loaded||writing||!dirty) return;
+  writing=true; dirty=false; setSync('speichert…');
+  try{ await dbRef.set(JSON.parse(JSON.stringify(S))); setSync('☁︎ gesichert'); }
+  catch(e){ setSync('offline'); dirty=true; }
+  writing=false; if(dirty) saveTimer=setTimeout(flush,4000);
+}
+// merge two states without losing progress: newest entry per word, newest settings block
+function mergeStates(a,b){
+  const out=JSON.parse(JSON.stringify(a));
+  const pa=a.p||{}, pb=b.p||{}; out.p={};
+  const score=r=>r?[(r.t||0),(r.n||0),(r.d||0)]:[-1,-1,-1];
+  const newer=(x,y)=>{const A=score(x),B=score(y);for(let i=0;i<3;i++){if(A[i]!==B[i])return A[i]>B[i]?x:y;}return y;};
+  new Set([...Object.keys(pa),...Object.keys(pb)]).forEach(k=>{ out.p[k]=newer(pa[k],pb[k]); });
+  const sa=a.settings||{}, sb=b.settings||{};
+  out.settings = ((sb._t||0) >= (sa._t||0)) ? {...sa,...sb} : {...sb,...sa};
+  if(a.day===b.day) out.newToday=Math.max(a.newToday||0,b.newToday||0);
+  else { const t=today(); const src=b.day===t?b:a; out.day=src.day; out.newToday=src.newToday||0; }
+  out.updated=Math.max(a.updated||0,b.updated||0);
+  return out;
+}
+(async()=>{
+  try{
+    if(!window.claude||!window.claude.use) return;
+    const [db,user]=await Promise.all([window.claude.use('db'),window.claude.use('user')]);
+    if(!db||!user) return;
+    const uid=await user.id(); if(!uid) return;
+    const ref=db.doc('data/users/'+uid+'/progress');
+    setSync('lädt…');
+    const snap=await ref.get();
+    const remote = snap.exists ? JSON.parse(JSON.stringify(snap.data()||{})) : null;
+    if(remote && remote.p){
+      const merged=mergeStates(S,remote);
+      const changedLocal = JSON.stringify(merged)!==JSON.stringify(S);
+      S=merged; fixSettings(); lsSave();
+      dbRef=ref; loaded=true;
+      if(JSON.stringify(S)!==JSON.stringify(remote)){ dirty=true; flush(); } else setSync('☁︎ gesichert');
+      if(changedLocal) rebuildAfterSync();
+    } else {
+      dbRef=ref; loaded=true; dirty=true; flush();
+    }
+  }catch(e){ setSync('nur lokal'); try{window.__hzlog&&window.__hzlog('sync: '+(e&&(e.message||e.code)));}catch(_){} }
+})();
+
+// ---------- data ----------
+const WORDS=window.WORDS.map(w=>({w:w[0],py:w[1],num:w[2],m:w[3],d:w[4],e:w[5],k:w[6]||w[0],alt:w[7]||''}));
+const BYW={};WORDS.forEach(x=>BYW[x.k]=x);
+
+function rollDay(){const t=today();if(S.day!==t){S.day=t;S.newToday=0;}}
+function inLevels(x){const sel=S.settings.decks;return x.d.some(d=>sel.includes(d))||(S.settings.extras&&x.e.some(d=>sel.includes(d)));}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const RND=()=>S.settings.random!==false;
+function freshList(){
+  const cur=S.settings.cur, sel=S.settings.decks;
+  let f=WORDS.filter(x=>inLevels(x)&&!S.p[x.k]);
+  if(RND()) f=shuffle(f);
+  if(!cur||!sel.includes(cur)) return f;
+  const inCur=x=>x.d.includes(cur)||(S.settings.extras&&x.e.includes(cur));
+  return [...f.filter(inCur),...f.filter(x=>!inCur(x))];
+}
+function deckOf(x){const sel=S.settings.decks;const cur=S.settings.cur;const ex=!!S.settings.extras;
+  const id=(cur&&(x.d.includes(cur)||(ex&&x.e.includes(cur)))&&cur)||x.d.find(d=>sel.includes(d))||(ex&&x.e.find(d=>sel.includes(d)))||x.d[0]||x.e[0];return DECK[id];}
+function counts(){
+  const now=Date.now();let due=0,known=0;
+  for(const k in S.p){const r=S.p[k];const x=BYW[k];if(!x)continue;if(r.b>=3)known++;if(inLevels(x)&&r.d<=now)due++;}
+  return {due,known};
+}
+
+// ---------- tone helpers ----------
+const VOW={a:'āáǎàa',e:'ēéěèe',i:'īíǐìi',o:'ōóǒòo',u:'ūúǔùu',ü:'ǖǘǚǜü'};
+function syl2dia(s){
+  let m=s.match(/^([a-zü:v]+)([1-5])$/i); if(!m) return {t:5,s:s};
+  let b=m[1].toLowerCase().replace('u:','ü').replace('v','ü'),t=+m[2];
+  let idx=-1;
+  if(b.includes('a'))idx=b.indexOf('a');else if(b.includes('e'))idx=b.indexOf('e');else if(b.includes('ou'))idx=b.indexOf('o');
+  else{for(let i=b.length-1;i>=0;i--){if('iouü'.includes(b[i])){idx=i;break;}}}
+  if(idx>=0&&t<5){b=b.slice(0,idx)+VOW[b[idx]][t-1]+b.slice(idx+1);}
+  return {t,s:b};
+}
+
+// ---------- queue ----------
+let queue=[], card=null, cram=false;
+function buildQueue(){
+  rollDay();
+  const now=Date.now();
+  const due=WORDS.filter(x=>inLevels(x)&&S.p[x.k]&&S.p[x.k].d<=now).sort((a,b)=>S.p[a.k].d-S.p[b.k].d);
+  const left=Math.max(0,S.settings.newPerDay-S.newToday);
+  const fresh=freshList().slice(0,left);
+  // interleave: new words spread among reviews
+  if(RND()){ queue=shuffle([...due,...fresh.filter(x=>!due.includes(x))]); cram=false; return; }
+  queue=[];let i=0,j=0;
+  while(i<due.length||j<fresh.length){ if(i<due.length)queue.push(due[i++]); if(i<due.length)queue.push(due[i++]); if(j<fresh.length)queue.push(fresh[j++]); }
+  cram=false;
+}
+function addNew(n){
+  const fresh=freshList().slice(0,n);
+  S.newToday=Math.max(0,S.newToday-n); // extend today's allowance
+  queue.push(...fresh); if(RND()) queue=shuffle(queue); persist();
+}
+function cramRound(){
+  const seen=WORDS.filter(x=>inLevels(x)&&S.p[x.k]);
+  const pool=(seen.length?seen:WORDS.filter(inLevels)).slice();
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+  queue=pool.slice(0,10); cram=true;
+}
+
+// ---------- writer ----------
+let seq=0, animBusy=false, strokeErr=0, phase='write', unknownChar=false, pyTries=0, pyNote='';
+let writer=null, size=400, charIdx=0, mistakes=0, helped=false, outlineOn=false, quizzing=false, totalStrokes=0, doneStrokes=0;
+function layout(){
+  const vw=window.innerWidth, vh=window.innerHeight;
+  const portrait=vh>vw*1.05;
+  document.body.classList.toggle('portrait',portrait);
+  { const pa=$('pyask'); if(pa.classList.contains('done')) pa.classList.toggle('show',!portrait); }
+  const head=70, tools=140;
+  let s;
+  if(portrait){ const infoH=$('info').offsetHeight||260; s=Math.min(vw-40, vh-head-infoH-tools-30); }
+  else { s=Math.min(vh-head-tools-20, vw*0.55); }
+  s=Math.max(240,Math.floor(s));
+  size=s;
+  const pad=$('pad'); pad.style.width=s+'px'; pad.style.height=s+'px'; $('padcol').style.width=s+'px';
+  const g=$('grid'); g.setAttribute('viewBox','0 0 100 100'); g.setAttribute('width',s); g.setAttribute('height',s);
+  g.innerHTML='<g stroke="#e6c9bf" stroke-width=".35" fill="none"><rect x="1.5" y="1.5" width="97" height="97" rx="3" stroke="#dcb6aa" stroke-width=".6"/><line x1="50" y1="2" x2="50" y2="98" stroke-dasharray="1.6 1.6"/><line x1="2" y1="50" x2="98" y2="50" stroke-dasharray="1.6 1.6"/><line x1="2" y1="2" x2="98" y2="98" stroke-dasharray="1.6 1.6"/><line x1="98" y1="2" x2="2" y2="98" stroke-dasharray="1.6 1.6"/></g>';
+  if(writer) writer.updateDimensions({width:s,height:s,padding:Math.round(s*.06)});
+}
+function makeWriter(ch){
+  writer=HanziWriter.create('hw',ch,{
+    width:size,height:size,padding:Math.round(size*.06),
+    showCharacter:false,showOutline:false,
+    strokeColor:'#1f1b16',outlineColor:'#e4dccd',drawingColor:'#1f1b16',drawingWidth:Math.max(14,Math.round(size/26)),
+    highlightColor:'#b8321f',strokeAnimationSpeed:1.1,delayBetweenStrokes:180,
+    charDataLoader:(c,onLoad,onErr)=>{const d=window.CHARS[c];d?onLoad(d):onErr(new Error('no data'));}
+  });
+}
+function flash(cls){const p=$('pad');p.classList.remove('ok','err');void p.offsetWidth;p.classList.add(cls);setTimeout(()=>p.classList.remove(cls),450);}
+function setOutline(on){outlineOn=on;$('btnOutline').classList.toggle('on',unknownChar);if(!writer)return;on?writer.showOutline():writer.hideOutline();}
+function strokeInfo(){ $('strokeinfo').textContent=totalStrokes?`Strich ${Math.min(doneStrokes+1,totalStrokes)} / ${totalStrokes}`:''; }
+
+async function startChar(){
+  while(charIdx<card.w.length && !window.CHARS[card.w[charIdx]]) charIdx++;
+  if(charIdx>=card.w.length){finishCard();return;}
+  const ch=card.w[charIdx];
+  renderSlots();
+  const my=seq;
+  if(!writer) makeWriter(ch); else { try{writer.cancelQuiz();}catch(e){} await writer.setCharacter(ch); }
+  if(my!==seq) return;
+  writer.hideCharacter();
+  totalStrokes=(window.CHARS[ch]||{strokes:[]}).strokes.length; doneStrokes=0; strokeInfo();
+  setOutline(unknownChar||S.settings.outlineReview);
+  quiz();
+}
+function quiz(){
+  quizzing=true;
+  writer.quiz({
+    leniency:1.15,
+    showHintAfterMisses:outlineOn?1:3,
+    highlightOnComplete:true,
+    onMistake:()=>{mistakes++;strokeErr++;flash('err');},
+    onCorrectStroke:(d)=>{doneStrokes=d.strokeNum+1;strokeInfo();},
+    onComplete:()=>{quizzing=false;flash('ok');const my=seq,ci=charIdx;setTimeout(()=>{if(my===seq&&ci===charIdx)nextChar();},550);}
+  });
+}
+function nextChar(){
+  charIdx++;
+  if(charIdx<card.w.length) startChar(); else finishCard();
+}
+function finishCard(){
+  renderSlots();
+  writer.showCharacter();
+  $('tools').style.display='none';
+  const g=$('grade'); g.classList.add('show');
+  const r=S.p[card.k];
+  const sug = helped||mistakes>=4 ? 0 : mistakes===0 ? 2 : 1;
+  const b=r?r.b:0;
+  $('ivG').textContent=fmtIv(Math.max(1,b+1)); $('ivE').textContent=fmtIv(Math.max(2,b+2));
+  document.querySelectorAll('.g').forEach(el=>el.classList.toggle('sug',+el.dataset.g===sug));
+  $('res').textContent = (pyNote?pyNote+' · ':'') + (helped ? 'mit Hilfe geschrieben' : strokeErr===0 ? 'Zeichen fehlerfrei' : `${strokeErr} Fehlstrich${strokeErr>1?'e':''}`);
+  if(!S.settings.autoSay) say();
+}
+function fmtIv(b){const d=IV[Math.min(b,IV.length-1)];return d===1?'1 Tag':d<30?d+' Tage':d<60?'1 Monat':Math.round(d/30)+' Monate';}
+function grade(g){
+  if(!$('grade').classList.contains('show')) return;
+  $('grade').classList.remove('show');
+  const now=Date.now();
+  const wasNew=!S.p[card.k];
+  if(!cram){
+    rollDay(); if(wasNew) S.newToday++;
+    let r=S.p[card.k]||{b:0,d:0,n:0};
+    if(g===0){ r.b=0; r.d=now+10*60e3; requeue(card,4); }
+    else { r.b=Math.max(g===2?2:1, r.b+(g===2?2:1)); r.b=Math.min(r.b,IV.length-1); r.d=now+IV[r.b]*DAY-36e5; }
+    r.n=(r.n||0)+1; r.t=Date.now(); S.p[card.k]=r; persist();
+  } else if(g===0){ requeue(card,4); }
+  next();
+}
+
+// ---------- render ----------
+function renderSlots(){
+  const syl=card.num.split(/\s+/);
+  const match=syl.length===card.w.length;
+  $('slots').innerHTML=[...card.w].map((c,i)=>{
+    const cls=i<charIdx||charIdx>=card.w.length||!window.CHARS[c]?'done':i===charIdx?'cur':'';
+    let py='<span class="py">&nbsp;</span>';
+    if(match&&phase!=='pinyin'){const d=syl2dia(syl[i]);py=`<span class="py" style="color:var(--t${d.t})">${d.s}</span>`;}
+    return `<div class="slot ${cls}"><div class="box">${cls==='done'?c:''}</div>${py}</div>`;
+  }).join('');
+}
+function renderChips(){const c=counts();$('cDue').textContent=c.due;$('cNew').textContent=Math.max(0,S.settings.newPerDay-S.newToday);$('cKnown').textContent=c.known;}
+function requeue(c,pos){ queue=queue.filter(x=>x.k!==c.k); if(queue.length>=2) queue.splice(Math.min(pos,queue.length),0,c); else queue.push(c); }
+function next(){
+  seq++; animBusy=false; resetTouch();
+  try{ writer&&writer.cancelQuiz(); }catch(e){} quizzing=false;
+  renderChips();
+  $('grade').classList.remove('show'); $('tools').style.display='';
+  const prevK=card&&card.k;
+  card=queue.shift();
+  while(card && !cram && !inLevels(card)) card=queue.shift();
+  // avoid the same word twice in a row if anything else is available
+  if(card && card.k===prevK && queue.length){ const alt=queue.findIndex(x=>x.k!==prevK); if(alt>=0){ const c=queue.splice(alt,1)[0]; queue.unshift(card); card=c; } }
+  if(!card){ showEmpty(); return; }
+  $('main').style.display=''; $('empty').classList.remove('show');
+  charIdx=0; mistakes=0; strokeErr=0; helped=false; unknownChar=false; pyTries=0; pyNote=''; pyShown=false; lastTry='';
+  const r=S.p[card.k];
+  {const dk=deckOf(card);$('tagLevel').textContent=dk?dk.t:'';}
+  const st=$('tagState');
+  if(cram){st.textContent='Übung';st.className='tag';}
+  else if(!r){st.textContent='Neu';st.className='tag new';}
+  else if(r.b===0){st.textContent='Lernen';st.className='tag new';}
+  else {st.textContent='Wiederholung';st.className='tag rev';}
+  $('meaning').textContent=card.m;
+  const ask=S.settings.askPinyin && card.num && !cram_skipPy();
+  phase = ask ? 'pinyin' : 'write';
+  showPinyin(!ask);
+  $('pyask').classList.remove('done'); $('pyask').classList.toggle('show',ask);
+  $('pad').classList.toggle('locked',ask);
+  $('tools').style.display = ask ? 'none' : '';
+  $('pyin').value=''; $('pyin').classList.remove('bad'); $('pyfb').textContent=''; $('pyfb').className='pyfb';
+  renderSlots(); layout();
+  startChar();
+  if(!ask && S.settings.autoSay) say();
+}
+function cram_skipPy(){return false;}
+function showPinyin(on){ if(on) $('pinyin').textContent=card.py; else $('pinyin').innerHTML='<span class="hid">• • •</span>'; $('btnSay').style.visibility=on?'':'hidden'; }
+function goWrite(delay){
+  const my=seq;
+  setTimeout(()=>{ if(my!==seq||phase!=='reveal') return; phase='write'; $('pyask').classList.add('done'); $('pad').classList.remove('locked'); $('tools').style.display=''; renderSlots(); layout(); try{$('pyin').blur();}catch(e){} },delay);
+}
+// pinyin parsing: returns {letters, tones[]} ; tones only for syllables where user gave one
+const TONEMARK={'\u0304':1,'\u0301':2,'\u030c':3,'\u0300':4};
+function parsePy(str){
+  let s=(str||'').normalize('NFD').toLowerCase().replace(/u:/g,'v').replace(/\u0308/g,'§');
+  let letters='', tones=[];
+  for(const ch of s){
+    if(TONEMARK[ch]) tones.push(TONEMARK[ch]);
+    else if(/[1-5]/.test(ch)) tones.push(+ch);
+    else if(ch==='§') letters=letters.replace(/u$/,'v');
+    else if(ch==='ü') letters+='v';
+    else if(/[a-z]/.test(ch)) letters+=ch;
+  }
+  return {letters,tones};
+}
+function expectedPy(numStr){
+  const syl=(numStr||card.num).toLowerCase().split(/\s+/);
+  let letters='',tones=[];
+  syl.forEach(x=>{const m=x.match(/^([a-zü:v]+)([1-5])?$/); if(!m)return; letters+=m[1].replace('u:','v').replace('ü','v'); tones.push(+(m[2]||5));});
+  return {letters,tones};
+}
+function checkPinyin(){
+  if(phase!=='pinyin') return;
+  const inp=$('pyin'), fb=$('pyfb');
+  const u=parsePy(inp.value), e=expectedPy();
+  const bad0=(msg)=>{ fb.textContent=msg; fb.className='pyfb'; };
+  if(!u.letters){ bad0('Bitte zuerst das Pinyin eingeben.'); return; }
+  const norm=inp.value.trim();
+  if(norm===lastTry){ return; }
+  lastTry=norm;
+  const bad=(msg)=>{ inp.classList.remove('bad'); void inp.offsetWidth; inp.classList.add('bad'); fb.textContent=msg; fb.className='pyfb bad'; };
+  const lettersOk = u.letters===e.letters || u.letters.replace(/v/g,'u')===e.letters.replace(/v/g,'u');
+  if(!lettersOk){
+    pyTries++; if(pyTries<=3) mistakes++;
+    bad(pyShown?'Noch nicht richtig – schau auf die Lösung oben.':'Nicht richtig, versuch es noch einmal. Mit „Weiß ich nicht“ siehst du die Lösung.');
+    return;
+  }
+  const ut=u.tones.filter(t=>t!==5), et=e.tones.filter(t=>t!==5);
+  const et2=card.alt?expectedPy(card.alt).tones.filter(t=>t!==5):null;
+  if(ut.length===0){ bad('Silben richtig – jetzt noch die Töne dazu.'); return; }
+  if(ut.join()!==et.join() && !(et2 && ut.join()===et2.join())){
+    pyTries++; if(pyTries<=3) mistakes++;
+    bad('Silben richtig, Töne noch nicht.');
+    return;
+  }
+  if(!pyNote) pyNote = pyShown ? 'Pinyin mit Hilfe' : (pyTries? 'Pinyin im '+(pyTries+1)+'. Versuch' : 'Pinyin richtig');
+  fb.textContent='Richtig!'; fb.className='pyfb ok';
+  phase='reveal'; showPinyin(true); flash('ok'); say(); goWrite(900);
+}
+let pyShown=false, lastTry='';
+function showSolution(){ pyShown=true; helped=true; showPinyin(true); say(); if(!ownKb()) try{$('pyin').select();}catch(e){} }
+function revealPy(){
+  if(!pyShown){ mistakes+=2; pyNote='Pinyin nicht gewusst'; } lastTry='';
+  showSolution();
+  $('pyfb').textContent='Tippe das Pinyin ab, um weiterzumachen.'; $('pyfb').className='pyfb';
+  if(!ownKb()) try{$('pyin').focus();}catch(e){}
+}
+function showEmpty(){
+  $('main').style.display='none'; $('empty').classList.add('show');
+  const left=WORDS.filter(x=>inLevels(x)&&!S.p[x.k]).length;
+  $('emptyText').textContent= cram ? 'Übungsrunde beendet.' : `Alle fälligen Karten sind wiederholt. In deinen Lektionen warten noch ${left} neue Wörter.`;
+  $('btnMore').style.display=left?'':'none';
+}
+function rebuildAfterSync(){ renderSettings(); renderChips();
+  const untouched = !card || (phase==='pinyin' && !$('pyin').value) || (!cram&&!inLevels(card));
+  if(untouched){ buildQueue(); next(); } else { const cur=card; buildQueue(); queue=queue.filter(x=>x.k!==cur.k); renderChips(); } }
+
+// ---------- speech ----------
+let zhVoice=null;
+function pickVoice(){try{const v=speechSynthesis.getVoices();zhVoice=v.find(x=>/zh[-_]CN/i.test(x.lang))||v.find(x=>/^zh/i.test(x.lang))||null;}catch(e){}}
+try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}catch(e){}
+function say(){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(card.w);u.lang='zh-CN';if(zhVoice)u.voice=zhVoice;u.rate=.8;speechSynthesis.speak(u);}catch(e){}}
+
+// ---------- pencil handling: convert touches to mouse events for the writer ----------
+let stylusSeen=false, activeId=null;
+function resetTouch(){ if(activeId!==null){ activeId=null; try{ document.dispatchEvent(new MouseEvent('mouseup',{bubbles:true})); }catch(e){} } }
+document.addEventListener('visibilitychange',resetTouch);
+function svgNode(){return $('hw').querySelector('svg');}
+function fire(type,t,target){target.dispatchEvent(new MouseEvent(type,{bubbles:true,cancelable:true,clientX:t.clientX,clientY:t.clientY,button:0,buttons:type==='mouseup'?0:1}));}
+function inPad(e){return $('pad').contains(e.target);}
+function onTouch(e){
+  if(!inPad(e)) return;
+  e.preventDefault(); e.stopPropagation();
+  if(phase!=='write') return;
+  const node=svgNode(); if(!node) return;
+  const list=[...e.changedTouches];
+  if(e.type==='touchstart'){
+    if(activeId!==null){
+      // a stroke whose end we never saw (e.g. fullscreen ended mid-stroke): drop it
+      const still=[...e.touches].some(t=>t.identifier===activeId);
+      if(still) return;
+      const node2=svgNode(); activeId=null; if(node2) try{fire('mouseup',list[0],document);}catch(_){}
+    }
+    const pencil=list.find(t=>t.touchType==='stylus');
+    if(pencil&&!stylusSeen){ stylusSeen=true; if(!S.settings.pencilAsked){S.settings.pencilAsked=true;S.settings.pencilOnly=true;S.settings._t=Date.now();persist();} updatePencilNote(); }
+    const t = pencil || (S.settings.pencilOnly ? null : list[0]);
+    if(!t) return;
+    activeId=t.identifier; fire('mousedown',t,node);
+  } else if(e.type==='touchmove'){
+    const t=list.find(t=>t.identifier===activeId); if(t) fire('mousemove',t,node);
+  } else {
+    const t=list.find(t=>t.identifier===activeId); if(t){activeId=null; fire('mouseup',t,document);}
+  }
+}
+['touchstart','touchmove','touchend','touchcancel'].forEach(t=>window.addEventListener(t,onTouch,{capture:true,passive:false}));
+function updatePencilNote(){$('pencilnote').textContent=S.settings.pencilOnly?'✎ nur Pencil':(stylusSeen?'✎ Pencil erkannt':'');}
+
+// ---------- controls ----------
+$('btnSay').onclick=say;
+$('pyOk').onclick=checkPinyin;
+function otherWord(){
+  if(!card) return;
+  if(!queue.length){ $('pyfb').textContent='Keine weiteren Wörter in dieser Runde.'; $('pyfb').className='pyfb'; return; }
+  try{ writer&&writer.cancelQuiz(); }catch(e){}
+  quizzing=false; const c=card; queue=queue.filter(x=>x.k!==c.k); if(RND()&&queue.length>1){queue.splice(1+Math.floor(Math.random()*queue.length),0,c);} else queue.push(c); next();
+}
+$('pySkip').onclick=otherWord; $('btnOther').onclick=otherWord;
+// ---- tone buttons ----
+const MARKS={a:'āáǎà',e:'ēéěè',i:'īíǐì',o:'ōóǒò',u:'ūúǔù',ü:'ǖǘǚǜ'};
+const UNMARK={};for(const v in MARKS)[...MARKS[v]].forEach((c,i)=>UNMARK[c]=v);
+function placeTone(run,t){
+  // run: plain letters of one syllable (may contain v/ü)
+  let r=run.replace(/v/g,'ü');
+  const low=r.toLowerCase();
+  let idx=low.indexOf('a'); if(idx<0) idx=low.indexOf('e'); if(idx<0&&low.includes('ou')) idx=low.indexOf('o');
+  if(idx<0){for(let i=low.length-1;i>=0;i--){if('iouü'.includes(low[i])){idx=i;break;}}}
+  if(idx<0) return null;
+  const ch=MARKS[low[idx]][t-1];
+  return r.slice(0,idx)+(r[idx]===r[idx].toUpperCase()&&r[idx]!==low[idx]?ch.toUpperCase():ch)+r.slice(idx+1);
+}
+function applyTone(t){
+  const inp=$('pyin'); let v=inp.value;
+  if(t==='del'){ inp.value=[...v].slice(0,-1).join(''); return; }
+  if(t==='u'){ inp.value=v+'ü'; return; }
+  t=+t;
+  // trailing run of unmarked letters
+  const m=v.match(/[a-zA-ZüÜ]+$/);
+  if(m){
+    // if run directly follows a marked syllable without separator, the run is the new syllable
+    const res=placeTone(m[0],t);
+    if(res){ inp.value=v.slice(0,v.length-m[0].length)+res; return; }
+  }
+  // no plain run: re-tone the last marked vowel
+  const chars=[...v];
+  for(let i=chars.length-1;i>=0;i--){ const b=UNMARK[chars[i]]; if(b){ chars[i]=MARKS[b][t-1]; inp.value=chars.join(''); return; } if(!/[a-zA-Zü]/.test(chars[i])) break; }
+}
+// ---- own pinyin keyboard (keeps iPad fullscreen, no system keyboard) ----
+const ownKb=()=>S.settings.ownKb!==false;
+function applyKbMode(){
+  const on=ownKb(), inp=$('pyin');
+  document.body.classList.toggle('ownkb',on);
+  inp.readOnly=on; inp.setAttribute('inputmode',on?'none':'text'); inp.tabIndex=on?-1:0;
+  if(on) try{inp.blur();}catch(e){}
+}
+document.querySelectorAll('#kb .r').forEach(r=>{
+  r.innerHTML=[...r.dataset.k].map(c=>`<button data-c="${c}">${c}</button>`).join('')+(r.dataset.k==='yxcvbnm'?'<button class="wide" data-c="del">⌫</button>':'');
+});
+$('kb').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b||phase!=='pinyin')return; const inp=$('pyin');
+  if(b.dataset.c==='del') inp.value=[...inp.value].slice(0,-1).join(''); else inp.value+=b.dataset.c; inp.classList.remove('bad'); });
+// hardware keyboard while using own keyboard
+document.addEventListener('keydown',e=>{
+  if(!ownKb()||phase!=='pinyin'||$('sheet').classList.contains('show')||e.metaKey||e.ctrlKey) return;
+  const inp=$('pyin'); const k=e.key;
+  if(k==='Enter'){ e.preventDefault(); checkPinyin(); }
+  else if(k==='Backspace'){ e.preventDefault(); inp.value=[...inp.value].slice(0,-1).join(''); }
+  else if(/^[a-zA-Z0-9 üÜ]$/.test(k)){ e.preventDefault(); inp.value+=k.toLowerCase(); inp.classList.remove('bad'); }
+});
+$('tones').addEventListener('pointerdown',e=>{ if(!ownKb()&&e.target.closest('button')) e.preventDefault(); });
+$('tones').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b||phase!=='pinyin')return; applyTone(b.dataset.t); $('pyin').classList.remove('bad'); });
+$('pyin').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();checkPinyin();}});
+$('pyDunno').onclick=()=>{ if(phase==='pinyin') revealPy(); };
+$('btnOutline').onclick=()=>{ if(!writer||phase!=='write')return; unknownChar=!unknownChar; if(unknownChar) helped=true; setOutline(unknownChar); if(quizzing){writer.cancelQuiz();quiz();} };
+$('btnShow').onclick=async()=>{
+  if(!writer) return; helped=true; writer.cancelQuiz(); quizzing=false; doneStrokes=0; strokeInfo();
+  if(animBusy) return; animBusy=true; const my=seq;
+  try{ await writer.animateCharacter(); }catch(e){}
+  animBusy=false; if(my!==seq||phase!=='write') return;
+  writer.hideCharacter(); unknownChar=true; setOutline(true); quiz();
+};
+$('btnRestart').onclick=()=>{ if(!writer)return; writer.cancelQuiz(); writer.hideCharacter(); doneStrokes=0; strokeInfo(); setOutline(outlineOn); quiz(); };
+$('btnSkip').onclick=()=>{ if(!writer||phase!=='write'||animBusy)return; helped=true; mistakes+=4; writer.cancelQuiz(); quizzing=false; writer.showCharacter(); const my=seq,ci=charIdx; setTimeout(()=>{if(my===seq&&ci===charIdx)nextChar();},700); };
+document.querySelectorAll('.g').forEach(b=>b.onclick=()=>grade(+b.dataset.g));
+$('btnMore').onclick=()=>{cram=false;addNew(5);next();};
+$('btnCram').onclick=()=>{cramRound();next();};
+
+// settings
+function renderSettings(){
+  const sel=S.settings.decks;
+  const grp=g=>DECKS.filter(d=>d.g===g).map(d=>`<button data-d="${d.id}" class="${sel.includes(d.id)?'on':''}">${d.l}</button>`).join('');
+  const allBtn=g=>`<button data-all="${g}" class="${GROUPS[g].every(d=>sel.includes(d))?'on':''}">Alle</button>`;
+  $('segLevels').innerHTML=allBtn('ce1')+grp('China entdecken 1');
+  $('segB2').innerHTML=allBtn('ce2')+grp('China entdecken 2');
+  $('segHsk').innerHTML=grp('HSK');
+  $('segCur').innerHTML=`<button data-c="" class="${!S.settings.cur?'on':''}">Keine</button>`+DECKS.filter(d=>d.g!=='HSK'&&sel.includes(d.id)).map(d=>`<button data-c="${d.id}" class="${S.settings.cur===d.id?'on':''}">${d.id.startsWith('ce2')?'B2':'B1'} ${d.l}</button>`).join('');
+  $('swExtras').classList.toggle('on',!!S.settings.extras);
+  $('segNew').innerHTML=[5,10,15,20,30].map(n=>`<button data-n="${n}" class="${S.settings.newPerDay===n?'on':''}">${n}</button>`).join('');
+  $('swOutline').classList.toggle('on',S.settings.outlineReview);
+  $('swPy').classList.toggle('on',S.settings.askPinyin);
+  $('swRnd').classList.toggle('on',RND());
+  $('swKb').classList.toggle('on',ownKb());
+  applyKbMode();
+  $('swPencil').classList.toggle('on',S.settings.pencilOnly);
+  $('swAuto').classList.toggle('on',S.settings.autoSay);
+  const lv=DECKS.filter(d=>sel.includes(d.id)).map(d=>{const all=WORDS.filter(x=>x.d.includes(d.id)||(S.settings.extras&&x.e.includes(d.id)));const k=all.filter(x=>S.p[x.k]&&S.p[x.k].b>=3).length;const s=all.filter(x=>S.p[x.k]).length;return `<div>${d.g==='HSK'?d.l:(d.id.startsWith('ce2')?'B2 ':'B1 ')+d.l}<b>${k}/${all.length}</b>${s} begonnen</div>`;}).join('');
+  $('stats').innerHTML=lv;
+  $('note').textContent = dbRef ? 'Dein Fortschritt wird in deinem Claude-Konto gespeichert und ist auf allen Geräten verfügbar, auf denen du diese Seite öffnest.' : 'Dein Fortschritt wird in diesem Browser gespeichert.';
+  updatePencilNote();
+  try{ const a=JSON.parse(localStorage.getItem('hanzi-errlog')||'[]'); $('errlog').textContent=a.length?'Fehlerprotokoll (für Claude):\n'+a.join('\n'):''; }catch(e){}
+}
+$('btnSettings').onclick=()=>{renderSettings();$('sheet').classList.add('show');};
+let settingsChanged=false;
+function toggleDeck(e){const b=e.target.closest('button');if(!b)return;let L=S.settings.decks.slice();
+  if(b.dataset.all){const G=GROUPS[b.dataset.all];const on=G.every(d=>L.includes(d));L=on?L.filter(d=>!G.includes(d)):[...new Set([...L,...G])]; if(!on&&S.settings.cur&&!G.includes(S.settings.cur)) S.settings.cur='';}
+  else{const id=b.dataset.d;L=L.includes(id)?L.filter(x=>x!==id):[...L,id];}
+  if(!L.length)return;S.settings.decks=DECKS.map(d=>d.id).filter(id=>L.includes(id));settingsChanged=true;S.settings._t=Date.now();persist();renderSettings();}
+$('segCur').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.settings.cur=b.dataset.c||'';settingsChanged=true;S.settings._t=Date.now();persist();renderSettings();};
+$('segLevels').onclick=toggleDeck;$('segB2').onclick=toggleDeck;$('segHsk').onclick=toggleDeck;
+$('swExtras').onclick=()=>{S.settings.extras=!S.settings.extras;settingsChanged=true;S.settings._t=Date.now();persist();renderSettings();};
+$('segNew').onclick=e=>{const n=+e.target.dataset.n;if(!n)return;S.settings.newPerDay=n;settingsChanged=true;S.settings._t=Date.now();persist();renderSettings();};
+$('swKb').onclick=()=>{S.settings.ownKb=!ownKb();S.settings._t=Date.now();persist();applyKbMode();renderSettings();};
+$('swRnd').onclick=()=>{S.settings.random=!RND();settingsChanged=true;S.settings._t=Date.now();persist();renderSettings();};
+$('swPy').onclick=()=>{S.settings.askPinyin=!S.settings.askPinyin;S.settings._t=Date.now();persist();renderSettings();};
+$('swOutline').onclick=()=>{S.settings.outlineReview=!S.settings.outlineReview;S.settings._t=Date.now();persist();renderSettings();};
+$('swPencil').onclick=()=>{S.settings.pencilAsked=true;S.settings.pencilOnly=!S.settings.pencilOnly;S.settings._t=Date.now();persist();renderSettings();};
+$('swAuto').onclick=()=>{S.settings.autoSay=!S.settings.autoSay;S.settings._t=Date.now();persist();renderSettings();};
+$('btnClose').onclick=()=>{$('sheet').classList.remove('show');if(settingsChanged){settingsChanged=false;buildQueue();next();}else renderChips();};
+$('btnExport').onclick=async()=>{
+  const txt='HANZI1:'+btoa(unescape(encodeURIComponent(JSON.stringify(S))));
+  $('xferBox').style.display='block'; $('xfer').value=txt; $('btnImport').style.display='none';
+  try{ await navigator.clipboard.writeText(txt); $('xferMsg').textContent='Kopiert! In der neuen App unter „Importieren …“ einfügen.'; }
+  catch(e){ try{$('xfer').focus();$('xfer').select();}catch(_){} $('xferMsg').textContent='Text oben markieren und kopieren, dann in der neuen App einfügen.'; }
+};
+$('btnImportShow').onclick=()=>{ $('xferBox').style.display='block'; $('xfer').value=''; $('btnImport').style.display=''; $('xferMsg').textContent='Exportierten Text einfügen und „Übernehmen“ tippen.'; };
+$('btnImport').onclick=()=>{
+  try{
+    let t=$('xfer').value.trim(); if(t.startsWith('HANZI1:')) t=decodeURIComponent(escape(atob(t.slice(7))));
+    const o=JSON.parse(t); if(!o||!o.p) throw new Error('kein Fortschritt');
+    S=mergeStates(S,o); fixSettings(); S.settings._t=Date.now(); persist();
+    $('xferMsg').textContent='Übernommen: '+Object.keys(o.p).length+' Wörter.'; renderSettings(); buildQueue(); next();
+  }catch(e){ $('xferMsg').textContent='Das hat nicht geklappt – bitte den kompletten exportierten Text einfügen.'; }
+};
+$('btnReset').onclick=()=>$('confirm').classList.add('show');
+$('cNo').onclick=()=>$('confirm').classList.remove('show');
+$('cYes').onclick=()=>{S.p={};S.newToday=0;S.settings._t=Date.now();persist();$('confirm').classList.remove('show');$('sheet').classList.remove('show');buildQueue();next();};
+
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(layout,120);});
+
+// ---------- go ----------
+applyKbMode();
+layout();
+buildQueue();
+next();
+})();
+</script>
+</body>
+</html>

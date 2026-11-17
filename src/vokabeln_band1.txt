@@ -1,0 +1,414 @@
+埃及|Āijí|2|0|Ägypten
+矮|ǎi|4|0|klein (Körpergröße)
+澳大利亚|Àodàlìyà|2|1|Australien
+爸爸|bàba|3|1|Vater, Papa
+吧|ba|8|1|Partikel für Vorschläge
+百|bǎi|8|1|hundert
+白色|báisè|8|1|weiß
+班|bān|12|1|ZEW für Klassen, Gruppen
+半|bàn|7|1|halb (halbe Stunde)
+棒球|bàngqiú|11|0|Baseball
+北边|běibian|9|1|Norden
+北京|Běijīng|2|1|Peking
+蹦极|bèngjí|11|1|Bungee-Jumping
+比赛|bǐsài|11|1|Wettkampf, Spiel
+别|bié|12|1|nicht (Imperativ)
+兵马俑|Bīngmǎyǒng|12|1|Terrakotta-Armee
+博客|bókè|7|1|Blog
+不|bù|2|1|nicht, nein
+不错|bùcuò|8|1|nicht schlecht, gut
+菜|cài|7|1|Gericht, Essen
+餐|cān|6|1|Küche, Mahlzeit
+参观|cānguān|10|1|besichtigen
+餐厅|cāntīng|10|1|Restaurant
+长|cháng|4|0|lang
+唱歌|chànggē|7|1|singen
+超市|chāoshì|8|1|Supermarkt
+衬衫|chènshān|8|0|Hemd
+城市|chéngshì|12|1|Stadt
+吃|chī|6|1|essen
+吃饭|chīfàn|6|1|essen (eine Mahlzeit)
+冲浪|chōnglàng|11|1|surfen
+出生地|chūshēngdì|4|1|Geburtsort
+出租|chūzū|9|1|vermieten
+出租车|chūzūchē|10|1|Taxi
+厨房|chúfáng|6|1|Küche (Raum)
+厨师|chúshī|3|0|Koch
+船|chuán|10|1|Boot, Schiff
+从|cóng|12|1|von, aus
+打|dǎ|6|1|spielen (Ballspiel mit Händen)
+打电话|dǎ diànhuà|5|1|telefonieren
+打工|dǎgōng|12|0|jobben
+打算|dǎsuan|12|1|vorhaben, planen
+大家|dàjiā|1|1|alle
+大学|dàxué|5|1|Universität
+大衣|dàyī|8|1|Mantel
+但是|dànshì|3|1|aber
+当然|dāngrán|10|1|natürlich
+导游|dǎoyóu|3|0|Reiseleiter
+到|dào|7|1|ankommen, nach … gehen
+德国|Déguó|2|0|Deutschland
+的|de|3|1|Strukturpartikel (Besitz)
+弟弟|dìdi|3|1|jüngerer Bruder
+地方|dìfang|12|1|Ort, Platz
+地铁站|dìtiězhàn|9|1|U-Bahn-Station
+地址|dìzhǐ|5|1|Adresse
+第一个|dì-yī gè|10|1|der/die/das erste
+点|diǎn|7|1|Uhr (Uhrzeit)
+电话|diànhuà|5|1|Telefon
+电视|diànshì|7|0|Fernseher
+电影|diànyǐng|7|1|Film
+电影院|diànyǐngyuàn|7|1|Kino
+电子邮件|diànzǐ yóujiàn|7|1|E-Mail
+电子邮箱|diànzǐ yóuxiāng|4|1|E-Mail-Postfach, E-Mail-Adresse
+东边|dōngbian|9|1|Osten
+东西|dōngxi|8|1|Ding, Sache
+动物|dòngwù|4|1|Tier
+都|dōu|3|1|alle, beide
+短|duǎn|4|0|kurz
+短裤|duǎnkù|8|0|kurze Hose
+短信|duǎnxìn|5|0|SMS, Kurznachricht
+队|duì|11|1|Mannschaft, Team
+对|duì|9|1|richtig
+对不起|duìbuqǐ|1|1|Entschuldigung
+多大|duō dà|5|1|wie alt
+多少|duōshao|5|1|wie viel, wie viele
+二月|Èryuè|6|1|Februar
+发件人|fājiànrén|5|1|Absender
+发送|fāsòng|5|0|senden
+法国|Fǎguó|2|0|Frankreich
+饭馆|fànguǎn|9|1|Restaurant
+方便|fāngbiàn|9|1|praktisch, bequem
+房间|fángjiān|5|1|Zimmer
+房子|fángzi|9|1|Wohnung, Haus
+飞机|fēijī|12|1|Flugzeug
+飞机场|fēijīchǎng|10|0|Flughafen
+分|fēn|7|1|Minute (Uhrzeit)
+分钟|fēnzhōng|9|1|Minute (Dauer)
+服务员|fúwùyuán|3|0|Kellner, Kellnerin
+服装市场|fúzhuāng shìchǎng|8|1|Kleidermarkt
+附近|fùjìn|9|1|in der Nähe
+橄榄球|gǎnlǎnqiú|11|0|Rugby
+高|gāo|4|1|groß (Körpergröße), hoch
+高兴|gāoxìng|1|1|froh, erfreut
+哥哥|gēge|3|1|älterer Bruder
+个子|gèzi|4|0|Körpergröße
+给|gěi|5|1|geben; für
+跟|gēn|6|1|mit
+工程师|gōngchéngshī|3|0|Ingenieur
+工作|gōngzuò|3|1|Arbeit; arbeiten
+公共汽车|gōnggòng qìchē|10|1|Bus
+公寓|gōngyù|5|1|Wohnhaus, Apartmentgebäude
+公园|gōngyuán|5|1|Park
+购物中心|gòuwù zhōngxīn|8|1|Einkaufszentrum
+广州|Guǎngzhōu|12|0|Guangzhou
+贵|guì|8|1|teuer
+桂林|Guìlín|10|1|Guilin
+国|guó|2|1|Land, Staat
+国籍|guójí|4|1|Staatsangehörigkeit
+过|guo|11|1|Partikel für Erfahrung (schon einmal)
+还是|háishi|10|1|oder (in Fragen)
+韩国|Hánguó|2|0|Korea
+好|hǎo|1|1|gut
+好吃|hǎochī|6|1|lecker
+好看|hǎokàn|8|1|hübsch, gutaussehend
+好莱坞|Hǎoláiwū|2|1|Hollywood
+好玩|hǎowán|12|1|lustig, macht Spaß
+号|hào|5|1|Nummer; Datum (Tag)
+号码|hàomǎ|5|1|Nummer
+和|hé|3|1|und
+黑色|hēisè|8|1|schwarz
+很|hěn|1|1|sehr
+很多|hěnduō|8|1|viele
+红|hóng|8|1|rot
+后边|hòubian|9|1|hinten
+护士|hùshi|3|0|Krankenschwester, Pfleger
+滑雪|huáxuě|11|1|Ski fahren
+黄色|huángsè|8|0|gelb
+回|huí|12|1|zurückkehren
+会|huì|11|1|können (gelernt)
+火车|huǒchē|10|1|Zug
+火车站|huǒchēzhàn|10|0|Bahnhof
+或者|huòzhě|12|1|oder (in Aussagen)
+几|jǐ|6|1|wie viele (kleine Zahl)
+几点|jǐ diǎn|7|1|wie spät, um wie viel Uhr
+计划|jìhuà|7|1|Plan
+记者|jìzhě|3|1|Journalist
+家|jiā|3|1|Familie, Zuhause
+加拿大|Jiānádà|2|1|Kanada
+加油站|jiāyóuzhàn|10|0|Tankstelle
+假期|jiàqī|10|1|Ferien, Urlaub
+价钱|jiàqian|8|1|Preis
+见|jiàn|7|1|sehen, treffen
+件|jiàn|8|1|ZEW für Kleidung, Dinge
+见面|jiànmiàn|6|1|sich treffen
+健身房|jiànshēnfáng|9|0|Fitnessstudio
+交通|jiāotōng|9|1|Verkehr
+叫|jiào|1|1|heißen
+街|jiē|5|0|Straße
+姐姐|jiějie|3|1|ältere Schwester
+今年|jīnnián|12|1|dieses Jahr
+今天|jīntiān|6|1|heute
+近|jìn|9|1|nah
+京剧|jīngjù|12|1|Peking-Oper
+警察局|jǐngchájú|9|0|Polizeiwache
+景点|jǐngdiǎn|10|1|Sehenswürdigkeit
+九月|Jiǔyuè|6|0|September
+觉得|juéde|12|1|finden, meinen
+咖啡店|kāfēidiàn|9|0|Café
+开始|kāishǐ|7|1|anfangen
+看|kàn|6|1|sehen, lesen, anschauen
+刻|kè|7|1|Viertelstunde
+可爱|kě'ài|4|1|süß, niedlich
+可以|kěyǐ|5|1|dürfen, können
+肯尼亚|Kěnníyà|2|0|Kenia
+酷|kù|4|1|cool
+裤子|kùzi|8|1|Hose
+块|kuài|8|1|Kuai (Yuan, umgangssprachlich)
+来|lái|8|1|kommen
+篮球|lánqiú|4|1|Basketball
+蓝色|lánsè|8|1|blau
+老|lǎo|4|0|alt
+老师|lǎoshī|3|1|Lehrer, Lehrerin
+离|lí|9|1|entfernt von
+理发师|lǐfàshī|3|0|Friseur
+历史|lìshǐ|12|1|Geschichte
+联系|liánxì|9|1|Kontakt; kontaktieren
+连衣裙|liányīqún|8|0|Kleid
+了|le|7|1|Partikel (Abschluss, Veränderung)
+六月|Liùyuè|6|1|Juni
+楼|lóu|9|1|Gebäude, Stockwerk
+路|lù|5|1|Straße, Weg
+路人|lùrén|9|1|Passant
+旅馆|lǚguǎn|9|0|Hotel
+旅行|lǚxíng|10|1|reisen; Reise
+绿色|lǜsè|8|0|grün
+律师|lǜshī|3|0|Anwalt
+伦敦|Lúndūn|2|1|London
+妈妈|māma|3|1|Mutter, Mama
+吗|ma|2|1|Fragepartikel
+买|mǎi|8|1|kaufen
+毛衣|máoyī|8|0|Pullover
+帽子|màozi|8|0|Hut, Mütze
+没问题|méi wèntí|6|1|kein Problem
+没有|méiyǒu|7|1|nicht haben
+每|měi|8|1|jeder, jede
+美国|Měiguó|2|1|USA
+妹妹|mèimei|3|1|jüngere Schwester
+门口|ménkǒu|7|1|Eingang, Tür
+秘书|mìshū|3|0|Sekretär, Sekretärin
+明年|míngnián|6|0|nächstes Jahr
+明天|míngtiān|7|1|morgen
+明星|míngxīng|2|1|Star, Promi
+名字|míngzi|1|1|Name
+墨尔本|Mò'ěrběn|2|1|Melbourne
+墨西哥|Mòxīgē|2|0|Mexiko
+哪|nǎ|2|1|welcher, welche
+哪里|nǎli|2|1|wo
+哪儿|nǎr|9|1|wo
+那里|nàli|6|1|dort
+那么|nàme|12|1|dann, also
+奶奶|nǎinai|7|1|Oma (väterlicherseits)
+男|nán|11|1|männlich
+南边|nánbian|9|1|Süden
+南非|Nánfēi|2|1|Südafrika
+南京|Nánjīng|9|1|Nanjing
+呢|ne|1|1|Fragepartikel (und du?)
+你|nǐ|1|1|du
+你好|nǐ hǎo|1|1|hallo
+你们|nǐmen|1|1|ihr
+年|nián|12|1|Jahr
+年龄|niánlíng|4|1|Alter
+年轻|niánqīng|4|0|jung
+牛仔裤|niúzǎikù|8|0|Jeans
+女士|nǚshì|1|0|Frau (Anrede)
+爬山|páshān|10|1|wandern, auf einen Berg steigen
+拍照|pāizhào|10|1|fotografieren
+排球|páiqiú|11|0|Volleyball
+派对|pàiduì|6|1|Party
+跑步|pǎobù|7|1|joggen
+朋友|péngyou|7|1|Freund, Freundin
+便宜|piányi|8|1|billig
+漂亮|piàoliang|12|1|schön, hübsch
+乒乓球|pīngpāngqiú|11|1|Tischtennis
+平方米|píngfāngmǐ|9|1|Quadratmeter
+七月|Qīyuè|6|0|Juli
+骑|qí|10|0|reiten, fahren (Fahrrad)
+其他|qítā|11|1|andere
+千|qiān|12|1|tausend
+钱|qián|8|1|Geld
+前边|qiánbian|9|1|vorne
+潜水|qiánshuǐ|11|1|tauchen
+请|qǐng|1|1|bitte; einladen
+请问|qǐngwèn|1|1|Entschuldigung, darf ich fragen
+球|qiú|11|1|Ball, Ballspiel
+区|qū|5|0|Bezirk
+曲棍球|qūgùnqiú|11|0|Hockey
+去|qù|6|1|gehen, fahren
+去年|qùnián|6|0|letztes Jahr
+裙子|qúnzi|8|1|Rock
+然后|ránhòu|10|1|danach, dann
+人|rén|2|1|Mensch, Person
+认识|rènshi|1|1|kennen, kennenlernen
+日|rì|6|1|Tag (Datum, schriftlich)
+日本|Rìběn|2|1|Japan
+三里屯|Sānlǐtún|10|1|Sanlitun (Viertel in Peking)
+商店|shāngdiàn|9|0|Geschäft, Laden
+上班|shàngbān|6|1|zur Arbeit gehen
+上个|shàngge|8|1|letzte, vorige
+上海|Shànghǎi|4|1|Shanghai
+上午|shàngwǔ|7|1|Vormittag
+谁|shéi|4|1|wer
+什么|shénme|1|1|was
+生日|shēngrì|6|1|Geburtstag
+生日卡|shēngrìkǎ|7|1|Geburtstagskarte
+省|shěng|5|0|Provinz
+时候|shíhou|11|1|Zeit, Zeitpunkt
+时间|shíjiān|7|1|Zeit
+实习|shíxí|12|0|ein Praktikum machen
+市|shì|5|0|Stadt
+事|shì|7|1|Sache, Angelegenheit
+试|shì|8|1|anprobieren, versuchen
+是|shì|1|1|sein
+收到|shōudào|5|1|erhalten
+收件箱|shōujiànxiāng|5|0|Posteingang
+手机|shǒujī|5|1|Handy
+售货员|shòuhuòyuán|8|1|Verkäufer, Verkäuferin
+书|shū|6|1|Buch
+书店|shūdiàn|8|1|Buchhandlung
+暑假|shǔjià|10|1|Sommerferien
+帅|shuài|4|1|gutaussehend (Mann)
+双|shuāng|8|1|Paar (ZEW)
+说|shuō|12|1|sagen, sprechen
+宿舍|sùshè|9|1|Wohnheim
+岁|suì|4|1|Jahre alt
+他|tā|3|1|er
+它|tā|10|1|es
+她|tā|3|1|sie (Singular)
+他们|tāmen|2|1|sie (Plural)
+太|tài|7|1|zu, sehr
+太太|tàitai|1|0|Frau (Anrede, verheiratet)
+泰国|Tàiguó|2|0|Thailand
+踢|tī|11|1|treten, spielen (mit dem Fuß)
+T恤|tīxù|8|1|T-Shirt
+体育场|tǐyùchǎng|11|1|Stadion, Sportplatz
+条|tiáo|8|1|ZEW für Hosen, Röcke, lange Dinge
+跳舞|tiàowǔ|11|1|tanzen
+听|tīng|7|1|hören
+停车场|tíngchēchǎng|10|0|Parkplatz
+同学|tóngxué|1|0|Mitschüler, Kommilitone
+头发|tóufa|4|0|Haare
+退出|tuìchū|5|0|beenden, zurück
+晚饭|wǎnfàn|7|1|Abendessen
+晚上|wǎnshang|7|1|Abend
+往|wǎng|9|1|in Richtung
+网球|wǎngqiú|11|1|Tennis
+围巾|wéijīn|8|0|Schal
+问|wèn|1|1|fragen
+问卷|wènjuàn|11|1|Fragebogen
+我|wǒ|1|1|ich
+我们|wǒmen|6|1|wir
+五月|Wǔyuè|6|0|Mai
+西安|Xī'ān|12|1|Xi'an
+西边|xībian|9|1|Westen
+悉尼|Xīní|2|1|Sydney
+希望|xīwàng|11|1|hoffen
+喜欢|xǐhuan|4|1|mögen
+洗手间|xǐshǒujiān|9|0|Toilette
+下个|xiàge|11|1|nächste
+下午|xiàwǔ|7|1|Nachmittag
+先生|xiānsheng|9|1|Herr
+现在|xiànzài|4|1|jetzt
+香港|Xiānggǎng|12|1|Hongkong
+想|xiǎng|11|1|denken; wollen
+小姐|xiǎojiě|1|1|Fräulein, Frau (Anrede)
+小时|xiǎoshí|11|1|Stunde
+鞋|xié|8|1|Schuhe
+写|xiě|7|1|schreiben
+谢谢|xièxie|5|1|danke
+新|xīn|5|1|neu
+新加坡|Xīnjiāpō|12|1|Singapur
+新西兰|Xīnxīlán|2|1|Neuseeland
+星期|xīngqī|6|1|Woche
+星期二|Xīngqī'èr|6|1|Dienstag
+星期六|Xīngqīliù|6|1|Samstag
+星期日|Xīngqīrì|6|1|Sonntag (schriftlich)
+星期三|Xīngqīsān|6|1|Mittwoch
+星期四|Xīngqīsì|6|1|Donnerstag
+星期天|Xīngqītiān|6|1|Sonntag (gesprochen)
+星期五|Xīngqīwǔ|6|1|Freitag
+星期一|Xīngqīyī|6|1|Montag
+姓|xìng|1|1|Nachname; mit Nachnamen heißen
+性别|xìngbié|11|1|Geschlecht
+姓名|xìngmíng|4|1|vollständiger Name
+熊猫|xióngmāo|4|1|Panda
+修理工|xiūlǐgōng|3|0|Mechaniker
+休闲|xiūxián|11|1|Freizeit
+需要|xūyào|10|1|brauchen
+学|xué|6|1|lernen
+学生|xuésheng|3|1|Schüler, Student
+学校|xuéxiào|3|1|Schule
+颜色|yánsè|10|1|Farbe
+演员|yǎnyuán|4|1|Schauspieler, Schauspielerin
+要|yào|7|1|wollen, möchten
+药店|yàodiàn|9|0|Apotheke
+爷爷|yéye|7|1|Opa (väterlicherseits)
+也|yě|3|1|auch
+野营|yěyíng|12|0|zelten
+一点儿|yìdiǎnr|8|1|ein bisschen
+衣服|yīfu|8|1|Kleidung
+一起|yìqǐ|7|1|zusammen
+医生|yīshēng|3|1|Arzt, Ärztin
+一些|yìxiē|10|1|einige
+医院|yīyuàn|3|1|Krankenhaus
+一月|Yīyuè|6|0|Januar
+以后|yǐhòu|12|1|nach, später
+意大利|Yìdàlì|10|1|Italien
+音乐|yīnyuè|7|1|Musik
+音乐会|yīnyuèhuì|7|1|Konzert
+银行|yínháng|9|1|Bank
+印度|Yìndù|2|0|Indien
+应该|yīnggāi|12|1|sollen, sollte
+英格兰|Yīnggélán|11|1|England
+英国|Yīngguó|2|1|Großbritannien
+英语|Yīngyǔ|7|1|Englisch
+赢|yíng|11|1|gewinnen
+邮局|yóujú|9|1|Post (Amt)
+游览|yóulǎn|10|1|besichtigen, eine Rundreise machen
+游泳|yóuyǒng|11|1|schwimmen
+有|yǒu|7|1|haben; es gibt
+有名|yǒumíng|8|1|berühmt
+远|yuǎn|8|1|weit
+月|yuè|6|1|Monat
+运动|yùndòng|7|1|Sport
+运动员|yùndòngyuán|4|1|Sportler
+在|zài|2|1|in, an, bei
+早上好|zǎoshang hǎo|2|1|guten Morgen
+怎么|zěnme|9|1|wie
+怎么样|zěnmeyàng|6|1|wie wäre es, wie ist es
+照片|zhàopiàn|3|1|Foto
+这|zhè|3|1|dies
+这边|zhèbian|8|1|hier entlang
+这个|zhège|7|1|dieser, diese, dieses
+这儿|zhèr|9|1|hier
+这里|zhèli|8|1|hier
+真|zhēn|4|1|wirklich, so
+真的|zhēn de|6|1|wirklich
+知道|zhīdào|4|1|wissen
+只|zhǐ|12|1|nur
+志愿者|zhìyuànzhě|12|0|Freiwilliger
+中餐|Zhōngcān|6|1|chinesisches Essen
+中国|Zhōngguó|2|1|China
+中文|Zhōngwén|1|1|Chinesisch
+中午|zhōngwǔ|7|1|Mittag
+周末|zhōumò|7|1|Wochenende
+主意|zhǔyi|12|1|Idee
+住|zhù|2|1|wohnen
+自行车|zìxíngchē|10|0|Fahrrad
+走|zǒu|9|1|gehen, laufen
+足球|zúqiú|11|1|Fußball
+最|zuì|4|1|am meisten
+昨天|zuótiān|6|0|gestern
+左右|zuǒyòu|9|1|ungefähr
+坐|zuò|10|1|fahren (mit Verkehrsmittel), sitzen
+做|zuò|3|1|machen, tun

@@ -8,3 +8,11 @@ deutsches Wort → Pinyin mit Tönen eingeben → Zeichen mit dem Stift schreibe
 - Installierbar über Safari → Teilen → „Zum Home-Bildschirm“, funktioniert danach offline
 
 Strichdaten: [Hanzi Writer](https://hanziwriter.org) / [Make Me a Hanzi](https://github.com/skishore/makemeahanzi) (Arphic Public License).
+
+## Aufbau
+
+- `src/app.html` – App (Oberfläche und Logik), mit Platzhaltern für Bibliothek und Daten
+- `src/data.js` – Wörter (Band 1, Band 2, HSK 1–4) und Strichdaten
+- `src/vokabeln_band*.txt` – Vokabellisten (Wort | Pinyin | Lektion | … | Bedeutung)
+- `build.py` – baut daraus `index.html` (`python3 build.py`)
+- `sw.js`, `manifest.webmanifest`, Icons – Installierbarkeit und Offline-Betrieb
