@@ -896,13 +896,21 @@ document.querySelectorAll('#kb .r').forEach(r=>{
 function hit(b){ b.classList.add('hit'); clearTimeout(b._h); b._h=setTimeout(()=>b.classList.remove('hit'),140); }
 // a tap that lands between keys counts for the nearest key
 function keyAt(e,root){
-  const b=e.target.closest('button'); if(b&&root.contains(b)) return b;
+  const b=e.target&&e.target.closest?e.target.closest('button'):null; if(b&&root.contains(b)) return b;
   let best=null,bd=1e9;
   root.querySelectorAll('button').forEach(k=>{ const r=k.getBoundingClientRect(); const dx=Math.max(r.left-e.clientX,0,e.clientX-r.right), dy=Math.max(r.top-e.clientY,0,e.clientY-r.bottom); const d=dx*dx+dy*dy; if(d<bd){bd=d;best=k;} });
   return bd<=22*22 ? best : null;
 }
-$('kb').addEventListener('pointerdown',e=>{ const b=keyAt(e,$('kb')); if(!b||phase!=='pinyin')return; e.preventDefault(); hit(b); const inp=$('pyin');
-  if(b.dataset.c==='del') inp.value=[...inp.value].slice(0,-1).join(''); else inp.value+=b.dataset.c; inp.classList.remove('bad'); });
+function pressKey(b){ if(!b||phase!=='pinyin') return; hit(b); const inp=$('pyin');
+  if(b.dataset.c==='del') inp.value=[...inp.value].slice(0,-1).join(''); else inp.value+=b.dataset.c; inp.classList.remove('bad'); }
+function pressTone(b){ if(!b||phase!=='pinyin') return; hit(b); applyTone(b.dataset.t); $('pyin').classList.remove('bad'); }
+// every finger (or the Pencil) counts on its own, even when the next one lands before the last one lifts
+function bindKeys(root, press){
+  root.addEventListener('touchstart',e=>{ e.preventDefault();
+    for(const t of e.changedTouches){ const fake={clientX:t.clientX,clientY:t.clientY,target:document.elementFromPoint(t.clientX,t.clientY)||root}; press(keyAt(fake,root)); } },{passive:false});
+  root.addEventListener('pointerdown',e=>{ if(e.pointerType==='touch'||e.pointerType==='pen') return; e.preventDefault(); press(keyAt(e,root)); });
+}
+bindKeys($('kb'),pressKey);
 // hardware keyboard while using own keyboard
 document.addEventListener('keydown',e=>{
   if(!ownKb()||phase!=='pinyin'||$('sheet').classList.contains('show')||e.metaKey||e.ctrlKey) return;
@@ -911,7 +919,7 @@ document.addEventListener('keydown',e=>{
   else if(k==='Backspace'){ e.preventDefault(); inp.value=[...inp.value].slice(0,-1).join(''); }
   else if(/^[a-zA-Z0-9 üÜ]$/.test(k)){ e.preventDefault(); inp.value+=k.toLowerCase(); inp.classList.remove('bad'); }
 });
-$('tones').addEventListener('pointerdown',e=>{ const b=keyAt(e,$('tones')); if(!b||phase!=='pinyin')return; e.preventDefault(); hit(b); applyTone(b.dataset.t); $('pyin').classList.remove('bad'); });
+bindKeys($('tones'),pressTone);
 $('pyin').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();checkPinyin();}});
 $('pyDunno').onclick=()=>{ if(phase==='pinyin') revealPy(); };
 $('btnOutline').onclick=()=>{ if(!writer||phase!=='write')return; unknownChar=!unknownChar; if(unknownChar){ helped=true; charHelp=true; } setOutline(unknownChar); if(quizzing){writer.cancelQuiz();quiz();} };
