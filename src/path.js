@@ -99,7 +99,21 @@ const VIDEOS={
   {id:'Z4Ka3MEwJ6E',title:'Was man in China besser nicht tut',src:'YouTube · Zhen Into Chinese',lvl:'A2–B1',
    ph:[['但是在中国是不可以的。','Dànshì zài Zhōngguó shì bù kěyǐ de.','Aber in China geht das nicht.'],['不礼貌','bù lǐmào','unhöflich'],['直接指出别人的错误','zhíjiē zhǐchū biérén de cuòwù','jemanden direkt auf seinen Fehler hinweisen'],['你不能只考虑自己。','Nǐ bù néng zhǐ kǎolǜ zìjǐ.','Du darfst nicht nur an dich denken.']]},
   {id:'aiVHQDnWshI',title:'Schilder lesen: 20 Hinweise und Verbote',src:'YouTube · Slow Easy Chinese',lvl:'A1–A2',
-   ph:[['节约用水','jiéyuē yòngshuǐ','Wasser sparen']]}]
+   ph:[['节约用水','jiéyuē yòngshuǐ','Wasser sparen']]}],
+ 'ce2-e7':[
+  {id:'-3PaTfnyzYQ',start:0,end:230,title:'Feuertopf essen in Chengdu',src:'YouTube · Nihao Chinese',lvl:'A2',
+   ph:[['火锅在成都非常的有名。','Huǒguō zài Chéngdū fēicháng de yǒumíng.','Feuertopf ist in Chengdu sehr berühmt.'],['今天就跟我一起去吃火锅吧。','Jīntiān jiù gēn wǒ yìqǐ qù chī huǒguō ba.','Komm heute mit mir Feuertopf essen.'],['没有辣椒的叫清汤。','Méiyǒu làjiāo de jiào qīngtāng.','Die Brühe ohne Chili heißt klare Brühe.'],['有辣椒的是红汤。','Yǒu làjiāo de shì hóngtāng.','Die mit Chili ist die rote Brühe.'],['好吃！','Hǎochī!','Lecker!']]},
+  {id:'p0jFSceGkcE',title:'Straßeninterview: Gibt es etwas, das du nicht isst?',src:'YouTube · Easy Mandarin',lvl:'A2',ph:[]}],
+ 'ce2-e8':[
+  {id:'cZAGeDmUoYw',title:'Mit 100 Yuan über den Nachtmarkt',src:'YouTube · Chinese with Julie',lvl:'A2',
+   ph:[['多少钱？','Duōshao qián?','Wie viel kostet das?'],['几块？','Jǐ kuài?','Wie viele Kuai?'],['还剩多少？','Hái shèng duōshao?','Wie viel ist noch übrig?']]},
+  {id:'dPkgnLBcT20',start:240,end:385,title:'Dialog: Kleidung kaufen und handeln (Animation)',src:'YouTube · Yoyo Chinese',lvl:'A1–A2',
+   ph:[['那条休闲裤多少钱？','Nà tiáo xiūxiánkù duōshao qián?','Was kostet die Freizeithose dort?'],['这两件一共多少钱？','Zhè liǎng jiàn yígòng duōshao qián?','Was kosten die beiden zusammen?'],['再便宜一点。','Zài piányi yìdiǎn.','Noch etwas billiger.'],['太贵了，三百块行吗？','Tài guì le, sānbǎi kuài xíng ma?','Zu teuer, gehen 300 Kuai?'],['真的不能便宜了。','Zhēn de bù néng piányi le.','Billiger geht es wirklich nicht.']]}],
+ 'ce2-e9':[
+  {id:'frJkGgWYytg',start:265,end:400,title:'Bootsfahrt auf dem Li-Fluss bei Guilin',src:'YouTube · Chloe Chinese Class',lvl:'A2–B1',
+   ph:[['现在我们一起看看风景吧。','Xiànzài wǒmen yìqǐ kànkan fēngjǐng ba.','Schauen wir uns jetzt zusammen die Landschaft an.'],['特别美。','Tèbié měi.','Besonders schön.'],['这就是桂林最有名的风景。','Zhè jiù shì Guìlín zuì yǒumíng de fēngjǐng.','Das ist die berühmteste Landschaft von Guilin.']]},
+  {id:'_tLe3vzQrwU',start:1264,end:1400,title:'Die Reisterrassen von Longji',src:'YouTube · Chinese with Nicole',lvl:'A2–B1',
+   ph:[['这里的风景是最好看的。','Zhèlǐ de fēngjǐng shì zuì hǎokàn de.','Die Landschaft hier ist am schönsten.'],['这里的梯田就像一面镜子。','Zhèlǐ de tītián jiù xiàng yí miàn jìngzi.','Die Reisterrassen hier sind wie ein Spiegel.'],['走到这里感觉风景慢慢变好看了。','Zǒu dào zhèlǐ gǎnjué fēngjǐng mànmàn biàn hǎokàn le.','Hier angekommen wird die Landschaft allmählich schöner.']]}]
 };
 function vKey(pack){ if(VIDEOS[pack.id]) return pack.id; const m=/^ce2-(\d+)$/.exec(pack.deck||''); return m&&VIDEOS['ce2-e'+m[1]]?'ce2-e'+m[1]:null; }
 function vUnit(k){ const m=/^ce(\d)-e(\d+)$/.exec(k)||[]; return 'Buch '+(m[1]||'1')+' · '+(m[2]==='0'?'Einstieg':'Einheit '+(m[2]||'')); }
