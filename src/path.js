@@ -48,8 +48,19 @@ function playLine(pack,l){ const u=l.audio&&mediaUrl(pack,'audio/'+l.audio+'.mp3
   try{ if(lpA.src!==u) lpA.src=u; lpStopAt=Math.max(0,(l.t1||l.t0+4)-.08); const go=()=>{ lpA.currentTime=Math.max(0,l.t0-.05); lpA.play().catch(()=>say(l.zh)); }; if(lpA.readyState>=1) go(); else { lpA.onloadedmetadata=()=>{ lpA.onloadedmetadata=null; go(); }; lpA.load(); } }catch(e){ say(l.zh); } }
 function stopLp(){ try{ lpA.pause(); }catch(e){} lpStopAt=0; }
 
+// ---------------------------------------------------------------- Band 2: Einheiten aus den Vokabeln der App (bis die Buchscans da sind)
+const VPACKS=Array.from({length:12},(_,i)=>({id:'v-ce2-'+(i+1),virtual:true,deck:'ce2-'+(i+1),unit:'Band 2 · Einheit '+(i+1),parts:[]}));
+const anyPack=id=>packs.find(p=>p.id===id)||VPACKS.find(p=>p.id===id);
+function vData(pack){ const ws=(HZ.deckWords?HZ.deckWords(pack.deck):[]).filter(w=>w.zh&&w.de); const words=[], lines=[], chars=[], seen=new Set();
+  ws.forEach((w,i)=>{ const les=Math.floor(i/14)+1; words.push({zh:w.zh,py:w.py,de:w.de,les});
+    if(w.s&&w.s[0]&&w.s[2]&&!seen.has(w.s[0])){ seen.add(w.s[0]); lines.push({zh:w.s[0],py:w.s[1]||'',de:w.s[2],sp:'',les,audio:null,t0:0,t1:0}); }
+    [...w.zh].forEach(c=>{ if(/[\u4e00-\u9fff]/.test(c)&&window.CHARS&&window.CHARS[c]&&!chars.some(x=>x.zh===c)&&chars.length<16) chars.push({zh:c,py:[...w.zh].length===1?w.py:'',de:[...w.zh].length===1?w.de:'aus '+w.zh+' ('+w.de+')'}); }); });
+  chars.forEach(c=>{ if(!c.py){ const w=ws.find(x=>x.zh===c.zh); if(w){ c.py=w.py; c.de=w.de; } else { const src=ws.find(x=>x.zh.includes(c.zh)); const sy=sylls(src.py)[[...src.zh].indexOf(c.zh)]; c.py=sy||''; } } });
+  return {words,lines,orders:[],chars,notes:[]}; }
+
 // ---------------------------------------------------------------- data from a pack
 function unitData(pack){
+  if(pack.virtual) return vData(pack);
   const words=[], seen=new Set(), lines=[], lseen=new Set(), orders=[], chars=[], notes=[];
   pack.parts.forEach((pt,pi)=>pt.sections.forEach((s,si)=>{
     let les=lesOf(pt,s); les=typeof les==='number'?les:99;
@@ -71,10 +82,10 @@ function buildNodes(pack){
   const D=unitData(pack), nodes=[];
   const nums=[...new Set(D.words.map(w=>w.les).concat(D.lines.map(l=>l.les)))].sort((a,b)=>a-b);
   const addW=(ws,les)=>{ for(let i=0;i<ws.length;i+=7){ let part=ws.slice(i,i+7); if(part.length<3&&nodes.length&&nodes[nodes.length-1].kind==='words'){ nodes[nodes.length-1].words.push(...part); continue; }
-      nodes.push({id:'w'+les+'-'+i,kind:'words',les,words:part,label:part.slice(0,3).map(w=>clean(w.zh)).join(' · '),sub:les===99?'Mehr Wörter':'Wörter · Lektion '+les}); } };
+      nodes.push({id:'w'+les+'-'+i,kind:'words',les,words:part,label:part.slice(0,3).map(w=>clean(w.zh)).join(' · '),sub:les===99?'Mehr Wörter':(pack.virtual?'Wörter · Teil ':'Wörter · Lektion ')+les}); } };
   for(const n of nums){ addW(n===99?D.words.filter(w=>w.les===99&&[...clean(w.zh)].length<=3).slice(0,14):D.words.filter(w=>w.les===n),n);
-    if(D.lines.filter(l=>l.les===n).length>=3) nodes.push({id:'d'+n,kind:'dialog',les:n,label:n===99?'Sätze':'Sätze & Dialog',sub:n===99?'Hören und bauen':'Lektion '+n}); }
-  if(D.chars.length) nodes.push({id:'wr',kind:'write',label:D.chars.slice(0,4).map(c=>c.zh).join(' '),sub:'Schreiben'});
+    if(D.lines.filter(l=>l.les===n).length>=3) nodes.push({id:'d'+n,kind:'dialog',les:n,label:n===99?'Sätze':'Sätze & Dialog',sub:n===99?'Hören und bauen':(pack.virtual?'Teil ':'Lektion ')+n}); }
+  for(let i=0;i<D.chars.length;i+=8){ const cs=D.chars.slice(i,i+8); nodes.push({id:i?'wr'+i:'wr',kind:'write',chars:cs,label:cs.slice(0,4).map(c=>c.zh).join(' '),sub:'Schreiben'}); }
   if(VIDEOS[pack.id]) nodes.push({id:'vid',kind:'video',clip:0,label:'Echtes Leben',sub:'Video'});
   nodes.push({id:'rev',kind:'review',label:'Wiederholung',sub:'Truhe'});
   const t=findTest(pack); if(t) nodes.push({id:'test',kind:'test',ref:t,label:'Einheitentest',sub:'Prüfung'});
@@ -104,7 +115,7 @@ function genItems(pack,node){
     pickN(D.orders.filter(o=>o.les===node.les),3).forEach(o=>it.push({t:'order',o}));
     pickN(pool.filter(w=>w.les<=node.les),3).forEach(w=>it.push({t:'meaning',w,pool}));
     const head=it[0]&&it[0].t==='tip'?[it.shift()]:[]; return head.concat(mix(it)); }
-  if(node.kind==='write'){ const cs=D.chars.slice(0,8), it=[]; cs.forEach(c=>it.push({t:'trace',c})); shuf(cs).forEach(c=>it.push({t:'recall',c})); return it; }
+  if(node.kind==='write'){ const cs=(node.chars||D.chars).slice(0,8), it=[]; cs.forEach(c=>it.push({t:'trace',c})); shuf(cs).forEach(c=>it.push({t:'recall',c})); return it; }
   if(node.kind==='review'||node.kind==='mist'){ const dict=segDict(D); const it=[];
     LS.mist.filter(m=>node.kind==='mist'||m.p===pack.id).slice(-10).forEach(m=>{ const x=fromMist(m); if(x) it.push(x); });
     if(node.kind==='review'){ pickN(pool,6).forEach(w=>it.push({t:['meaning','listen','reverse'][Math.floor(Math.random()*3)],w,pool}));
@@ -120,7 +131,7 @@ function genItems(pack,node){
 }
 function mix(it){ const by={}; it.forEach(x=>(by[x.t]=by[x.t]||[]).push(x)); const ks=Object.keys(by), out=[]; while(ks.some(k=>by[k].length)) shuf(ks).forEach(k=>{ if(by[k].length) out.push(by[k].shift()); }); return out; }
 function mistOf(it){ const w=it.w||it.c, l=it.l; if(w) return {t:it.t==='teach'||it.t==='pairs'?'meaning':it.t,zh:w.zh}; if(l) return {t:it.t,zh:l.zh}; if(it.o) return {t:'order',zh:it.o.ans[0]}; return null; }
-function fromMist(m){ const pk=packs.find(p=>p.id===m.p); if(!pk) return null; const {D}=buildNodes(pk);
+function fromMist(m){ const pk=anyPack(m.p); if(!pk) return null; const {D}=buildNodes(pk);
   if(['meaning','listen','reverse','tone','trace','recall'].includes(m.t)){ const w=D.words.find(x=>x.zh===m.zh)||D.chars.find(x=>x.zh===m.zh); if(!w) return null; if(m.t==='trace'||m.t==='recall') return {t:'recall',c:w,_m:m}; return {t:m.t,w,pool:D.words,_m:m}; }
   if(m.t==='order'){ const o=D.orders.find(x=>x.ans[0]===m.zh); return o?{t:'order',o,_m:m}:null; }
   const l=D.lines.find(x=>x.zh===m.zh); if(!l) return null; if(m.t==='build'){ const tiles=buildable(l,segDict(D)); return tiles?{t:'build',l,tiles,pool:D.words,_m:m}:null; } return {t:m.t,l,ls:D.lines,_m:m}; }
@@ -145,7 +156,8 @@ body{background:var(--paper)!important}
 .lp-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:18px}
 .lp-side{width:300px;display:flex;flex-direction:column;gap:16px;position:sticky;top:0}
 @media (max-width:900px){.lp-cols{flex-direction:column}.lp-side{width:100%;position:static}}
-.lp-units{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.lp-units{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.lp-units::-webkit-scrollbar{display:none}
 .lp-units button{flex:none;padding:10px 16px;border-radius:999px;background:#fff;font-weight:700;font-size:14px;color:var(--ink2);box-shadow:0 2px 10px rgba(20,20,43,.05)}
 .lp-units button.on{background:var(--ink);color:#fff}
 .lp-hero{position:relative;border-radius:32px;padding:26px 30px;color:#fff;overflow:hidden;background:linear-gradient(120deg,#5b4bff 0%,#8b5cff 45%,#ff2d75 100%);box-shadow:0 18px 40px rgba(91,75,255,.28)}
@@ -277,21 +289,25 @@ async function openLp(){ closePagesIfOpen(); stopAudio(); root.classList.remove(
 function closeLp(){ stopLp(); lp.classList.remove('show'); document.body.classList.remove('lp-run-on'); run=null; }
 function lpHome(){
   run=null; document.body.classList.remove('lp-run-on'); stopLp();
-  const ord=UNITS.map(u=>packs.find(p=>p.id===u[0])).filter(Boolean).concat(packs.filter(p=>!UNITS.some(u=>u[0]===p.id)));
+  const real=UNITS.map(u=>packs.find(p=>p.id===u[0])).filter(Boolean).concat(packs.filter(p=>!UNITS.some(u=>u[0]===p.id)));
+  const ord=real.concat(VPACKS);
+  if(!LS.b2){ LS.b2=1; LS.unit='v-ce2-3'; saveL(); }
   if(!ord.length){ lp.innerHTML=`<div class="lp-home"><div class="lp-empty">${BAO()}<h2>Noch keine Lektionspakete</h2>Importiere deine Pakete im Bereich <b>Buch</b>, dann entsteht hier dein Lernpfad.<br><br><button class="lp-main-btn" id="lpImp">Zum Buch</button></div></div>`; $('lpImp').onclick=()=>{ lp.classList.remove('show'); root.classList.add('show'); applyView(); showHome(); }; return; }
   let pack=ord.find(p=>p.id===LS.unit)||ord.find(p=>buildNodes(p).nodes.some(n=>!nodeDone(p,n)))||ord[0]; curLpPack=pack;
-  const {nodes}=buildNodes(pack); const u=UNITS.find(x=>x[0]===pack.id)||[pack.id,pack.unit,pack.title||'',''];
-  const dn=nodes.filter(n=>nodeDone(pack,n)).length; const nxt=nodes.findIndex(n=>!nodeDone(pack,n));
+  if(pack.virtual&&pack.deck&&!HZ.hasDeck(pack.deck)){ try{ HZ.addDeck(pack.deck); }catch(e){} }
+  const off_=navigator.onLine===false;
+  const {nodes}=buildNodes(pack); const u=pack.virtual?[pack.id,'Einheit '+pack.deck.split('-')[1],nodes[0]&&nodes[0].words?nodes[0].words[0].zh:'',pack.unit]:(UNITS.find(x=>x[0]===pack.id)||[pack.id,pack.unit,pack.title||'','']);
+  const dn=nodes.filter(n=>nodeDone(pack,n)).length; const nxt=nodes.findIndex(n=>!nodeDone(pack,n)&&!(off_&&n.kind==='video'));
   const off=[0,70,110,70,0,-70,-110,-70];
   const xp=xpToday(), pct=Math.min(100,Math.round(100*xp/XPGOAL)), sk=streakN();
   const days=['So','Mo','Di','Mi','Do','Fr','Sa']; const today=new Date().getDay();
   const mist=LS.mist.length, due=HZ.dueCount?HZ.dueCount():0;
   const vids=[]; Object.keys(VIDEOS).forEach(k=>VIDEOS[k].forEach((v,i)=>vids.push({k,i,v})));
   lp.innerHTML=`<div class="lp-home"><div class="lp-cols"><div class="lp-main">
-    <div class="lp-units">${ord.map(p=>`<button data-u="${esc(p.id)}" class="${p.id===pack.id?'on':''}">${esc((UNITS.find(x=>x[0]===p.id)||[0,p.unit])[1])}</button>`).join('')}</div>
-    <div class="lp-hero"><div class="big lz">${esc(String(u[2]).replace(/[！？。]/g,'').slice(0,3))}</div><small>${esc(u[1])} · Band 1</small><h2>${esc(u[3]||u[2])}</h2>
+    <div class="lp-units">${ord.map(p=>`<button data-u="${esc(p.id)}" class="${p.id===pack.id?'on':''}">${p.virtual?'B2 · '+p.deck.split('-')[1]:'B1 · '+esc((UNITS.find(x=>x[0]===p.id)||[0,p.unit])[1]).replace('Einheit ','')}</button>`).join('')}</div>
+    <div class="lp-hero"><div class="big lz">${esc(String(u[2]).replace(/[！？。]/g,'').slice(0,3))}</div><small>${esc(u[1])} · ${pack.virtual?'Band 2':'Band 1'}</small><h2>${esc(pack.virtual?'Vokabeln & Sätze':(u[3]||u[2]))}</h2>${pack.virtual?'<div style="font-size:14px;font-weight:600;opacity:.9;margin:-8px 0 12px">Aus den Vokabeln deines Kurses · Buchübungen folgen mit den Scans</div>':''}
       <div class="pb"><b><i style="width:${Math.round(100*dn/nodes.length)}%"></i></b>${dn} von ${nodes.length} Knoten · je ca. 10 Min.</div></div>
-    <div class="lp-path">${nodes.map((n,i)=>{ const d=nodeDone(pack,n), c=i===nxt; return `<div class="lp-node k-${n.kind} ${d?'done':c?'cur':'todo'}" style="transform:translateX(${off[i%off.length]}px)">${c?'<span class="go">START</span>':''}<button class="nb" data-n="${i}" aria-label="${esc(n.sub+': '+n.label)}">${d?CHECK:(n.kind==='words'?`<span class="lz">${esc([...n.words[0].zh][0])}</span>`:ICON[n.kind])}</button><span class="nl ${n.kind==='words'||n.kind==='write'?'lz':''}">${esc(n.label)}</span><span class="ns">${esc(n.sub)}</span></div>`; }).join('')}</div>
+    <div class="lp-path">${nodes.map((n,i)=>{ const d=nodeDone(pack,n), c=i===nxt; return `<div class="lp-node k-${n.kind} ${d?'done':c?'cur':'todo'}" style="transform:translateX(${off[i%off.length]}px)">${c?'<span class="go">START</span>':''}<button class="nb" data-n="${i}" aria-label="${esc(n.sub+': '+n.label)}">${d?CHECK:(n.kind==='words'?`<span class="lz">${esc([...n.words[0].zh][0])}</span>`:ICON[n.kind])}</button><span class="nl ${n.kind==='words'||n.kind==='write'?'lz':''}">${esc(n.label)}</span><span class="ns">${esc(n.kind==='video'&&off_?'Video · nur online':n.sub)}</span></div>`; }).join('')}</div>
   </div><aside class="lp-side">
     <div class="lp-card lp-goal"><div class="lp-ring" style="background:conic-gradient(var(--jade) 0 ${pct}%,#e3f8ef ${pct}% 100%)"><span>${pct}%</span></div><div><h4 style="margin:0">Tagesziel</h4><small style="color:var(--ink3);font-weight:700">${xp} von ${XPGOAL} XP</small></div></div>
     <div class="lp-card lp-streak"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:26px">🔥</span><b style="font-size:22px">${sk} ${sk===1?'Tag':'Tage'}</b><small style="color:#a9abc7;font-weight:700">Serie</small></div>
@@ -303,10 +319,11 @@ function lpHome(){
     <div class="lp-card"><h4>Videos aus dem echten Leben</h4>${vids.map(x=>`<button class="lp-vl" data-vk="${x.k}" data-vi="${x.i}"><span class="th">▶</span><span><b>${esc(x.v.title)}</b><small>${esc((UNITS.find(u=>u[0]===x.k)||[0,''])[1])} · ${esc(x.v.lvl)}${LS.vid[x.v.id]?' · gesehen':''}</small></span></button>`).join('')}<div class="lp-vnote" style="margin-top:8px">Eingebettet von YouTube · nur online</div></div>
   </aside></div></div>`;
   lp.querySelectorAll('.lp-units button').forEach(b=>b.onclick=()=>{ LS.unit=b.dataset.u; saveL(); lpHome(); });
-  lp.querySelectorAll('.lp-node .nb').forEach(b=>b.onclick=()=>startNode(pack,nodes[+b.dataset.n]));
+  lp.querySelectorAll('.lp-node .nb').forEach(b=>b.onclick=()=>{ const n=nodes[+b.dataset.n]; if(n.kind==='video'&&navigator.onLine===false){ toast('Videos brauchen Internet – mach einfach mit dem nächsten Knoten weiter.'); return; } startNode(pack,n); });
   $('lpMist').onclick=()=>{ if(!LS.mist.length){ toast('Keine offenen Fehler. 很好！'); return; } startNode(pack,{id:'mist',kind:'mist',label:'Fehler-Mix'}); };
   $('lpCards').onclick=()=>{ closeLp(); closeBook(); };
-  lp.querySelectorAll('.lp-vl').forEach(b=>b.onclick=()=>{ const k=b.dataset.vk, pk=packs.find(p=>p.id===k)||pack; startNode(pk,{id:'vid'+b.dataset.vi,kind:'video',unit:k,clip:+b.dataset.vi,label:'Video'}); });
+  lp.querySelectorAll('.lp-vl').forEach(b=>b.onclick=()=>{ if(navigator.onLine===false){ toast('Videos brauchen Internet.'); return; } const k=b.dataset.vk, pk=packs.find(p=>p.id===k)||pack; startNode(pk,{id:'vid'+b.dataset.vi,kind:'video',unit:k,clip:+b.dataset.vi,label:'Video'}); });
+  { const on=lp.querySelector('.lp-units .on'); if(on) on.scrollIntoView({inline:'center',block:'nearest'}); }
   const cur=lp.querySelector('.lp-node.cur'); if(cur&&cur.offsetTop>window.innerHeight*.6) lp.querySelector('.lp-home').scrollTop=cur.offsetTop-260;
 }
 

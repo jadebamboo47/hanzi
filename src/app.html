@@ -466,7 +466,7 @@ function wordsHTML(d){
 window.HZ={hasDeck:id=>S.settings.decks.includes(id),addDeck:id=>{ if(!DECK[id]||S.settings.decks.includes(id)) return false; S.settings.decks=DECKS.map(d=>d.id).filter(x=>S.settings.decks.includes(x)||x===id); S.settings._t=Date.now(); persist(); try{ buildQueue(); if(!card||phase==='pinyin'&&!$('pyin').value) next(); prefetchAudio(); }catch(e){} return true; },
   removeDeck:id=>{ S.settings.decks=S.settings.decks.filter(x=>x!==id); if(!S.settings.decks.length) S.settings.decks=['ce2-1']; S.settings._t=Date.now(); persist(); try{ buildQueue(); }catch(e){} },
   dueCount:()=>{ try{ return counts().due; }catch(e){ return 0; } },
-  speak:t=>speak(t),sayWord:k=>sayWord(k),addXP:n=>{ S.log=S.log||{}; const t=dayKey(0); const d=dayLog(t); d.x=(d.x||0)+n; S.log[t]=d; persist(); try{ renderToday(); }catch(e){} },streak:()=>streak(),hasWord:k=>!!BYW[k],syl2dia:x=>syl2dia(x),parsePy:x=>parsePy(x),confetti:()=>confetti()};
+  speak:t=>speak(t),sayWord:k=>sayWord(k),addXP:n=>{ S.log=S.log||{}; const t=dayKey(0); const d=dayLog(t); d.x=(d.x||0)+n; S.log[t]=d; persist(); try{ renderToday(); }catch(e){} },streak:()=>streak(),deckWords:id=>WORDS.filter(x=>(x.d||[]).includes(id)).map(x=>({zh:x.w,py:x.py,de:x.m,s:sentFor(x)})),hasWord:k=>!!BYW[k],syl2dia:x=>syl2dia(x),parsePy:x=>parsePy(x),confetti:()=>confetti()};
 function sayWord(k){ const x=BYW[k]; if(!x) return; const plan=audioPlan(x); const t=x.w.replace(/[…\.]/g,''); if(plan) playFiles(plan,t); else speak(t); }
 const STAMPS={3:['完美','perfekt'],2:['很好','sehr gut'],1:['不错','nicht schlecht'],0:['加油','weiter so']};
 function showStamp(q){
