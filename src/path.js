@@ -113,7 +113,22 @@ const VIDEOS={
   {id:'frJkGgWYytg',start:265,end:400,title:'Bootsfahrt auf dem Li-Fluss bei Guilin',src:'YouTube · Chloe Chinese Class',lvl:'A2–B1',
    ph:[['现在我们一起看看风景吧。','Xiànzài wǒmen yìqǐ kànkan fēngjǐng ba.','Schauen wir uns jetzt zusammen die Landschaft an.'],['特别美。','Tèbié měi.','Besonders schön.'],['这就是桂林最有名的风景。','Zhè jiù shì Guìlín zuì yǒumíng de fēngjǐng.','Das ist die berühmteste Landschaft von Guilin.']]},
   {id:'_tLe3vzQrwU',start:1264,end:1400,title:'Die Reisterrassen von Longji',src:'YouTube · Chinese with Nicole',lvl:'A2–B1',
-   ph:[['这里的风景是最好看的。','Zhèlǐ de fēngjǐng shì zuì hǎokàn de.','Die Landschaft hier ist am schönsten.'],['这里的梯田就像一面镜子。','Zhèlǐ de tītián jiù xiàng yí miàn jìngzi.','Die Reisterrassen hier sind wie ein Spiegel.'],['走到这里感觉风景慢慢变好看了。','Zǒu dào zhèlǐ gǎnjué fēngjǐng mànmàn biàn hǎokàn le.','Hier angekommen wird die Landschaft allmählich schöner.']]}]
+   ph:[['这里的风景是最好看的。','Zhèlǐ de fēngjǐng shì zuì hǎokàn de.','Die Landschaft hier ist am schönsten.'],['这里的梯田就像一面镜子。','Zhèlǐ de tītián jiù xiàng yí miàn jìngzi.','Die Reisterrassen hier sind wie ein Spiegel.'],['走到这里感觉风景慢慢变好看了。','Zǒu dào zhèlǐ gǎnjué fēngjǐng mànmàn biàn hǎokàn le.','Hier angekommen wird die Landschaft allmählich schöner.']]}],
+ 'ce2-e10':[
+  {id:'jg5NBf3IlMg',start:89,end:199,title:'Straßeninterview in Peking: Wie wichtig ist das Aussehen?',src:'YouTube · China Admissions',lvl:'A2–B1',
+   ph:[['我比较喜欢显瘦的。','Wǒ bǐjiào xǐhuan xiǎn shòu de.','Ich mag eher die, die schlank wirken.'],['看起来','kànqǐlái','aussehen, wirken'],['样子','yàngzi','Aussehen']]},
+  {id:'IToewfNgmxg',title:'„她长什么样子？“ – Aussehen beschreiben',src:'YouTube · Ariel KK Chinese',lvl:'A2',
+   ph:[['她长什么样子？','Tā zhǎng shénme yàngzi?','Wie sieht sie aus?']]}],
+ 'ce2-e11':[
+  {id:'sIOQBFFZW6k',title:'Krank in China: Beschwerden nennen und ins Krankenhaus gehen',src:'YouTube · Un Thé Vert Chez Cléo',lvl:'A2',
+   ph:[['今天我要去医院。','Jīntiān wǒ yào qù yīyuàn.','Heute gehe ich ins Krankenhaus.'],['我牙齿疼。','Wǒ yáchǐ téng.','Ich habe Zahnschmerzen.'],['我发烧了。','Wǒ fāshāo le.','Ich habe Fieber.'],['我头疼。','Wǒ tóuténg.','Ich habe Kopfschmerzen.'],['我嗓子疼。','Wǒ sǎngzi téng.','Ich habe Halsschmerzen.']]},
+  {id:'woaP6aQRRgw',title:'Erkältet: Was man sagt, wenn man krank ist',src:'YouTube · Chinese with Mini',lvl:'A2',
+   ph:[['我感冒了。','Wǒ gǎnmào le.','Ich bin erkältet.'],['前两天还有点发烧。','Qián liǎng tiān hái yǒudiǎn fāshāo.','Vor zwei Tagen hatte ich noch etwas Fieber.'],['不舒服','bù shūfu','sich unwohl fühlen'],['感冒药','gǎnmàoyào','Erkältungsmedizin']]}],
+ 'ce2-e12':[
+  {id:'jg5NBf3IlMg',start:14,end:89,title:'Straßeninterview in Peking: Welche Eigenschaften zählen?',src:'YouTube · China Admissions',lvl:'A2–B1',
+   ph:[['性格比较重要吧。','Xìnggé bǐjiào zhòngyào ba.','Der Charakter ist wohl wichtiger.'],['比较幽默','bǐjiào yōumò','eher humorvoll'],['善良','shànliáng','gutherzig']]},
+  {id:'MyyUvRl-TvM',title:'Eine Freundschaft in China: jemanden vorstellen und beschreiben',src:'YouTube · Everyday Chinese',lvl:'A2',
+   ph:[['我有很多中国朋友。','Wǒ yǒu hěn duō Zhōngguó péngyou.','Ich habe viele chinesische Freunde.']]}]
 };
 function vKey(pack){ if(VIDEOS[pack.id]) return pack.id; const m=/^ce2-(\d+)$/.exec(pack.deck||''); return m&&VIDEOS['ce2-e'+m[1]]?'ce2-e'+m[1]:null; }
 function vUnit(k){ const m=/^ce(\d)-e(\d+)$/.exec(k)||[]; return 'Buch '+(m[1]||'1')+' · '+(m[2]==='0'?'Einstieg':'Einheit '+(m[2]||'')); }
