@@ -2032,7 +2032,11 @@ const VPACKS=Array.from({length:12},(_,i)=>({id:'v-ce2-'+(i+1),virtual:true,deck
 const anyPack=id=>packs.find(p=>p.id===id)||VPACKS.find(p=>p.id===id);
 function vData(pack){ let ws=(HZ.deckWords?HZ.deckWords(pack.deck):[]).filter(w=>w.zh&&w.de); const words=[], lines=[], chars=[], seen=new Set();
   const ord=new Map((pack.wordOrder||[]).map((x,i)=>[x[0],[x[1],i]]));
-  if(ord.size) ws=ws.map(w=>({...w,_o:ord.get(w.zh)||[3,999]})).sort((a,b)=>a._o[0]-b._o[0]||a._o[1]-b._o[1]);
+  if(ord.size){ ws=ws.map(w=>({...w,_o:ord.get(w.zh)||[3,999]}));
+    // einzelne Restwörter nicht als eigenen Mini-Knoten zeigen: an die vorige Lektion hängen
+    const cnt={}; ws.forEach(w=>cnt[w._o[0]]=(cnt[w._o[0]]||0)+1); const big=Object.keys(cnt).map(Number).filter(k=>cnt[k]>=3).sort((x,y)=>x-y);
+    ws.forEach(w=>{ if(cnt[w._o[0]]<3&&big.length){ const t=big.filter(k=>k<w._o[0]).pop()||big[0]; w._o=[t,999]; } });
+    ws.sort((a,b)=>a._o[0]-b._o[0]||a._o[1]-b._o[1]); }
   ws.forEach((w,i)=>{ const les=ord.size?w._o[0]:Math.floor(i/14)+1; words.push({zh:w.zh,py:w.py,de:w.de,les});
     if(w.s&&w.s[0]&&w.s[2]&&!seen.has(w.s[0])){ seen.add(w.s[0]); lines.push({zh:w.s[0],py:w.s[1]||'',de:w.s[2],sp:'',les,audio:null,t0:0,t1:0}); }
     [...w.zh].forEach(c=>{ if(/[\u4e00-\u9fff]/.test(c)&&window.CHARS&&window.CHARS[c]&&!chars.some(x=>x.zh===c)&&chars.length<16) chars.push({zh:c,py:[...w.zh].length===1?w.py:'',de:[...w.zh].length===1?w.de:'aus '+w.zh+' ('+w.de+')'}); }); });
