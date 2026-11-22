@@ -463,6 +463,7 @@ function statsHTML(d){
 function wordsHTML(d){
   return (d.w||[]).map(([k,q])=>{const x=BYW[k]; if(!x) return ''; return `<button data-k="${k}" class="${q===3?'f':''}" title="${x.m}">${x.w.replace('…','…')}</button>`;}).join('');
 }
+window.HZ={speak:t=>speak(t),sayWord:k=>sayWord(k),hasWord:k=>!!BYW[k],syl2dia:x=>syl2dia(x),parsePy:x=>parsePy(x),confetti:()=>confetti()};
 function sayWord(k){ const x=BYW[k]; if(!x) return; const plan=audioPlan(x); const t=x.w.replace(/[…\.]/g,''); if(plan) playFiles(plan,t); else speak(t); }
 const STAMPS={3:['完美','perfekt'],2:['很好','sehr gut'],1:['不错','nicht schlecht'],0:['加油','weiter so']};
 function showStamp(q){
@@ -939,13 +940,16 @@ function sayExample(){ const s=sentFor(card); if(!s) return; playSeq++; try{play
 let stylusSeen=false, activeId=null;
 function resetTouch(){ if(activeId!==null){ activeId=null; try{ document.dispatchEvent(new MouseEvent('mouseup',{bubbles:true})); }catch(e){} } }
 document.addEventListener('visibilitychange',resetTouch);
-function svgNode(){return $('hw').querySelector('svg');}
+let activePad='main';
+function svgNode(){return (activePad==='bk'?document.getElementById('bkWhw'):$('hw')).querySelector('svg');}
 function fire(type,t,target){target.dispatchEvent(new MouseEvent(type,{bubbles:true,cancelable:true,clientX:t.clientX,clientY:t.clientY,button:0,buttons:type==='mouseup'?0:1}));}
-function inPad(e){return $('pad').contains(e.target);}
+function inPad(e){ const b=document.getElementById('bkWpad'); if(b&&b.contains(e.target)&&document.getElementById('bkWrite').classList.contains('show')) return 'bk'; return $('pad').contains(e.target)?'main':null; }
 function onTouch(e){
-  if(!inPad(e)) return;
+  const which = (e.type==='touchstart'||activeId===null) ? inPad(e) : activePad;
+  if(!which) return;
   e.preventDefault(); e.stopPropagation();
-  if(phase!=='write') return;
+  if(e.type==='touchstart' && activeId===null) activePad=which;
+  if(activePad==='main' && phase!=='write') return;
   const node=svgNode(); if(!node) return;
   const list=[...e.changedTouches];
   if(e.type==='touchstart'){
@@ -1040,6 +1044,7 @@ bindKeys($('kb'),pressKey);
 // hardware keyboard while using own keyboard
 document.addEventListener('keydown',e=>{
   if(!ownKb()||phase!=='pinyin'||$('sheet').classList.contains('show')||e.metaKey||e.ctrlKey) return;
+  const bk=document.getElementById('book'); if(bk&&bk.classList.contains('show')) return;
   const inp=$('pyin'); const k=e.key;
   if(k==='Enter'){ e.preventDefault(); checkPinyin(); }
   else if(k==='Backspace'){ e.preventDefault(); inp.value=[...inp.value].slice(0,-1).join(''); }
@@ -1146,5 +1151,6 @@ buildQueue();
 next();
 })();
 </script>
+<script>/*BOOK*/</script>
 </body>
 </html>
