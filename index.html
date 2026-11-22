@@ -1359,6 +1359,35 @@ const css=`
 .bk-hot.on{background:rgba(190,60,40,.26);outline-style:solid}
 .bk-hotn{color:#d8cfbf;font-size:12.5px;text-align:center}
 .bk-pg.fold .bk-hotn,.bk-pg.fold .bk-hot{display:none}
+.dm-bar{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 8px}
+.dm-k{height:36px;padding:0 12px;border-radius:999px;border:0;background:var(--paper);color:var(--ink);font:500 13.5px inherit;font-family:inherit;display:inline-flex;align-items:center;gap:6px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.dm-k.on{background:var(--seal);color:#fff}
+.dm-list{display:flex;flex-direction:column;gap:6px;overflow:auto;-webkit-overflow-scrolling:touch}
+.bk-pg .dm-list{max-height:calc(100vh - 320px);max-height:calc(100dvh - 320px - env(safe-area-inset-bottom))}
+.dm-h{color:#d8cfbf;font-size:12.5px;margin:6px 2px 0}
+.dm-c{display:flex;align-items:center;gap:8px;background:var(--card,#fff);border:2px solid transparent;border-radius:12px;padding:8px}
+.dm-c.on{border-color:var(--seal)}
+.dm-c.wait{border-color:var(--jade)}
+.dm-n{flex:none;width:22px;text-align:center;font-size:12.5px;color:var(--ink3)}
+.dm-c.heard .dm-n{color:var(--jade);font-weight:700}
+.dm-s{flex:1;min-width:0;min-height:40px;position:relative;cursor:pointer}
+.dm-s canvas{display:block;max-width:100%;height:auto;border-radius:6px}
+.dm-cov{display:none;position:absolute;inset:0;background:var(--paper2);color:var(--ink2);font-size:13px;align-items:center;justify-content:center;border-radius:6px}
+.dm.hide .dm-c:not(.open) .dm-cov{display:flex}
+.dm-w{display:none;font-size:12.5px;color:var(--jade);font-weight:600;margin-top:4px}
+.dm-c.wait .dm-w{display:block}
+.dm-p{display:block;height:3px;width:0;background:var(--seal);border-radius:2px;margin-top:4px}
+.dm-b{flex:none;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:16px;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.dm-b.on{background:var(--seal);color:#fff;border-color:var(--seal)}
+.dm-e{color:#d8cfbf;font-size:13px;padding:10px 4px}
+.dm-c.wide{flex-wrap:wrap}
+.dm-c.wide .dm-s{flex:1 1 calc(100% - 40px)}
+.dm-c.wide [data-a="play"]{margin-left:auto}
+@media (orientation:landscape) and (min-width:901px){ .bk-pg.dmode{flex-basis:56%} }
+#pgLines{display:none;width:100%;max-width:820px;margin:0 auto;padding:12px 12px 24px;box-sizing:border-box}
+#bkPages.lines .pg-view{display:block}
+#bkPages.lines #pgImg,#bkPages.lines #pgHot{display:none}
+#bkPages.lines #pgLines{display:block}
 #bkPages .pg-bar{display:flex;gap:8px;align-items:center;padding:10px 14px;flex-wrap:wrap;background:rgba(0,0,0,.35)}
 #bkPages .pg-bar .btn{height:42px}
 #bkPages .pg-bar .nav{min-width:54px;justify-content:center;font-size:20px}
@@ -1405,10 +1434,10 @@ body.hz-tabs .app{padding-bottom:78px}
 .bk-pg{flex:0 0 46%;position:sticky;top:0;align-self:flex-start;background:#2a2622;border-radius:14px;padding:8px;display:flex;flex-direction:column;gap:6px}
 .bk-pg img{width:100%;border-radius:8px;display:block;cursor:zoom-in}
 .bk-pg .r{display:flex;align-items:center;gap:6px;color:#f5efe3;font-size:13px}
-.bk-pg .r .btn{height:34px;padding:0 10px;font-size:14px}
+.bk-pg .r .btn{height:34px;padding:0 10px;font-size:14px;color:var(--ink)}
 .bk-pg .r span{flex:1;text-align:center}
 .bk-split.nopg .bk-pg{display:none}
-@media (orientation:portrait),(max-width:900px){ .bk-split{flex-direction:column} .bk-pg{position:relative;flex:none;width:100%} .bk-pg.fold img{display:none} }
+@media (orientation:portrait),(max-width:900px){ .bk-split{flex-direction:column} .bk-pg{position:relative;flex:none;width:100%} .bk-pg.fold img,.bk-pg.fold .dm{display:none} .bk-pg .dm-list{max-height:58vh} }
 .bk-step-nav{display:flex;gap:10px;justify-content:space-between;align-items:center;padding:14px 0 4px;border-top:1px solid var(--line);margin-top:6px}
 .bk-step-nav .mid{font-size:13px;color:var(--ink3);text-align:center;flex:1}
 /* tests */
@@ -1441,8 +1470,8 @@ wroot.innerHTML=`<div class="panel"><div class="wh"><span class="zh" id="bkWzh" 
 document.body.appendChild(wroot);
 
 const proot=document.createElement('div'); proot.id='bkPages';
-proot.innerHTML=`<div class="pg-top"><button class="btn" id="pgClose">← Zurück</button><h2 id="pgTitle"></h2><button class="btn" id="pgZoom">🔍</button></div>
-<div class="pg-view" id="pgView"><img id="pgImg" alt=""><div id="pgHot"></div></div>
+proot.innerHTML=`<div class="pg-top"><button class="btn" id="pgClose">← Zurück</button><h2 id="pgTitle"></h2><button class="btn" id="pgLinesBtn" style="display:none">Zeilen</button><button class="btn" id="pgZoom">🔍</button></div>
+<div class="pg-view" id="pgView"><img id="pgImg" alt=""><div id="pgHot"></div><div id="pgLines" class="dm"></div></div>
 <div class="pg-bar"><button class="btn nav" id="pgPrev">‹</button><span class="pg-lbl" id="pgLbl"></span><button class="btn nav" id="pgNext">›</button><span class="sp"></span><span id="pgChips" style="display:flex;gap:8px;flex-wrap:wrap"></span></div>`;
 document.body.appendChild(proot);
 
@@ -1582,11 +1611,13 @@ function splitOff(){ const sp=$('bkSplit'); if(sp) sp.classList.add('nopg'); }
 function pagePanel(pack,book,pageNo){
   const list=(pack.pages||[]).filter(x=>x.b===book).sort((a,b)=>a.p[0]-b.p[0]);
   let i=list.findIndex(x=>x.p.includes(pageNo)); if(i<0) return false;
-  const pg=$('bkPg'); const draw=()=>{ const it=list[i]; pg.innerHTML=`<div class="r"><button class="btn" data-d="-1">‹</button><span>${book==='LB'?'Lehrbuch':'Arbeitsbuch'} · S. ${it.p.join('–')}</span><button class="btn" data-d="1">›</button><button class="btn" data-f="1" title="Seite ein-/ausklappen">▾</button></div><div class="bk-hotw"><img src="${mediaUrl(pack,it.img)||''}" alt="">${hotHTML(it)}</div>${(it.hot||[]).length?'<div class="bk-hotn">Markierte Zeilen antippen: einzeln anhören</div>':''}`;
-    hotStop(); hotBind(pg,pack,it);
+  const pg=$('bkPg'); const draw=()=>{ const it=list[i]; const hasHot=(it.hot||[]).length>0, ln=hasHot&&!!P.view.dm;
+    pg.innerHTML=`<div class="r"><button class="btn" data-d="-1">‹</button><span>${book==='LB'?'Lehrbuch':'Arbeitsbuch'} · S. ${it.p.join('–')}</span><button class="btn" data-d="1">›</button>${hasHot?`<button class="btn" data-m="1" title="Zwischen Buchseite und einzelnen Zeilen wechseln">${ln?'Seite':'Zeilen'}</button>`:''}<button class="btn" data-f="1" title="Seite ein-/ausklappen">▾</button></div>`+(ln?'<div class="dm" id="bkDm"></div>':`<div class="bk-hotw"><img src="${mediaUrl(pack,it.img)||''}" alt="">${hotHTML(it)}</div>${hasHot?'<div class="bk-hotn">Markierte Zeilen antippen: einzeln anhören · „Zeilen“ zeigt sie als Karten</div>':''}`);
+    pg.classList.toggle('dmode',ln); hotHalt(); if(ln) linesView($('bkDm'),pack,it); else hotBind(pg,pack,it);
     pg.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{ const n=i+(+b.dataset.d); if(n>=0&&n<list.length){ i=n; draw(); } });
     pg.querySelector('[data-f]').onclick=()=>pg.classList.toggle('fold');
-    pg.querySelector('img').onclick=()=>openPages(pack,book,0,list[i].p[0]); };
+    { const m=pg.querySelector('[data-m]'); if(m) m.onclick=()=>{ P.view.dm=!P.view.dm; saveP(); pg.classList.remove('fold'); draw(); }; }
+    { const im=pg.querySelector('.bk-hotw img'); if(im) im.onclick=()=>openPages(pack,book,0,list[i].p[0]); } };
   draw(); return true;
 }
 function openSection(pack,pi,si){
@@ -1653,22 +1684,78 @@ function showTests(){
 // ---------------------------------------------------------------- audio
 const ap=new Audio(); ap.preload='auto';
 let apOwner=null, apStop=null, raf=0;
-let hotEl=null, hotRaf=0;
-function hotStop(){ cancelAnimationFrame(hotRaf); if(hotEl){ hotEl.classList.remove('on'); hotEl=null; } }
+let hotEl=null, hotRaf=0, dmTimer=0, dmIdle=null;
+function hotStop(){ cancelAnimationFrame(hotRaf); clearTimeout(dmTimer); dmTimer=0; const f=dmIdle; dmIdle=null; if(hotEl){ hotEl.classList.remove('on'); hotEl=null; } if(f){ try{f();}catch(e){} } }
+function hotHalt(){ if(hotEl){ try{ap.pause();}catch(e){} } hotStop(); }
 function hotHTML(pg){ return (pg.hot||[]).map((h,i)=>`<button class="bk-hot" data-h="${i}" aria-label="Zeile anhören" style="left:${(100*h.r[0]).toFixed(2)}%;top:${(100*h.r[1]).toFixed(2)}%;width:${(100*h.r[2]).toFixed(2)}%;height:${(100*h.r[3]).toFixed(2)}%"></button>`).join(''); }
 function hotBind(box,pack,pg){ box.querySelectorAll('.bk-hot').forEach(b=>b.onclick=e=>{ e.stopPropagation(); playHot(pack,pg.hot[+b.dataset.h],b); }); }
-function playHot(pack,h,el){
-  const u=mediaUrl(pack,'audio/'+h.a+'.mp3'); if(!u){ toast('Diese Aufnahme fehlt im Paket.'); return; }
-  if(hotEl===el){ try{ap.pause();}catch(e){} hotStop(); return; }
+// opt (nur Zeilen-Modus): rate, prog(0..1), done(), fail()
+function playHot(pack,h,el,opt){
+  opt=opt||{};
+  const u=mediaUrl(pack,'audio/'+h.a+'.mp3'); if(!u){ toast('Diese Aufnahme fehlt im Paket.'); if(opt.fail) opt.fail(); return; }
+  if(hotEl===el && !opt.done){ try{ap.pause();}catch(e){} hotStop(); return; }
   stopAudio(); ap.onended=null; document.querySelectorAll('#pgChips [data-tr].on').forEach(x=>{ x.classList.remove('on'); x.textContent='▶︎ Track '+x.dataset.tr.replace(/^(LB|AB)/,''); });
-  const t0=Math.max(0,h.t[0]-0.12), t1=h.t[1]+0.15; let started=false;
-  ap.src=u; const go=()=>{ ap.currentTime=t0; ap.play().then(()=>{ started=true; }).catch(()=>{ if(hotEl===el) hotStop(); }); };
+  const t0=Math.max(0,h.t[0]-0.12), t1=h.t[1]+0.15, rate=opt.rate||1; let started=false;
+  ap.src=u; const go=()=>{ ap.currentTime=t0; try{ap.playbackRate=rate;}catch(e){} ap.play().then(()=>{ started=true; try{ if(ap.playbackRate!==rate) ap.playbackRate=rate; }catch(e){} }).catch(()=>{ if(hotEl===el){ dmIdle=null; hotStop(); if(opt.fail) opt.fail(); } }); };
   if(ap.readyState>=1) go(); else ap.addEventListener('loadedmetadata',go,{once:true});
   hotEl=el; el.classList.add('on');
-  const loop=()=>{ if(hotEl!==el) return; if(ap.currentTime>=t1 || ap.ended || (started&&ap.paused)){ try{ap.pause();}catch(e){} hotStop(); return; } hotRaf=requestAnimationFrame(loop); };
+  const loop=()=>{ if(hotEl!==el) return;
+    if(opt.prog && started) opt.prog(Math.max(0,Math.min(1,(ap.currentTime-t0)/(t1-t0))));
+    if(started && (ap.currentTime>=t1 || ap.ended || ap.paused)){ try{ap.pause();}catch(e){} dmIdle=null; hotStop(); if(opt.done) opt.done(); return; }
+    hotRaf=requestAnimationFrame(loop); };
   hotRaf=requestAnimationFrame(loop);
 }
-function stopAudio(){ hotStop(); try{ap.pause();}catch(e){} apStop=null; if(apOwner) apOwner.classList.remove('playing'); apOwner=null; document.querySelectorAll('.bk-line.on').forEach(x=>x.classList.remove('on')); }
+// ---------------------------------------------------------------- Zeilen-Modus
+// Zeigt die Tippflächen einer Seite als einzelne Karten (Ausschnitte aus dem Scan des Nutzers).
+const DM_RATES=[1,0.8,0.65];
+function linesView(box,pack,pg){
+  const hot=pg.hot||[]; P.dm=P.dm||{}; const o=P.dm; o.hard=o.hard||{};
+  const key=pack.id+'|'+pg.img, hard=new Set(o.hard[key]||[]);
+  const st={i:-1,all:false,loop:-1,only:false};
+  const trk=a=>'Track '+String(a).replace(/^(LB|AB)/,''), multi=new Set(hot.map(h=>h.a)).size>1;
+  const rl=()=>'Tempo '+String(o.rate||1).replace('.',',')+'×';
+  let html=`<div class="dm-bar"><button class="dm-k" data-k="all">▶︎ Alles abspielen</button><button class="dm-k${o.pause?' on':''}" data-k="pause" title="Nach jeder Zeile Zeit zum Nachsprechen">Nachsprechpause</button><button class="dm-k" data-k="rate">${rl()}</button><button class="dm-k${o.hide?' on':''}" data-k="hide" title="Zeilen verdecken und erst nach dem Hören aufdecken">Erst hören</button><button class="dm-k" data-k="only" title="Nur Zeilen mit Stern zeigen">★ Nur schwere</button></div><div class="dm-list">`;
+  hot.forEach((h,i)=>{ if(multi&&(i===0||hot[i-1].a!==h.a)) html+=`<div class="dm-h">${trk(h.a)}</div>`;
+    html+=`<div class="dm-c${h.r[2]>0.25?' wide':''}" data-i="${i}"><span class="dm-n">${i+1}</span><div class="dm-s"><canvas data-i="${i}"></canvas><div class="dm-cov">Verdeckt · antippen zum Aufdecken</div><i class="dm-p"></i><div class="dm-w">Jetzt nachsprechen …</div></div><button class="dm-b" data-a="play" aria-label="Zeile abspielen">▶︎</button><button class="dm-b" data-a="loop" aria-label="Zeile in Schleife wiederholen">↻</button><button class="dm-b${hard.has(i)?' on':''}" data-a="hard" aria-label="Als schwer merken">${hard.has(i)?'★':'☆'}</button></div>`; });
+  box.innerHTML=html+'<div class="dm-e" style="display:none">Noch keine Zeile mit Stern markiert.</div></div>';
+  box.classList.toggle('hide',!!o.hide);
+  const card=i=>box.querySelector(`.dm-c[data-i="${i}"]`), cards=()=>[...box.querySelectorAll('.dm-c')], K=k=>box.querySelector(`[data-k="${k}"]`);
+  const vis=()=>hot.map((h,i)=>i).filter(i=>!st.only||hard.has(i));
+  const setAll=on=>{ st.all=on; K('all').textContent=on?'❚❚ Stopp':'▶︎ Alles abspielen'; K('all').classList.toggle('on',on); };
+  const setPlay=()=>cards().forEach(c=>{ c.querySelector('[data-a="play"]').textContent=(+c.dataset.i===st.i)?'❚❚':'▶︎'; });
+  const idle=()=>{ cards().forEach(c=>{ c.classList.remove('wait','on'); c.querySelector('.dm-p').style.width='0'; }); st.i=-1; setAll(false); setPlay(); };
+  const halt=()=>{ dmIdle=null; clearTimeout(dmTimer); dmTimer=0; hotHalt(); idle(); };
+  const filter=()=>{ let n=0; cards().forEach(c=>{ const show=!st.only||hard.has(+c.dataset.i); c.style.display=show?'':'none'; if(show) n++; }); box.querySelectorAll('.dm-h').forEach(x=>x.style.display=st.only?'none':''); box.querySelector('.dm-e').style.display=n?'none':''; };
+  const play=i=>{ const c=card(i); if(!c) return;
+    dmIdle=null; clearTimeout(dmTimer); dmTimer=0; cards().forEach(x=>x.classList.remove('wait'));
+    const h=hot[i], rate=o.rate||1, bar=c.querySelector('.dm-p'); st.i=i; setPlay();
+    if(st.all){ try{ c.scrollIntoView({block:'nearest',behavior:'smooth'}); }catch(e){} }
+    playHot(pack,h,c,{rate, prog:f=>{ bar.style.width=(100*f).toFixed(1)+'%'; }, fail:idle, done:()=>{
+      c.classList.add('heard'); c.querySelector('.dm-n').textContent='✓'; bar.style.width='0';
+      const next=()=>{ dmTimer=0; dmIdle=null; c.classList.remove('wait');
+        if(st.loop===i){ play(i); return; }
+        if(st.all){ const v=vis(), k=v.indexOf(i); if(k>=0&&k<v.length-1){ play(v[k+1]); return; } }
+        idle(); };
+      if(st.loop===i||st.all){ const gap=o.pause?Math.round(1000*((h.t[1]-h.t[0])/rate*1.1+0.6)):450; if(o.pause) c.classList.add('wait'); dmIdle=idle; dmTimer=setTimeout(next,gap); }
+      else idle(); }});
+    if(hotEl===c) dmIdle=idle; };
+  K('all').onclick=()=>{ if(st.all){ halt(); return; } halt(); const v=vis(); if(!v.length) return; st.loop=-1; cards().forEach(c=>c.querySelector('[data-a="loop"]').classList.remove('on')); setAll(true); play(v[0]); };
+  K('pause').onclick=()=>{ o.pause=!o.pause; saveP(); K('pause').classList.toggle('on',!!o.pause); };
+  K('rate').onclick=()=>{ o.rate=DM_RATES[(DM_RATES.indexOf(o.rate||1)+1)%DM_RATES.length]; saveP(); K('rate').textContent=rl(); K('rate').classList.toggle('on',o.rate!==1); };
+  K('rate').classList.toggle('on',(o.rate||1)!==1);
+  K('hide').onclick=()=>{ o.hide=!o.hide; saveP(); K('hide').classList.toggle('on',!!o.hide); box.classList.toggle('hide',!!o.hide); cards().forEach(c=>c.classList.remove('open')); };
+  K('only').onclick=()=>{ if(!st.only&&!hard.size){ toast('Noch keine Zeile mit Stern markiert.'); return; } halt(); st.only=!st.only; K('only').classList.toggle('on',st.only); filter(); };
+  cards().forEach(c=>{ const i=+c.dataset.i;
+    const tap=()=>{ if(st.i===i){ halt(); return; } play(i); };
+    c.querySelector('[data-a="play"]').onclick=tap;
+    c.querySelector('.dm-s').onclick=()=>{ if(o.hide&&!c.classList.contains('open')){ c.classList.add('open'); return; } tap(); };
+    c.querySelector('[data-a="loop"]').onclick=e=>{ const b=e.currentTarget, on=st.loop!==i; cards().forEach(x=>x.querySelector('[data-a="loop"]').classList.remove('on')); st.loop=on?i:-1; b.classList.toggle('on',on); if(on){ setAll(false); if(st.i!==i) play(i); } };
+    c.querySelector('[data-a="hard"]').onclick=e=>{ const b=e.currentTarget; if(hard.has(i)) hard.delete(i); else hard.add(i); b.classList.toggle('on',hard.has(i)); b.textContent=hard.has(i)?'★':'☆'; if(hard.size) o.hard[key]=[...hard].sort((a,b)=>a-b); else delete o.hard[key]; saveP(); if(st.only) filter(); }; });
+  const im=new Image(); im.onload=()=>{ const W=im.naturalWidth, H=im.naturalHeight; box.querySelectorAll('canvas').forEach(cv=>{ const h=hot[+cv.dataset.i]; const sx=Math.round(h.r[0]*W), sy=Math.round(h.r[1]*H), sw=Math.max(1,Math.round(h.r[2]*W)), sh=Math.max(1,Math.round(h.r[3]*H));
+    cv.width=sw; cv.height=sh; try{ cv.getContext('2d').drawImage(im,sx,sy,sw,sh,0,0,sw,sh); }catch(e){} cv.style.width=Math.round(h.r[2]*(box.id==='pgLines'?3000:2400))+'px'; }); };
+  im.src=mediaUrl(pack,pg.img)||'';
+}
+function stopAudio(){ hotStop(); try{ap.pause();}catch(e){} try{ap.playbackRate=1;}catch(e){} apStop=null; if(apOwner) apOwner.classList.remove('playing'); apOwner=null; document.querySelectorAll('.bk-line.on').forEach(x=>x.classList.remove('on')); }
 function fmt(t){ t=Math.max(0,t||0); return Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0'); }
 function tick(){ cancelAnimationFrame(raf); const loop=()=>{ if(apOwner){ const d=ap.duration||0; const bar=apOwner.querySelector('.tr i'); if(bar) bar.style.width=(d?100*ap.currentTime/d:0)+'%';
       const tm=apOwner.querySelector('.tm'); if(tm) tm.textContent=fmt(ap.currentTime)+' / '+fmt(d);
@@ -1965,7 +2052,9 @@ function showPage(){
   const {pack,book,list,i}=pv, pg=list[i];
   const lbl=pg.p.length>1?`S. ${pg.p[0]}–${pg.p[pg.p.length-1]}`:`S. ${pg.p[0]}`;
   $('pgTitle').textContent=`${pack.unit} · ${book==='LB'?'Lehrbuch':'Arbeitsbuch'}`; $('pgLbl').textContent=lbl;
-  $('pgImg').src=mediaUrl(pack,pg.img)||''; $('pgView').scrollTop=0; $('pgView').scrollLeft=0; hotStop(); $('pgHot').innerHTML=hotHTML(pg); hotBind($('pgHot'),pack,pg); layHot();
+  $('pgImg').src=mediaUrl(pack,pg.img)||''; $('pgView').scrollTop=0; $('pgView').scrollLeft=0; hotHalt(); $('pgHot').innerHTML=hotHTML(pg); hotBind($('pgHot'),pack,pg); layHot();
+  { const hasHot=(pg.hot||[]).length>0, ln=hasHot&&!!P.view.dm; $('pgLinesBtn').style.display=hasHot?'':'none'; $('pgLinesBtn').textContent=ln?'Seite':'Zeilen'; $('pgZoom').style.display=ln?'none':'';
+    proot.classList.toggle('lines',ln); if(ln){ proot.classList.remove('zoom'); linesView($('pgLines'),pack,pg); } else $('pgLines').innerHTML=''; }
   $('pgPrev').disabled=i===0; $('pgNext').disabled=i===list.length-1;
   $('pgPrev').style.opacity=i===0?.3:1; $('pgNext').style.opacity=i===list.length-1?.3:1;
   const secs=secsForPages(pack,book,pg.p);
@@ -1981,16 +2070,17 @@ function showPage(){
 }
 function layHot(){ const im=$('pgImg'), h=$('pgHot'); if(!im||!h) return; h.style.left=im.offsetLeft+'px'; h.style.top=im.offsetTop+'px'; h.style.width=im.offsetWidth+'px'; h.style.height=im.offsetHeight+'px'; }
 $('pgImg').addEventListener('load',layHot); window.addEventListener('resize',layHot); try{ new ResizeObserver(layHot).observe($('pgImg')); }catch(e){}
-function closePages(){ hotStop(); try{ap.pause();}catch(e){} ap.onended=null; proot.classList.remove('show'); }
+function closePages(){ hotStop(); try{ap.pause();}catch(e){} ap.onended=null; proot.classList.remove('show'); $('pgLines').innerHTML=''; }
 function pgGo(d){ if(!pv) return; const n=pv.i+d; if(n<0||n>=pv.list.length) return; hotStop(); try{ap.pause();}catch(e){} pv.i=n; proot.classList.remove('zoom'); showPage(); }
 $('pgPrev').onclick=()=>pgGo(-1); $('pgNext').onclick=()=>pgGo(1);
 $('pgClose').onclick=()=>{ closePages(); if(root.classList.contains('show')) showHome(); };
 $('pgZoom').onclick=()=>proot.classList.toggle('zoom');
+$('pgLinesBtn').onclick=()=>{ if(!pv) return; P.view.dm=!P.view.dm; saveP(); showPage(); };
 { let lastTap=0, sx=0, sy=0, t0=0;
   $('pgView').addEventListener('touchstart',e=>{ if(e.touches.length!==1) return; sx=e.touches[0].clientX; sy=e.touches[0].clientY; t0=Date.now(); },{passive:true});
   $('pgView').addEventListener('touchend',e=>{ const t=e.changedTouches[0]; const dx=t.clientX-sx, dy=t.clientY-sy;
     if(!proot.classList.contains('zoom') && Math.abs(dx)>70 && Math.abs(dx)>2*Math.abs(dy) && Date.now()-t0<700){ pgGo(dx<0?1:-1); return; }
-    if(e.target&&e.target.closest&&e.target.closest('.bk-hot')){ lastTap=0; return; }
+    if(proot.classList.contains('lines')||(e.target&&e.target.closest&&e.target.closest('.bk-hot'))){ lastTap=0; return; }
     if(Math.abs(dx)<10&&Math.abs(dy)<10){ const now=Date.now(); if(now-lastTap<320){ proot.classList.toggle('zoom'); lastTap=0; } else lastTap=now; } },{passive:true});
   $('pgImg').addEventListener('dblclick',()=>proot.classList.toggle('zoom'));
   document.addEventListener('keydown',e=>{ if(!proot.classList.contains('show')) return; if(e.key==='ArrowRight') pgGo(1); if(e.key==='ArrowLeft') pgGo(-1); if(e.key==='Escape') $('pgClose').click(); });
