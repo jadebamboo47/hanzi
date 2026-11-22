@@ -170,7 +170,7 @@ const css=`
 .bk-today small{opacity:.75;font-size:13.5px}
 .bk-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .bk-tools .btn{height:40px;font-size:14px}
-#bkPages{position:fixed;inset:0;z-index:16;background:#2a2622;display:none;flex-direction:column}
+#bkPages{position:fixed;inset:0;z-index:23;background:#2a2622;display:none;flex-direction:column}
 #bkPages.show{display:flex}
 #bkPages .pg-top{display:flex;align-items:center;gap:10px;padding:10px 14px;color:#f5efe3}
 #bkPages .pg-top .btn{height:40px}
@@ -187,6 +187,57 @@ const css=`
 #bkPages .chip3.on{background:var(--seal);color:#fff}
 #bkPages .chip3.ex{background:var(--jade-soft);color:#1f4d3a}
 #bkPages .pg-lbl{color:#f5efe3;font-size:14px;min-width:90px;text-align:center}
+/* tab bar */
+#hzTabs{position:fixed;left:0;right:0;bottom:0;z-index:22;display:flex;justify-content:center;gap:6px;padding:6px 10px calc(6px + env(safe-area-inset-bottom));background:rgba(245,239,227,.96);border-top:1px solid var(--line);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+#hzTabs button{flex:0 1 180px;height:48px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;color:var(--ink3);gap:1px}
+#hzTabs button span{font-size:20px;line-height:1}
+#hzTabs button.on{color:var(--seal);background:var(--card);box-shadow:0 0 0 1px var(--line)}
+body.hz-tabs .app{padding-bottom:78px}
+#book .bk-body{padding-bottom:96px}
+#bkPages{bottom:0}
+/* course */
+.cu-head{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.cu-head h2{margin:0;font:600 30px Fraunces,serif;flex:1}
+.cu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.cu-unit{position:relative;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-height:118px}
+.cu-unit .no{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.cu-unit .zh{font-size:22px;line-height:1.25}
+.cu-unit .de{font-size:14px;color:var(--ink2)}
+.cu-unit .bar{margin-top:auto;height:6px;border-radius:3px;background:var(--paper2);overflow:hidden}.cu-unit .bar i{display:block;height:100%;background:var(--jade)}
+.cu-unit .st{font-size:12.5px;color:var(--ink3)}
+.cu-unit.cur{border-color:var(--seal);box-shadow:0 0 0 2px var(--seal-soft)}
+.cu-unit.missing{opacity:.55;border-style:dashed}
+.cu-unit.done{border-color:var(--jade)}
+.cu-path{display:flex;flex-direction:column;gap:6px}
+.cu-les{margin:14px 0 4px;font:600 19px Fraunces,serif;display:flex;align-items:center;gap:10px}
+.cu-les:after{content:'';flex:1;height:1px;background:var(--line)}
+.cu-step{display:flex;align-items:center;gap:12px;text-align:left;padding:10px 14px;border-radius:14px;border:1px solid var(--line);background:var(--card);width:100%}
+.cu-step .ic{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:19px;background:var(--paper2)}
+.cu-step.LB .ic{background:#f6dcd5}.cu-step.AB .ic{background:#dce9e1}.cu-step.LH .ic{background:#e6e0f1}.cu-step.TEST .ic{background:#f3e6c7}
+.cu-step .t{flex:1;min-width:0}.cu-step .t b{display:block;font-weight:600;font-size:15.5px}.cu-step .t small{color:var(--ink3);font-size:13px}
+.cu-step .ck{flex:none;font-size:13px;color:var(--ink3);white-space:nowrap}
+.cu-step.done{border-color:var(--jade)}.cu-step.done .ck{color:var(--jade);font-weight:700}
+.cu-step.next{border-color:var(--seal);box-shadow:0 0 0 2px var(--seal-soft)}
+.cu-tools{display:flex;gap:8px;flex-wrap:wrap}
+/* split reading view */
+.bk-split{display:flex;gap:18px;align-items:flex-start;max-width:1400px;margin:0 auto}
+.bk-split .bk-wrap{flex:1;min-width:0;max-width:none;margin:0}
+.bk-pg{flex:0 0 46%;position:sticky;top:0;align-self:flex-start;background:#2a2622;border-radius:14px;padding:8px;display:flex;flex-direction:column;gap:6px}
+.bk-pg img{width:100%;border-radius:8px;display:block;cursor:zoom-in}
+.bk-pg .r{display:flex;align-items:center;gap:6px;color:#f5efe3;font-size:13px}
+.bk-pg .r .btn{height:34px;padding:0 10px;font-size:14px}
+.bk-pg .r span{flex:1;text-align:center}
+.bk-split.nopg .bk-pg{display:none}
+@media (orientation:portrait),(max-width:900px){ .bk-split{flex-direction:column} .bk-pg{position:relative;flex:none;width:100%} .bk-pg.fold img{display:none} }
+.bk-step-nav{display:flex;gap:10px;justify-content:space-between;align-items:center;padding:14px 0 4px;border-top:1px solid var(--line);margin-top:6px}
+.bk-step-nav .mid{font-size:13px;color:var(--ink3);text-align:center;flex:1}
+/* tests */
+.testmode .bk-ex .ft button,.testmode .bk-ex .bk-why,.testmode .bk-ex .bk-self{display:none}
+.testmode.graded .bk-ex .bk-why{display:block}
+.bk-testbar{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.bk-testbar .sc{font:600 34px Fraunces,serif}
+.bk-testbar .sc small{font-size:16px;color:var(--ink3)}
+.bk-testbar p{margin:0;flex:1;min-width:200px;color:var(--ink2)}
 #bkWrite{position:fixed;inset:0;z-index:25;background:rgba(31,27,22,.45);display:none;align-items:center;justify-content:center;padding:16px}
 #bkWrite.show{display:flex}
 #bkWrite .panel{max-width:560px;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
@@ -200,7 +251,7 @@ const css=`
 const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
 const root=document.createElement('div'); root.id='book';
 root.innerHTML=`<div class="bk-top"><button class="btn" id="bkBack">← Zurück</button><h2 id="bkTitle">Buch</h2><div class="bk-toggles" id="bkToggles"><button class="btn" id="bkPy">Pinyin</button><button class="btn" id="bkDe">Deutsch</button></div></div>
-<div class="bk-body" id="bkBody"><div class="bk-wrap" id="bkWrap"></div></div>
+<div class="bk-body" id="bkBody"><div class="bk-split nopg" id="bkSplit"><div class="bk-pg" id="bkPg"></div><div class="bk-wrap" id="bkWrap"></div></div></div>
 <input type="file" id="bkFile" accept=".json,application/json,text/plain" style="display:none">`;
 document.body.appendChild(root);
 const wroot=document.createElement('div'); wroot.id='bkWrite';
@@ -217,7 +268,7 @@ document.body.appendChild(proot);
 
 // header button
 const hb=document.createElement('button'); hb.className='icon-btn'; hb.id='btnBook'; hb.setAttribute('aria-label','Buch'); hb.textContent='📖';
-const sb=$('btnSettings'); sb.parentNode.insertBefore(hb,sb);
+const sb=$('btnSettings'); sb.parentNode.insertBefore(hb,sb); hb.style.display='none';
 hb.onclick=()=>openBook();
 
 let packs=[], cur=null, view='home', secRef=null;
@@ -226,13 +277,22 @@ function mediaUrl(pack,name){ const k=pack.id+'/'+name; if(urls.has(k)) return u
 function applyView(){ root.classList.toggle('hidepy',!P.view.py); root.classList.toggle('hidede',!P.view.de); $('bkPy').classList.toggle('on',P.view.py); $('bkDe').classList.toggle('on',P.view.de); }
 $('bkPy').onclick=()=>{P.view.py=!P.view.py;saveP();applyView();};
 $('bkDe').onclick=()=>{P.view.de=!P.view.de;saveP();applyView();};
-$('bkBack').onclick=()=>{ stopAudio(); if(view==='sec') showHome(); else closeBook(); };
+$('bkBack').onclick=()=>{ stopAudio(); if(view==='sec'&&curPack){ const s=secRef&&curPack.parts[secRef.pi].sections[secRef.si]; if(s&&s.test&&prevView==='tests'){ showTests(); return; } openUnit(curPack); } else showHome(); };
+let prevView='home';
 $('bkFile').onchange=async e=>{ const f=e.target.files[0]; e.target.value=''; if(!f) return;
   try{ const p=await importFile(f); toast(`„${p.book} · ${p.unit}“ importiert.`); await showHome(); }catch(err){ toast((err&&err.message)||'Import fehlgeschlagen.'); try{window.__hzlog('book import: '+(err&&(err.message||err.name)));}catch(e){} } };
 function toast(t){ try{ window.__hztoast(t); }catch(e){ alert(t); } }
 
-async function openBook(){ root.classList.add('show'); applyView(); await showHome(); if(P.last && view==='home'){ /* stay on overview */ } }
-function closeBook(){ stopAudio(); root.classList.remove('show'); }
+async function openBook(){ root.classList.add('show'); applyView(); await showHome(); }
+function closeBook(){ stopAudio(); root.classList.remove('show'); setTab('karten'); }
+const tabs=document.createElement('nav'); tabs.id='hzTabs';
+tabs.innerHTML=`<button data-t="kurs"><span>📖</span>Kurs</button><button data-t="karten"><span>✎</span>Schreibkarten</button><button data-t="tests"><span>📝</span>Tests</button>`;
+document.body.appendChild(tabs); document.body.classList.add('hz-tabs');
+function setTab(t){ tabs.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.t===t)); if(P.tab!==t){ P.tab=t; saveP(); } }
+tabs.onclick=e=>{ const b=e.target.closest('button'); if(!b) return; const t=b.dataset.t; closePagesIfOpen();
+  if(t==='karten'){ closeBook(); } else if(t==='kurs'){ root.classList.add('show'); applyView(); prevView='home'; showHome(); } else { root.classList.add('show'); applyView(); prevView='tests'; showTests(); } };
+function closePagesIfOpen(){ try{ if(proot.classList.contains('show')) closePages(); }catch(e){} }
+setTimeout(()=>{ if(P.tab!=='karten'){ openBook(); } else setTab('karten'); },50);
 
 // ---------------------------------------------------------------- progress
 const GRADED=new Set(['match','choice','gap','order','seg','tone','sort','pinyin','write','open','rating']);
@@ -253,47 +313,149 @@ function nextSection(){
 }
 
 // ---------------------------------------------------------------- home
+const UNITS=[['ce1-e0','Einstieg','中文入门','Chinesisch entdecken']].concat([['你好！','Hallo!'],['你是哪国人？','Woher kommen Sie?'],['你做什么工作？','Was machen Sie beruflich?'],['他真高！','Er ist so groß!'],['这是我的电话号码。','Das ist meine Telefonnummer.'],['今天几号？','Welches Datum ist heute?'],['八点见！','Bis um acht!'],['多少钱？','Wie viel kostet das?'],['不远！','Nicht weit!'],['坐火车吧。','Fahren wir mit dem Zug.'],['我会跳舞。','Ich kann tanzen.'],['我们去看京剧。','Wir gehen in die Pekingoper.']].map((x,i)=>['ce1-e'+(i+1),'Einheit '+(i+1),x[0],x[1]]));
+function lesOf(pt,s){ if(s.les) return s.les; if(s.test) return 'end'; const m=String(s.title).match(/Lektion\s*(\d)/); return m?+m[1]:'end'; }
+function unitPath(pack){
+  const out=[];
+  const order=[1,2,3,'end'];
+  for(const L of order){
+    for(const kind of ['LB','AB','LH','TEST']){
+      pack.parts.forEach((pt,pi)=>{ if(pt.id!==kind) return; pt.sections.forEach((s,si)=>{ if(String(lesOf(pt,s))===String(L)) out.push({kind,pi,si,s,les:L,pt}); }); });
+    }
+  }
+  return out;
+}
+const KIND={LB:['📕','Lehrbuch'],AB:['📗','Arbeitsbuch'],LH:['🎓','Lehrer'],TEST:['📝','Test']};
+function stepDone(pack,st){ curPack=pack; if(st.s.test){ return !!(P.tests&&P.tests[pack.id+':'+st.s.id]); } return secDone(pack,st.s); }
+function unitProgress(pack){ const p=unitPath(pack); const d=p.filter(x=>stepDone(pack,x)).length; return {d,n:p.length}; }
+function nextStep(pack){ const p=unitPath(pack); return p.find(x=>!stepDone(pack,x))||null; }
+function nextSection(){
+  for(const [id] of UNITS){ const pk=packs.find(x=>x.id===id); if(!pk) continue; const st=nextStep(pk); if(st) return {p:pk,pi:st.pi,si:st.si,s:st.s,pt:st.pt}; }
+  return null;
+}
+async function loadPacks(){ try{ packs=await listPacks(); }catch(e){ packs=[]; } packs.sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true})); }
 async function showHome(){
-  view='home'; $('bkTitle').textContent='Buch'; $('bkToggles').style.display='none'; { const old=$('bkPgBtn'); if(old) old.remove(); }
-  try{ packs=await listPacks(); }catch(e){ packs=[]; }
-  packs.sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true}));
+  view='home'; setTab('kurs'); $('bkBack').style.display='none'; $('bkTitle').textContent='汉字 · China entdecken'; $('bkToggles').style.display='none'; { const old=$('bkPgBtn'); if(old) old.remove(); }
+  splitOff();
+  await loadPacks();
   const w=$('bkWrap'); w.innerHTML='';
-  if(!packs.length){
-    w.innerHTML=`<div class="bk-empty"><div class="big">书</div><h2 style="font-family:Fraunces,serif">Noch keine Buchinhalte</h2>
-      <p>Importiere hier deine Lektionspakete (Dateien wie <b>China-entdecken-1_Einheit-1.json</b>). Sie werden nur auf diesem Gerät gespeichert und funktionieren auch offline.</p>
-      <p><button class="btn primary" id="bkImp">Lektionspaket importieren</button></p></div>`;
-    $('bkImp').onclick=()=>$('bkFile').click(); $('bkBody').scrollTop=0; return;
+  const nx=nextSection(); const due=HZ.dueCount?HZ.dueCount():0;
+  const t=document.createElement('div'); t.className='bk-today';
+  t.innerHTML=`<h3>Heute dran</h3>${nx?`<small>Weiter: ${esc(nx.p.unit)} · ${esc(KIND[nx.pt.id][1])} · ${esc(nx.s.title.replace(/^.*?·\s*/,''))}${nx.s.page?` (S. ${esc(nx.s.page)})`:''}</small>`:(packs.length?'<small>Alle importierten Einheiten sind durchgearbeitet. 很好！</small>':'<small>Importiere zuerst deine Lektionspakete (unten).</small>')}
+    <div class="row">${nx?'<button class="btn primary" id="tdGo">Weiterlernen →</button>':''}<button class="btn" id="tdCards">✎ Schreibkarten${due?` · ${due} fällig`:''}</button></div>`;
+  w.appendChild(t);
+  if(nx) $('tdGo').onclick=()=>openSection(nx.p,nx.pi,nx.si);
+  $('tdCards').onclick=()=>closeBook();
+  const hd=document.createElement('div'); hd.className='cu-head'; hd.innerHTML=`<h2>Band 1</h2><button class="btn" id="bkImp">+ Paket importieren</button>`; w.appendChild(hd);
+  const g=document.createElement('div'); g.className='cu-grid';
+  for(const [id,label,zh,de] of UNITS){
+    const pk=packs.find(x=>x.id===id);
+    const b=document.createElement('button'); b.className='cu-unit';
+    if(!pk){ b.classList.add('missing'); b.innerHTML=`<span class="no">${label}</span><span class="zh">${esc(zh)}</span><span class="de">${esc(de)}</span><span class="st">noch nicht importiert</span>`; b.onclick=()=>toast('Dieses Paket ist noch nicht importiert.'); }
+    else { const pr=unitProgress(pk); if(nx&&nx.p.id===id) b.classList.add('cur'); if(pr.d>=pr.n) b.classList.add('done');
+      b.innerHTML=`<span class="no">${label}</span><span class="zh">${esc(zh)}</span><span class="de">${esc(de)}</span><span class="bar"><i style="width:${Math.round(100*pr.d/pr.n)}%"></i></span><span class="st">${pr.d} von ${pr.n} Schritten</span>`;
+      b.onclick=()=>openUnit(pk); }
+    g.appendChild(b);
   }
-  { const nx=nextSection(); const due=HZ.dueCount?HZ.dueCount():0;
-    const t=document.createElement('div'); t.className='bk-today';
-    t.innerHTML=`<h3>Heute dran</h3>${nx?`<small>Weiter im Buch: ${esc(nx.p.unit)} · ${esc(nx.pt.title)} · ${esc(nx.s.title)} (S. ${esc(nx.s.page)})</small>`:'<small>Alle Übungen deiner Pakete sind erledigt. 很好！</small>'}
-      <div class="row">${nx?'<button class="btn primary" id="tdGo">Weiterlernen →</button>':''}<button class="btn" id="tdCards">✎ Schreibkarten${due?` · ${due} fällig`:''}</button></div>`;
-    w.appendChild(t);
-    if(nx) $('tdGo').onclick=()=>openSection(nx.p,nx.pi,nx.si);
-    $('tdCards').onclick=()=>closeBook(); }
-  for(const p of packs){
-    curPack=p;
-    const el=document.createElement('div'); el.className='bk-pack';
-    let h=`<h3>${esc(p.book)} · ${esc(p.unit)}</h3><div class="sub zh">${esc(p.title||'')}</div>`;
-    p.parts.forEach((pt,pi)=>{
-      h+=`<div class="bk-part"><h4>${esc(pt.title)}</h4>`;
-      pt.sections.forEach((s,si)=>{ const pr=secProgress(s); const done=pr.n&&pr.d>=pr.n;
-        h+=`<button class="bk-sec${done?' done':''}" data-p="${pi}" data-s="${si}"><span class="t">${esc(s.title)}</span><span class="pg">S. ${esc(s.page)}</span>${pr.n?`<span class="bk-bar"><i style="width:${Math.round(100*pr.d/pr.n)}%"></i></span><span class="pr">${pr.d}/${pr.n}</span>`:''}</button>`; });
-      h+='</div>';
-    });
-    const hasLB=(p.pages||[]).some(x=>x.b==='LB'), hasAB=(p.pages||[]).some(x=>x.b==='AB');
-    h+=`<div class="bk-tools">${hasLB?'<button class="btn" data-pg="LB">📄 Lehrbuch-Seiten</button>':''}${hasAB?'<button class="btn" data-pg="AB">📄 Arbeitsbuch-Seiten</button>':''}${p.deck?`<button class="btn" data-deck="1">${HZ.hasDeck(p.deck)?'✓ Vokabeln in den Schreibkarten':'+ Vokabeln in die Schreibkarten'}</button>`:''}<span style="flex:1"></span><button class="btn" data-del="1" style="font-size:13px">Paket entfernen</button></div>`;
-    el.innerHTML=h;
-    el.addEventListener('click',async e=>{ const b=e.target.closest('.bk-sec'); if(b){ openSection(p,+b.dataset.p,+b.dataset.s); return; }
-      const pg=e.target.closest('[data-pg]'); if(pg){ openPages(p,pg.dataset.pg,0); return; }
-      if(e.target.closest('[data-deck]')){ if(HZ.hasDeck(p.deck)){ HZ.removeDeck(p.deck); toast('Die Vokabeln dieser Einheit sind nicht mehr in den Schreibkarten.'); } else { HZ.addDeck(p.deck); toast(`Die Vokabeln von ${p.unit} sind jetzt in deinen Schreibkarten.`); } showHome(); return; }
-      if(e.target.closest('[data-del]')){ if(confirm(`„${p.unit}“ von diesem Gerät entfernen? Dein Übungsfortschritt bleibt erhalten.`)){ await delPack(p.id); showHome(); } } });
-    w.appendChild(el);
-  }
-  const imp=document.createElement('div'); imp.style.textAlign='center';
-  imp.innerHTML=`<button class="btn" id="bkImp">+ Weiteres Lektionspaket importieren</button>`; w.appendChild(imp);
+  for(const pk of packs) if(!UNITS.some(u=>u[0]===pk.id)){ const b=document.createElement('button'); b.className='cu-unit'; b.innerHTML=`<span class="no">${esc(pk.book)}</span><span class="zh">${esc(pk.title||'')}</span><span class="de">${esc(pk.unit)}</span>`; b.onclick=()=>openUnit(pk); g.appendChild(b); }
+  w.appendChild(g);
   $('bkImp').onclick=()=>$('bkFile').click();
   $('bkBody').scrollTop=0;
+}
+function openUnit(pack){
+  view='unit'; curPack=pack; splitOff(); $('bkBack').style.display=''; $('bkTitle').textContent=`${pack.unit} · ${pack.title||''}`; $('bkToggles').style.display='none'; { const old=$('bkPgBtn'); if(old) old.remove(); }
+  const w=$('bkWrap'); w.innerHTML='';
+  const tools=document.createElement('div'); tools.className='cu-tools';
+  const hasLB=(pack.pages||[]).some(x=>x.b==='LB'), hasAB=(pack.pages||[]).some(x=>x.b==='AB');
+  tools.innerHTML=`${hasLB?'<button class="btn" data-pg="LB">📕 Lehrbuch blättern</button>':''}${hasAB?'<button class="btn" data-pg="AB">📗 Arbeitsbuch blättern</button>':''}${pack.deck?`<button class="btn" data-deck="1">${HZ.hasDeck(pack.deck)?'✓ Vokabeln in den Schreibkarten':'+ Vokabeln in die Schreibkarten'}</button>`:''}<span style="flex:1"></span><button class="btn" data-del="1" style="font-size:13px">Paket entfernen</button>`;
+  tools.onclick=async e=>{ const pg=e.target.closest('[data-pg]'); if(pg){ openPages(pack,pg.dataset.pg,0); return; }
+    if(e.target.closest('[data-deck]')){ if(HZ.hasDeck(pack.deck)){ HZ.removeDeck(pack.deck); toast('Die Vokabeln dieser Einheit sind nicht mehr in den Schreibkarten.'); } else { HZ.addDeck(pack.deck); toast(`Die Vokabeln von ${pack.unit} sind jetzt in deinen Schreibkarten.`); } openUnit(pack); return; }
+    if(e.target.closest('[data-del]')){ if(confirm(`„${pack.unit}“ von diesem Gerät entfernen? Dein Übungsfortschritt bleibt erhalten.`)){ await delPack(pack.id); showHome(); } } };
+  w.appendChild(tools);
+  const path=unitPath(pack), nx=nextStep(pack); let lastL=null;
+  const box=document.createElement('div'); box.className='cu-path';
+  path.forEach(st=>{
+    if(st.les!==lastL){ lastL=st.les; const h=document.createElement('div'); h.className='cu-les'; h.textContent=st.les==='end'?'Abschluss der Einheit':`Lektion ${st.les}`; box.appendChild(h); }
+    const b=document.createElement('button'); const done=stepDone(pack,st); curPack=pack; const pr=secProgress(st.s);
+    b.className=`cu-step ${st.kind}${done?' done':''}${nx===st?' next':''}`;
+    const tst=st.s.test&&P.tests&&P.tests[pack.id+':'+st.s.id];
+    b.innerHTML=`<span class="ic">${KIND[st.kind][0]}</span><span class="t"><b>${esc(stepLabel(st))}</b><small>${KIND[st.kind][1]}${st.s.page?` · S. ${esc(st.s.page)}`:''}</small></span><span class="ck">${st.s.test?(tst?`${tst.best} / ${tst.n} Punkte`:'offen'):(done?'✓ erledigt':(pr.n?`${pr.d}/${pr.n}`:''))}</span>`;
+    b.onclick=()=>openSection(pack,st.pi,st.si);
+    box.appendChild(b);
+  });
+  w.appendChild(box);
+  $('bkBody').scrollTop=0;
+}
+function stepLabel(st){ let t=st.s.title.replace(/^(Einstieg|Einheit \d+)\s*·\s*/,'').replace(/^Lektion \d\s*·?\s*/,''); if(!t) t=st.kind==='AB'?'Übungen im Arbeitsbuch':'Übungen'; return t; }
+function splitOff(){ const sp=$('bkSplit'); if(sp) sp.classList.add('nopg'); }
+function pagePanel(pack,book,pageNo){
+  const list=(pack.pages||[]).filter(x=>x.b===book).sort((a,b)=>a.p[0]-b.p[0]);
+  let i=list.findIndex(x=>x.p.includes(pageNo)); if(i<0) return false;
+  const pg=$('bkPg'); const draw=()=>{ const it=list[i]; pg.innerHTML=`<div class="r"><button class="btn" data-d="-1">‹</button><span>${book==='LB'?'Lehrbuch':'Arbeitsbuch'} · S. ${it.p.join('–')}</span><button class="btn" data-d="1">›</button><button class="btn" data-f="1" title="Seite ein-/ausklappen">▾</button></div><img src="${mediaUrl(pack,it.img)||''}" alt="">`;
+    pg.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{ const n=i+(+b.dataset.d); if(n>=0&&n<list.length){ i=n; draw(); } });
+    pg.querySelector('[data-f]').onclick=()=>pg.classList.toggle('fold');
+    pg.querySelector('img').onclick=()=>openPages(pack,book,0,list[i].p[0]); };
+  draw(); return true;
+}
+function openSection(pack,pi,si){
+  curPack=pack; view='sec'; secRef={pack,pi,si}; P.last={id:pack.id,pi,si}; saveP();
+  const part=pack.parts[pi], s=part.sections[si]; setTab(s.test&&prevView==='tests'?'tests':'kurs');
+  $('bkBack').style.display=''; $('bkTitle').textContent=`${pack.unit} · ${KIND[part.id]?KIND[part.id][1]:part.title} · ${s.title.replace(/^(Einstieg|Einheit \d+)\s*·\s*/,'')}`; $('bkToggles').style.display='';
+  { const old=$('bkPgBtn'); if(old) old.remove(); }
+  const sp=$('bkSplit'); const [a]=pageRange(s.page);
+  const hasPg=(part.id==='LB'||part.id==='AB') && pagePanel(pack,part.id,a);
+  sp.classList.toggle('nopg',!hasPg);
+  const w=$('bkWrap'); w.innerHTML=''; w.classList.toggle('testmode',!!s.test); w.classList.remove('graded');
+  if(s.test){ const tb=document.createElement('div'); tb.className='bk-testbar'; tb.id='bkTestbar';
+    const prev=P.tests&&P.tests[pack.id+':'+s.id];
+    tb.innerHTML=`<p>${esc(s.intro||'Bearbeite alle Aufgaben ohne Hilfe. Erst beim Abgeben siehst du, was richtig war.')}${prev?` Bisher bestes Ergebnis: <b>${prev.best} / ${prev.n}</b>.`:''}</p>`; w.appendChild(tb); }
+  s.ex.forEach(ex=>w.appendChild(renderEx(ex)));
+  if(s.test){ const b=document.createElement('button'); b.className='btn primary'; b.style.alignSelf='center'; b.textContent='Test abgeben'; b.onclick=()=>gradeTest(pack,s,w,b); w.appendChild(b); }
+  const path=unitPath(pack); const k=path.findIndex(x=>x.pi===pi&&x.si===si);
+  const prev=k>0?path[k-1]:null, next=k>=0&&k<path.length-1?path[k+1]:null;
+  const nav=document.createElement('div'); nav.className='bk-step-nav';
+  nav.innerHTML=`<span>${prev?'<button class="btn" id="bkPrev">← Zurück</button>':''}</span><span class="mid">Schritt ${k+1} von ${path.length}${next?`<br>Als Nächstes: ${KIND[next.kind][1]} · ${esc(next.s.title.replace(/^.*·\s*/,''))}`:''}</span><span>${next?'<button class="btn primary" id="bkNext">Weiter →</button>':'<button class="btn primary" id="bkHome">Einheit abschließen ✓</button>'}</span>`;
+  w.appendChild(nav);
+  if(prev) $('bkPrev').onclick=()=>{ stopAudio(); openSection(pack,prev.pi,prev.si); };
+  if(next) $('bkNext').onclick=()=>{ stopAudio(); openSection(pack,next.pi,next.si); };
+  else $('bkHome').onclick=()=>{ stopAudio(); try{HZ.confetti();}catch(e){} openUnit(pack); };
+  $('bkBody').scrollTop=0;
+}
+function exTotal(ex,el){
+  switch(ex.type){
+    case 'choice': return ex.items.filter(it=>it.ans!=null).length;
+    case 'gap': return el.querySelectorAll('.bk-slot').length;
+    case 'match': return ex.left.length;
+    case 'order': case 'seg': case 'tone': case 'sort': case 'pinyin': return ex.items.length;
+    default: return 0;
+  }
+}
+function gradeTest(pack,s,w,btn){
+  let got=0, tot=0;
+  w.querySelectorAll('.bk-ex').forEach(el=>{ const ex=s.ex.find(e=>'ex-'+e.id===el.id); if(!ex) return; const n=exTotal(ex,el); if(!n) return;
+    const c=el.querySelector('[data-a=check]'); if(c) c.click();
+    const m=(el.querySelector('.ft .msg')||{}).textContent||''; const mm=m.match(/(\d+) von (\d+)/);
+    got += el.classList.contains('ok') ? n : (mm? +mm[1] : 0); tot+=n; });
+  w.classList.add('graded'); btn.textContent='Nochmal versuchen'; btn.onclick=()=>{ s.ex.forEach(e=>{ delete P.open[key(e)]; delete P.ex[key(e)]; }); saveP(); openSection(pack,secRef.pi,secRef.si); };
+  P.tests=P.tests||{}; const k=pack.id+':'+s.id; const prev=P.tests[k]; P.tests[k]={best:Math.max(got,prev?prev.best:0),last:got,n:tot,t:Date.now()}; saveP();
+  const pct=tot?got/tot:0; const note=pct>=.9?'Ausgezeichnet! 太棒了！':pct>=.75?'Gut gemacht! 很好！':pct>=.5?'Bestanden – ein paar Punkte gehen noch. 加油！':'Wiederhole die Einheit und versuch es dann noch einmal. 加油！';
+  const tb=$('bkTestbar'); tb.innerHTML=`<div class="sc">${got}<small> / ${tot}</small></div><p><b>${note}</b><br>Rot markiert siehst du, was noch nicht stimmt, grün die richtige Lösung.</p>`;
+  if(pct>=.75) try{HZ.confetti();}catch(e){}
+  $('bkBody').scrollTop=0;
+}
+function showTests(){
+  view='tests'; setTab('tests'); splitOff(); $('bkBack').style.display='none'; $('bkTitle').textContent='Tests & Prüfungen'; $('bkToggles').style.display='none';
+  const w=$('bkWrap'); w.innerHTML='';
+  loadPacks().then(()=>{
+    w.innerHTML=`<div class="bk-note bk-ex"><div class="ti" style="font-weight:600">Einheitentests aus dem Lehrerhandbuch</div><p class="bk-self" style="display:block">Nach jeder Einheit ein Test mit 25 Punkten – wie im Unterricht. Die Prüfungsaufgaben 1–3 kommen nach Einheit 4, 8 und 12 dazu.</p></div>`;
+    const box=document.createElement('div'); box.className='cu-path';
+    let any=false;
+    for(const pk of packs) pk.parts.forEach((pt,pi)=>pt.sections.forEach((s,si)=>{ if(!s.test) return; any=true; const r=P.tests&&P.tests[pk.id+':'+s.id];
+      const b=document.createElement('button'); b.className='cu-step TEST'+(r?' done':''); b.innerHTML=`<span class="ic">📝</span><span class="t"><b>${esc(s.title)}</b><small>${esc(pk.unit)}</small></span><span class="ck">${r?`bestes Ergebnis ${r.best} / ${r.n}`:'noch nicht gemacht'}</span>`;
+      b.onclick=()=>openSection(pk,pi,si); box.appendChild(b); }));
+    if(!any) box.innerHTML='<p class="bk-self" style="display:block">Noch keine Tests importiert.</p>';
+    w.appendChild(box);
+  });
 }
 
 // ---------------------------------------------------------------- audio
@@ -327,24 +489,6 @@ function playSegment(ex,card,t0,t1,lineEl){
 function sayZh(zh){ const k=zh.replace(/[！？。，、；：…\s]/g,''); if(HZ.hasWord(k)) HZ.sayWord(k); else HZ.speak(zh.replace(/[A-Za-z][A-Za-z\- ]*/g,m=>m)); }
 
 // ---------------------------------------------------------------- section
-function openSection(pack,pi,si){
-  curPack=pack; view='sec'; secRef={pack,pi,si}; P.last={id:pack.id,pi,si}; saveP();
-  const part=pack.parts[pi], s=part.sections[si];
-  $('bkTitle').textContent=`${part.title} · ${s.title}`; $('bkToggles').style.display='';
-  { const old=$('bkPgBtn'); if(old) old.remove(); const b=pageButton(pack,pi,si); if(b){ b.id='bkPgBtn'; $('bkToggles').prepend(b); } }
-  const w=$('bkWrap'); w.innerHTML='';
-  s.ex.forEach(ex=>w.appendChild(renderEx(ex)));
-  const nav=document.createElement('div'); nav.className='bk-nav';
-  const prev=si>0?[pi,si-1]:(pi>0?[pi-1,pack.parts[pi-1].sections.length-1]:null);
-  const next=si<part.sections.length-1?[pi,si+1]:(pi<pack.parts.length-1?[pi+1,0]:null);
-  nav.innerHTML=`<span>${prev?'<button class="btn" id="bkPrev">← Vorheriger Abschnitt</button>':''}</span><span>${next?'<button class="btn primary" id="bkNext">Nächster Abschnitt →</button>':'<button class="btn primary" id="bkHome">Zur Übersicht</button>'}</span>`;
-  w.appendChild(nav);
-  if(prev) $('bkPrev').onclick=()=>{ stopAudio(); openSection(pack,prev[0],prev[1]); };
-  if(next) $('bkNext').onclick=()=>{ stopAudio(); openSection(pack,next[0],next[1]); };
-  else $('bkHome').onclick=()=>{ stopAudio(); showHome(); };
-  $('bkBody').scrollTop=0;
-}
-
 function card(ex,inner,opts={}){
   const el=document.createElement('div'); el.className='bk-ex'+(ex.type==='note'?' bk-note':''); el.id='ex-'+ex.id;
   const no=ex.n?`<span class="no">${esc(String(ex.n).replace(/b$/,''))}</span>`:'';
