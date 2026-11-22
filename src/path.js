@@ -88,7 +88,7 @@ const NCACHE=new Map();
 function buildNodes(pack){
   if(NCACHE.has(pack.id)) return NCACHE.get(pack.id);
   const D=unitData(pack), nodes=[];
-  const nums=[...new Set(D.words.map(w=>w.les).concat(D.lines.map(l=>l.les)))].sort((a,b)=>a-b);
+  const nums=[...new Set(D.words.map(w=>w.les).concat(D.lines.map(l=>l.les)).concat(pack.companion?pack.parts.filter(pt=>pt.id==='LB'||pt.id==='AB').flatMap(pt=>pt.sections.map(s=>lesOf(pt,s)).filter(x=>typeof x==='number')):[]))].sort((a,b)=>a-b);
   const addW=(ws,les)=>{ for(let i=0;i<ws.length;i+=7){ let part=ws.slice(i,i+7); if(part.length<3&&nodes.length&&nodes[nodes.length-1].kind==='words'){ nodes[nodes.length-1].words.push(...part); continue; }
       nodes.push({id:'w'+les+'-'+i,kind:'words',les,words:part,label:part.slice(0,3).map(w=>clean(w.zh)).join(' · '),sub:les===99?'Mehr Wörter':(pack.virtual||(pack.companion&&!pack.wordOrder)?'Wörter · Teil ':'Wörter · Lektion ')+les}); } };
   for(const n of nums){ addW(n===99?D.words.filter(w=>w.les===99&&[...clean(w.zh)].length<=3).slice(0,14):D.words.filter(w=>w.les===n),n);
