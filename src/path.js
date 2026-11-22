@@ -23,7 +23,25 @@ const VIDEOS={
  'ce1-e2':[
   {id:'1W7HgwPYhp4',title:'Straßeninterview: Was ist deine Lieblingsstadt in China?',src:'YouTube · Easy Mandarin',lvl:'A2–B1',
    ph:[['你是哪国人？','Nǐ shì nǎ guó rén?','Aus welchem Land kommst du?'],['我是德国人。','Wǒ shì Déguó rén.','Ich bin Deutscher.'],['北京','Běijīng','Peking'],['上海','Shànghǎi','Schanghai']]},
-  {id:'xyCqfa8ZZ6Q',title:'„你是哪儿人？“ – Woher kommst du?',src:'YouTube · Anfängerkurs',lvl:'A1',ph:[]}]
+  {id:'xyCqfa8ZZ6Q',title:'„你是哪儿人？“ – Woher kommst du?',src:'YouTube · Anfängerkurs',lvl:'A1',ph:[]}],
+ 'ce1-e3':[
+  {id:'UfsY7R3G5UI',start:148,end:261,title:'Straßeninterview: Was machst du beruflich?',src:'YouTube · Rita Mandarin Chinese',lvl:'A2–B1',
+   ph:[['目前有两家店。','Mùqián yǒu liǎng jiā diàn.','Zurzeit habe ich zwei Läden.'],['已经做了快八年了。','Yǐjīng zuò le kuài bā nián le.','Das mache ich schon fast acht Jahre.'],['我自己有一些养乌龟的小生意。','Wǒ zìjǐ yǒu yìxiē yǎng wūguī de xiǎo shēngyi.','Ich habe ein kleines Geschäft mit Schildkröten.']]},
+  {id:'FBI_AcFxn2g',title:'Straßeninterview: Was arbeitest du? (ohne Untertitel)',src:'YouTube · Easy Mandarin',lvl:'A2–B1',ph:[]}],
+ 'ce1-e4':[
+  {id:'c1Pz6H6YLQQ',start:201,title:'Straßeninterview: Alter, Größe, Lieblingsfarbe',src:'YouTube · Better in Chinese',lvl:'A2',
+   ph:[['你今年多大？','Nǐ jīnnián duō dà?','Wie alt bist du dieses Jahr?'],['你有多高？','Nǐ yǒu duō gāo?','Wie groß bist du?'],['好高啊！','Hǎo gāo a!','So groß!'],['你最喜欢的颜色是什么？','Nǐ zuì xǐhuan de yánsè shì shénme?','Was ist deine Lieblingsfarbe?'],['你最喜欢的水果是什么？','Nǐ zuì xǐhuan de shuǐguǒ shì shénme?','Was ist dein Lieblingsobst?'],['你是独生子女还是有兄弟姐妹？','Nǐ shì dúshēng zǐnǚ háishi yǒu xiōngdì jiěmèi?','Bist du Einzelkind oder hast du Geschwister?']]},
+  {id:'uGI1AfPq6eg',start:390,title:'„我的个子高“ – Aussehen beschreiben',src:'YouTube · Jin Tan',lvl:'A1',
+   ph:[['我的个子高。','Wǒ de gèzi gāo.','Ich bin groß.'],['它的个子矮。','Tā de gèzi ǎi.','Es ist klein.']]}],
+ 'ce1-e5':[
+  {id:'ACF5A4vn2gs',start:0,end:58,title:'Sieben Fragen zur Person: Adresse, Telefon, E-Mail',src:'YouTube · Mandarin HQ',lvl:'A1',
+   ph:[['你住在哪里？','Nǐ zhù zài nǎlǐ?','Wo wohnst du?'],['我的电话号码是……','Wǒ de diànhuà hàomǎ shì …','Meine Telefonnummer ist …'],['你的邮箱是什么？','Nǐ de yóuxiāng shì shénme?','Wie ist deine E-Mail-Adresse?'],['你的生日是几月几号？','Nǐ de shēngrì shì jǐ yuè jǐ hào?','Wann hast du Geburtstag?']]},
+  {id:'zADqVpS1G4E',title:'Telefonnummern erfragen und vorlesen',src:'YouTube · Everyday Chinese',lvl:'A1',ph:[]}],
+ 'ce1-e6':[
+  {id:'pmaguhYVKzQ',title:'„你的生日是几月几号？“ – über den Geburtstag sprechen',src:'YouTube · SherryChinese',lvl:'A1–A2',
+   ph:[['你的生日是几月几号？','Nǐ de shēngrì shì jǐ yuè jǐ hào?','Wann hast du Geburtstag?'],['你的生日，你喜欢做什么？','Nǐ de shēngrì, nǐ xǐhuan zuò shénme?','Was machst du gern an deinem Geburtstag?'],['开派对','kāi pàiduì','eine Party feiern'],['吃蛋糕','chī dàngāo','Kuchen essen'],['和家人吃饭','hé jiārén chīfàn','mit der Familie essen']]},
+  {id:'Cc4M2L5a-OU',start:55,title:'Jahr, Monat, Tag und Woche ausdrücken',src:'YouTube · Everyday Chinese',lvl:'A1',
+   ph:[['今天是几月几号？','Jīntiān shì jǐ yuè jǐ hào?','Welches Datum ist heute?'],['今天星期几？','Jīntiān xīngqī jǐ?','Welcher Wochentag ist heute?']]}]
 };
 
 // ---------------------------------------------------------------- helpers
