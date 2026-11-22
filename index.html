@@ -2049,8 +2049,25 @@ const VIDEOS={
  'ce1-e12':[
   {id:'udNgkHIiQVA',title:'Straßeninterview: Was hast du zum Frühlingsfest vor?',src:'YouTube · Easy Mandarin',lvl:'A2',
    ph:[['春节，你打算做些什么？','Chūnjié, nǐ dǎsuàn zuò xiē shénme?','Was hast du zum Frühlingsfest vor?'],['吃饺子','chī jiǎozi','Jiaozi essen'],['放鞭炮','fàng biānpào','Böller zünden'],['陪父母','péi fùmǔ','Zeit mit den Eltern verbringen'],['看春晚','kàn Chūnwǎn','die Frühlingsfest-Gala schauen']]},
-  {id:'RRTgsLZiClk',title:'Hello China: die Pekingoper kurz vorgestellt',src:'YouTube · Hello China',lvl:'A1',ph:[]}]
+  {id:'RRTgsLZiClk',title:'Hello China: die Pekingoper kurz vorgestellt',src:'YouTube · Hello China',lvl:'A1',ph:[]}],
+ 'ce2-e1':[
+  {id:'QjZfQfhyESE',start:30,end:200,title:'Ein Samstag in Shenzhen',src:'YouTube · Chinese with Nicole',lvl:'A2',
+   ph:[['因为今天是星期六，不用工作。','Yīnwèi jīntiān shì xīngqīliù, búyòng gōngzuò.','Weil heute Samstag ist, muss ich nicht arbeiten.'],['我喜欢一边化妆一边看一些视频。','Wǒ xǐhuan yìbiān huàzhuāng yìbiān kàn yìxiē shìpín.','Ich schaue gern Videos, während ich mich schminke.'],['现在快下午四点钟了。','Xiànzài kuài xiàwǔ sì diǎn zhōng le.','Es ist jetzt fast vier Uhr nachmittags.'],['今天外面的天气不太好。','Jīntiān wàimiàn de tiānqì bú tài hǎo.','Das Wetter draußen ist heute nicht so gut.']]},
+  {id:'rvRpgGZ0fk4',start:228,end:382,title:'Mein Tag in Berlin: der Plan für heute',src:'YouTube · jiayouchinese',lvl:'A2',
+   ph:[['我们来看一下我今天的计划。','Wǒmen lái kàn yíxià wǒ jīntiān de jìhuà.','Schauen wir uns meinen Plan für heute an.'],['第一个是运动，半个小时左右。','Dì-yī ge shì yùndòng, bàn ge xiǎoshí zuǒyòu.','Das Erste ist Sport, ungefähr eine halbe Stunde.'],['所以我要多运动。','Suǒyǐ wǒ yào duō yùndòng.','Deshalb will ich mehr Sport machen.'],['第二件事情是回邮件。','Dì-èr jiàn shìqing shì huí yóujiàn.','Das Zweite ist, E-Mails zu beantworten.']]}],
+ 'ce2-e2':[
+  {id:'7ou-i6kEHsc',title:'Im Winter rausgehen: Schnee, Kälte, Anziehen',src:'YouTube · Emily Chinese',lvl:'A1–A2',
+   ph:[['外面的温度现在是零下大概两度。','Wàimiàn de wēndù xiànzài shì língxià dàgài liǎng dù.','Draußen sind es gerade etwa zwei Grad unter null.'],['零下','língxià','unter null'],['冷','lěng','kalt'],['穿','chuān','anziehen, tragen']]},
+  {id:'6zuDnxE7gIs',title:'Dialog: Wetter und Jahreszeiten',src:'YouTube · OneCat Chinese',lvl:'A2',
+   ph:[['今天天气怎么样？','Jīntiān tiānqì zěnmeyàng?','Wie ist das Wetter heute?'],['今天是晴天，天气很好。','Jīntiān shì qíngtiān, tiānqì hěn hǎo.','Heute ist es sonnig, das Wetter ist schön.'],['我喜欢下雪天。','Wǒ xǐhuan xiàxuě tiān.','Ich mag Schneetage.'],['你最喜欢哪个季节？','Nǐ zuì xǐhuan nǎge jìjié?','Welche Jahreszeit magst du am liebsten?'],['冬天可以堆雪人。','Dōngtiān kěyǐ duī xuěrén.','Im Winter kann man Schneemänner bauen.']]}],
+ 'ce2-e3':[
+  {id:'Kq04YTh-PWU',title:'Straßeninterview in Taipeh: Pläne und Wünsche zum Neujahr',src:'YouTube · PeggyTeachesChinese',lvl:'A2–B1',
+   ph:[['猪年行大运！','Zhū nián xíng dà yùn!','Viel Glück im Jahr des Schweins!']]},
+  {id:'LAoke1XI_BI',start:5,title:'Das Frühlingsfest in langsamem Chinesisch erklärt',src:'YouTube · Spicy Mandarin Talks',lvl:'B1',
+   ph:[['过两天，就要到中国的新年了。','Guò liǎng tiān, jiù yào dào Zhōngguó de xīnnián le.','In zwei Tagen ist das chinesische Neujahr.'],['我们也叫它春节。','Wǒmen yě jiào tā Chūnjié.','Wir nennen es auch Frühlingsfest.'],['回家过年','huí jiā guònián','zum Neujahr nach Hause fahren'],['放鞭炮','fàng biānpào','Böller zünden'],['年夜饭','niányèfàn','Essen am Silvesterabend']]}]
 };
+function vKey(pack){ if(VIDEOS[pack.id]) return pack.id; const m=/^ce2-(\d+)$/.exec(pack.deck||''); return m&&VIDEOS['ce2-e'+m[1]]?'ce2-e'+m[1]:null; }
+function vUnit(k){ const m=/^ce(\d)-e(\d+)$/.exec(k)||[]; return 'Buch '+(m[1]||'1')+' · '+(m[2]==='0'?'Einstieg':'Einheit '+(m[2]||'')); }
 
 // ---------------------------------------------------------------- helpers
 const shuf=a=>{ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
@@ -2121,7 +2138,7 @@ function buildNodes(pack){
     if(D.lines.filter(l=>l.les===n).length>=3) nodes.push({id:'d'+n,kind:'dialog',les:n,label:pack.companion?'Sätze bauen':n===99?'Sätze':'Sätze & Dialog',sub:n===99?'Hören und bauen':(pack.virtual||(pack.companion&&!pack.wordOrder)?'Teil ':'Lektion ')+n});
     if(pack.companion) pack.parts.forEach((pt,pi)=>{ if(pt.id!=='LB'&&pt.id!=='AB') return; pt.sections.forEach((s,si)=>{ if(lesOf(pt,s)!==n||/Schriftzeichen schreiben/.test(s.title)) return; nodes.push({id:'b'+pt.id+si,kind:'book',ref:{pi,si},label:s.title.replace(/^(Einheit \d+|Lektion \d)\s*·\s*/,'').replace(/^Lektion \d$/,'Übungen'),sub:(pt.id==='LB'?'Lehrbuch':'Arbeitsbuch')+' · S. '+s.page}); }); }); }
   for(let i=0;i<D.chars.length;i+=8){ const cs=D.chars.slice(i,i+8); nodes.push({id:i?'wr'+i:'wr',kind:'write',chars:cs,label:cs.slice(0,4).map(c=>c.zh).join(' '),sub:'Schreiben'}); }
-  if(VIDEOS[pack.id]) nodes.push({id:'vid',kind:'video',clip:0,label:'Echtes Leben',sub:'Video'});
+  if(vKey(pack)) nodes.push({id:'vid',kind:'video',clip:0,label:'Echtes Leben',sub:'Video'});
   nodes.push({id:'rev',kind:'review',label:'Wiederholung',sub:'Truhe'});
   const t=findTest(pack); if(t) nodes.push({id:'test',kind:'test',ref:t,label:'Einheitentest',sub:'Prüfung'});
   const r={nodes,D}; NCACHE.set(pack.id,r); return r;
@@ -2158,7 +2175,7 @@ function genItems(pack,node){
       pickN(D.lines.filter(l=>l.audio),3).forEach(l=>it.push({t:'dlisten',l,ls:D.lines}));
       pickN(D.lines.map(l=>({l,tiles:buildable(l,dict)})).filter(x=>x.tiles),3).forEach(x=>it.push({t:'build',l:x.l,tiles:x.tiles,pool})); }
     return mix(it); }
-  if(node.kind==='video'){ const v=VIDEOS[node.unit||pack.id][node.clip||0], it=[{t:'vprep',v},{t:'vwatch',v},{t:'vrate',v}];
+  if(node.kind==='video'){ const v=VIDEOS[node.unit||vKey(pack)][node.clip||0], it=[{t:'vprep',v},{t:'vwatch',v},{t:'vrate',v}];
     const ph=v.ph.map(p=>({zh:p[0],py:p[1],de:p[2]})); const pp=ph.concat(pool).filter((w,i,a)=>a.findIndex(x=>x.zh===w.zh)===i);
     if(ph.length>=2){ ph.forEach(w=>it.push({t:'listen',w,pool:pp})); ph.forEach(w=>it.push({t:'vspeak',w})); }
     return it; }
@@ -2354,7 +2371,7 @@ function lpHome(){
       <button class="lp-fy" id="lpMist" style="background:#fff1ec"><span class="ic lz" style="background:var(--coral)">错</span><span><b>Fehler-Mix</b><small>${mist?mist+' offene Fehler':'keine offenen Fehler'}</small></span></button>
       <button class="lp-fy" id="lpCards" style="background:#e8faf2"><span class="ic lz" style="background:var(--jade)">写</span><span><b>Schreibkarten</b><small>${due?due+' fällig':'nichts fällig'}</small></span></button>
     </div>
-    <div class="lp-card"><h4>Videos aus dem echten Leben</h4>${vids.map(x=>`<button class="lp-vl" data-vk="${x.k}" data-vi="${x.i}"><span class="th">▶</span><span><b>${esc(x.v.title)}</b><small>${esc((UNITS.find(u=>u[0]===x.k)||[0,''])[1])} · ${esc(x.v.lvl)}${LS.vid[x.v.id]?' · gesehen':''}</small></span></button>`).join('')}<div class="lp-vnote" style="margin-top:8px">Eingebettet von YouTube · nur online</div></div>
+    <div class="lp-card"><h4>Videos aus dem echten Leben</h4>${vids.map(x=>`<button class="lp-vl" data-vk="${x.k}" data-vi="${x.i}"><span class="th">▶</span><span><b>${esc(x.v.title)}</b><small>${esc(vUnit(x.k))} · ${esc(x.v.lvl)}${LS.vid[x.v.id]?' · gesehen':''}</small></span></button>`).join('')}<div class="lp-vnote" style="margin-top:8px">Eingebettet von YouTube · nur online</div></div>
   </aside></div></div>`;
   lp.querySelectorAll('.lp-units button').forEach(b=>b.onclick=()=>{ LS.unit=b.dataset.u; saveL(); lpHome(); });
   lp.querySelectorAll('.lp-node .nb').forEach(b=>b.onclick=()=>{ const n=nodes[+b.dataset.n]; if(n.kind==='video'&&navigator.onLine===false){ toast('Videos brauchen Internet – mach einfach mit dem nächsten Knoten weiter.'); return; } startNode(pack,n); });
@@ -2399,7 +2416,7 @@ function feedback(ok,sol,note){
 function finish(){
   const {pack,node}=run; const acc=run.tot?run.ok/run.tot:1; const xp=10+Math.round(5*acc)+(node.kind==='video'?5:0);
   if(node.kind!=='mist'&&!/^vid\d/.test(node.id)) LS.done[nkey(pack,node)]={best:Math.max(acc,(LS.done[nkey(pack,node)]||{}).best||0),ts:Date.now()};
-  if(/^vid\d/.test(node.id)||node.kind==='video'){ const v=VIDEOS[node.unit||pack.id][node.clip||0]; LS.vid[v.id]=LS.vid[v.id]||1; }
+  if(/^vid\d/.test(node.id)||node.kind==='video'){ const v=VIDEOS[node.unit||vKey(pack)][node.clip||0]; LS.vid[v.id]=LS.vid[v.id]||1; }
   saveL(); addXP(xp);
   if(node.kind==='words'&&pack.deck&&!HZ.hasDeck(pack.deck)){ try{ HZ.addDeck(pack.deck); }catch(e){} }
   const sec=Math.round((Date.now()-run.t0)/1000); const nw=node.kind==='words'?node.words:[];
