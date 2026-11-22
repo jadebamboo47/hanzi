@@ -7,7 +7,7 @@ s = (R/'src/app.html').read_text()
 lib = (R/'src/hanzi-writer.min.js').read_text().replace('</script', '<\\/script')
 data = (R/'src/data.js').read_text()
 audio = (R/'src/audio.js').read_text()
-s = s.replace('/*LIB*/', lib).replace('/*DATA*/', data).replace('/*AUDIO*/', audio).replace('/*BOOK*/', open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'src','book.js'),encoding='utf8').read()).replace('/*SENT*/', open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'src','sentences.js'),encoding='utf8').read())
+s = s.replace('/*LIB*/', lib).replace('/*DATA*/', data).replace('/*AUDIO*/', audio).replace('/*BOOK*/', open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'src','book.js'),encoding='utf8').read()).replace('//@@PATH@@', open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'src','path.js'),encoding='utf8').read()).replace('/*SENT*/', open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'src','sentences.js'),encoding='utf8').read())
 s = s.replace('<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">',
  '''<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <link rel="manifest" href="manifest.webmanifest">

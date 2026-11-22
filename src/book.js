@@ -46,11 +46,11 @@ const css=`
 #book{position:fixed;inset:0;z-index:15;background:var(--paper);display:none;flex-direction:column}
 #book.show{display:flex}
 #book .bk-top{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--paper)}
-#book .bk-top h2{font:600 21px Fraunces,serif;margin:0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#book .bk-top h2{font:600 21px var(--fh,Fraunces),serif;margin:0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #book .bk-body{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:18px 20px 60px}
 #book .bk-wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 .bk-pack{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 18px}
-.bk-pack h3{margin:0 0 2px;font:600 22px Fraunces,serif}
+.bk-pack h3{margin:0 0 2px;font:600 22px var(--fh,Fraunces),serif}
 .bk-pack .sub{color:var(--ink3);font-size:14px;margin-bottom:10px}
 .bk-part{margin-top:12px}
 .bk-part h4{margin:0 0 8px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
@@ -131,19 +131,19 @@ const css=`
 .bk-ans.good{border-color:var(--jade);background:var(--jade-soft)}.bk-ans.bad{border-color:var(--seal);background:var(--seal-soft)}
 .bk-seg{display:flex;gap:12px;flex-wrap:wrap}
 .bk-syl{display:flex;gap:2px;padding:6px;border-radius:12px;border:1px solid var(--line);background:var(--paper)}
-.bk-syl button{width:34px;height:44px;border-radius:8px;font:600 22px Fraunces,serif}
+.bk-syl button{width:34px;height:44px;border-radius:8px;font:600 22px var(--fh,Fraunces),serif}
 .bk-syl button.on{background:var(--seal-soft);color:var(--seal);box-shadow:inset 0 0 0 2px var(--seal)}
 .bk-syl.good{border-color:var(--jade);background:var(--jade-soft)}.bk-syl.bad{border-color:var(--seal);background:var(--seal-soft)}
 .bk-tone{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--paper2);flex-wrap:wrap}
 .bk-tone .zh{font-size:28px;width:40px;text-align:center}
-.bk-tone .chip2{font-family:Fraunces,serif;min-width:58px}
+.bk-tone .chip2{font-family:var(--fh,Fraunces),serif;min-width:58px}
 .bk-cats{display:flex;flex-direction:column;gap:8px}
 .bk-cat{display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-height:54px;padding:6px 10px;border:1.5px dashed var(--line);border-radius:12px;text-align:left;width:100%}
 .bk-cat b{min-width:70px;font-size:14px;color:var(--ink2)}
 .bk-cat.act{border-color:var(--ink)}
 .bk-pin{display:flex;gap:10px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
 .bk-pin .zh{font-size:24px;min-width:70px}
-.bk-pin input{flex:1;min-width:180px;height:46px;border-radius:12px;border:1.5px solid var(--line);background:var(--paper);padding:0 12px;font:500 19px Fraunces,serif;-webkit-user-select:text;user-select:text}
+.bk-pin input{flex:1;min-width:180px;height:46px;border-radius:12px;border:1.5px solid var(--line);background:var(--paper);padding:0 12px;font:500 19px var(--fh,Fraunces),serif;-webkit-user-select:text;user-select:text}
 .bk-pin input.good{border-color:var(--jade);background:var(--jade-soft)}.bk-pin input.bad{border-color:var(--seal);background:var(--seal-soft)}
 .bk-pin .sol{font-size:14px;color:var(--seal)}
 .bk-write{display:flex;gap:10px;flex-wrap:wrap}
@@ -163,7 +163,7 @@ const css=`
 .bk-toggles{display:flex;gap:8px}
 .bk-toggles .btn{height:38px;font-size:14px;padding:0 12px}
 .bk-today{background:var(--ink);color:var(--paper);border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
-.bk-today h3{margin:0;font:600 20px Fraunces,serif}
+.bk-today h3{margin:0;font:600 20px var(--fh,Fraunces),serif}
 .bk-today .row{display:flex;gap:10px;flex-wrap:wrap}
 .bk-today .btn{background:var(--paper);color:var(--ink);border-color:var(--paper)}
 .bk-today .btn.primary{background:var(--seal);color:#fff;border-color:var(--seal)}
@@ -174,7 +174,7 @@ const css=`
 #bkPages.show{display:flex}
 #bkPages .pg-top{display:flex;align-items:center;gap:10px;padding:10px 14px;color:#f5efe3}
 #bkPages .pg-top .btn{height:40px}
-#bkPages .pg-top h2{flex:1;margin:0;font:600 18px Fraunces,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#bkPages .pg-top h2{flex:1;margin:0;font:600 18px var(--fh,Fraunces),serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #bkPages .pg-view{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;display:flex;align-items:flex-start;justify-content:center;touch-action:pan-x pan-y}
 #bkPages .pg-view img{max-width:100%;max-height:100%;object-fit:contain;display:block;margin:auto;user-select:none;-webkit-user-drag:none}
 #bkPages.zoom .pg-view{display:block}
@@ -197,7 +197,7 @@ body.hz-tabs .app{padding-bottom:78px}
 #bkPages{bottom:0}
 /* course */
 .cu-head{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
-.cu-head h2{margin:0;font:600 30px Fraunces,serif;flex:1}
+.cu-head h2{margin:0;font:600 30px var(--fh,Fraunces),serif;flex:1}
 .cu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
 .cu-unit{position:relative;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-height:118px}
 .cu-unit .no{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
@@ -209,7 +209,7 @@ body.hz-tabs .app{padding-bottom:78px}
 .cu-unit.missing{opacity:.55;border-style:dashed}
 .cu-unit.done{border-color:var(--jade)}
 .cu-path{display:flex;flex-direction:column;gap:6px}
-.cu-les{margin:14px 0 4px;font:600 19px Fraunces,serif;display:flex;align-items:center;gap:10px}
+.cu-les{margin:14px 0 4px;font:600 19px var(--fh,Fraunces),serif;display:flex;align-items:center;gap:10px}
 .cu-les:after{content:'';flex:1;height:1px;background:var(--line)}
 .cu-step{display:flex;align-items:center;gap:12px;text-align:left;padding:10px 14px;border-radius:14px;border:1px solid var(--line);background:var(--card);width:100%}
 .cu-step .ic{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:19px;background:var(--paper2)}
@@ -235,14 +235,14 @@ body.hz-tabs .app{padding-bottom:78px}
 .testmode .bk-ex .ft button,.testmode .bk-ex .bk-why,.testmode .bk-ex .bk-self{display:none}
 .testmode.graded .bk-ex .bk-why{display:block}
 .bk-testbar{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.bk-testbar .sc{font:600 34px Fraunces,serif}
+.bk-testbar .sc{font:600 34px var(--fh,Fraunces),serif}
 .bk-testbar .sc small{font-size:16px;color:var(--ink3)}
 .bk-testbar p{margin:0;flex:1;min-width:200px;color:var(--ink2)}
 #bkWrite{position:fixed;inset:0;z-index:25;background:rgba(31,27,22,.45);display:none;align-items:center;justify-content:center;padding:16px}
 #bkWrite.show{display:flex}
 #bkWrite .panel{max-width:560px;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
 #bkWrite .wh{display:flex;gap:12px;align-items:baseline;justify-content:center}
-#bkWrite .wh .py{font:600 28px Fraunces,serif}#bkWrite .wh .de{color:var(--ink2)}
+#bkWrite .wh .py{font:600 28px var(--fh,Fraunces),serif}#bkWrite .wh .de{color:var(--ink2)}
 #bkWpad{position:relative;background:var(--card);border-radius:16px;box-shadow:0 0 0 1px var(--line);touch-action:none}
 #bkWpad svg.g{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
 #bkWhw{position:absolute;inset:0}
@@ -286,13 +286,15 @@ function toast(t){ try{ window.__hztoast(t); }catch(e){ alert(t); } }
 async function openBook(){ root.classList.add('show'); applyView(); await showHome(); }
 function closeBook(){ stopAudio(); root.classList.remove('show'); setTab('karten'); }
 const tabs=document.createElement('nav'); tabs.id='hzTabs';
-tabs.innerHTML=`<button data-t="kurs"><span>📖</span>Kurs</button><button data-t="karten"><span>✎</span>Schreibkarten</button><button data-t="tests"><span>📝</span>Tests</button>`;
+tabs.innerHTML=`<button data-t="lernen"><span>✦</span>Lernen</button><button data-t="kurs"><span>📖</span>Buch</button><button data-t="karten"><span>✎</span>Schreibkarten</button><button data-t="tests"><span>📝</span>Tests</button>`;
 document.body.appendChild(tabs); document.body.classList.add('hz-tabs');
 function setTab(t){ tabs.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.t===t)); if(P.tab!==t){ P.tab=t; saveP(); } }
 tabs.onclick=e=>{ const b=e.target.closest('button'); if(!b) return; const t=b.dataset.t; closePagesIfOpen();
+  if(t==='lernen'){ openLp(); return; } try{ closeLp(); }catch(e){}
   if(t==='karten'){ closeBook(); } else if(t==='kurs'){ root.classList.add('show'); applyView(); prevView='home'; showHome(); } else { root.classList.add('show'); applyView(); prevView='tests'; showTests(); } };
 function closePagesIfOpen(){ try{ if(proot.classList.contains('show')) closePages(); }catch(e){} }
-setTimeout(()=>{ if(P.tab!=='karten'){ openBook(); } else setTab('karten'); },50);
+if(!P.lp1){ P.lp1=1; P.tab='lernen'; saveP(); }
+setTimeout(()=>{ if(P.tab==='lernen') openLp(); else if(P.tab!=='karten'){ openBook(); } else setTab('karten'); },50);
 
 // ---------------------------------------------------------------- progress
 const GRADED=new Set(['match','choice','gap','order','seg','tone','sort','pinyin','write','open','rating']);
@@ -792,5 +794,6 @@ function pageButton(pack,pi,si){ const s=pack.parts[pi].sections[si], book=pack.
 // "Im Buch weiterlernen" on the flashcards' done screen
 { const tools=document.querySelector('#empty .tools'); if(tools){ const b=document.createElement('button'); b.className='btn'; b.textContent='📖 Im Buch weiterlernen'; b.onclick=()=>openBook(); tools.appendChild(b); } }
 
+//@@PATH@@
 window.HZBook={open:openBook};
 })();
