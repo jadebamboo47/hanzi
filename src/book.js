@@ -375,8 +375,8 @@ R.choice=ex=>{
       draw(); P.open[key(ex)]={c:sel}; saveP(); const t=it.opts[o]; if(/^[一-鿿]/.test(t)) sayZh(t.split(' ')[0]); }); });
   const btn=el.querySelector('[data-a]');
   btn.onclick=()=>{ if(self){ setDone(ex,el,true,'Erledigt.'); return; }
-    let ok=0; el.querySelectorAll('.bk-q').forEach(q=>{ const qi=+q.dataset.q, it=ex.items[qi]; const a=(it.ans||[]).slice().sort().join(), s=sel[qi].slice().sort().join(); const g=a===s; if(g) ok++;
-      q.querySelectorAll('[data-o]').forEach(b=>{ const o=+b.dataset.o; b.classList.remove('good','bad'); if(sel[qi].includes(o)) b.classList.add(it.ans.includes(o)?'good':'bad'); else if(!g && it.ans.includes(o)) b.classList.add('good'); });
+    let ok=0; el.querySelectorAll('.bk-q').forEach(q=>{ const qi=+q.dataset.q, it=ex.items[qi]; const s=sel[qi].slice().sort().join(); const g=[it.ans||[],...(it.alts||[])].some(x=>x.slice().sort().join()===s); if(g) ok++;
+      q.querySelectorAll('[data-o]').forEach(b=>{ const o=+b.dataset.o; b.classList.remove('good','bad'); if(sel[qi].includes(o)) b.classList.add((g||it.ans.includes(o))?'good':'bad'); else if(!g && it.ans.includes(o)) b.classList.add('good'); });
       q.querySelectorAll('.bk-why').forEach(w=>w.style.display='block'); });
     setDone(ex,el,ok===ex.items.length, ok===ex.items.length?null:`${ok} von ${ex.items.length} richtig. Grün markiert ist die richtige Lösung.`); };
   draw(); return el;
