@@ -181,6 +181,13 @@ const css=`
 #bkPages .pg-view img{max-width:100%;max-height:100%;object-fit:contain;display:block;margin:auto;user-select:none;-webkit-user-drag:none}
 #bkPages.zoom .pg-view{display:block}
 #bkPages.zoom .pg-view img{max-width:none;max-height:none;width:200%}
+#bkPages .pg-view{position:relative}
+#pgHot{position:absolute;pointer-events:none}
+.bk-hotw{position:relative}
+.bk-hot{position:absolute;border:0;padding:0;margin:0;background:rgba(190,60,40,.08);border-radius:6px;outline:1.5px dashed rgba(190,60,40,.5);outline-offset:-1px;cursor:pointer;pointer-events:auto;-webkit-tap-highlight-color:transparent}
+.bk-hot.on{background:rgba(190,60,40,.26);outline-style:solid}
+.bk-hotn{color:#d8cfbf;font-size:12.5px;text-align:center}
+.bk-pg.fold .bk-hotn,.bk-pg.fold .bk-hot{display:none}
 #bkPages .pg-bar{display:flex;gap:8px;align-items:center;padding:10px 14px;flex-wrap:wrap;background:rgba(0,0,0,.35)}
 #bkPages .pg-bar .btn{height:42px}
 #bkPages .pg-bar .nav{min-width:54px;justify-content:center;font-size:20px}
@@ -264,7 +271,7 @@ document.body.appendChild(wroot);
 
 const proot=document.createElement('div'); proot.id='bkPages';
 proot.innerHTML=`<div class="pg-top"><button class="btn" id="pgClose">← Zurück</button><h2 id="pgTitle"></h2><button class="btn" id="pgZoom">🔍</button></div>
-<div class="pg-view" id="pgView"><img id="pgImg" alt=""></div>
+<div class="pg-view" id="pgView"><img id="pgImg" alt=""><div id="pgHot"></div></div>
 <div class="pg-bar"><button class="btn nav" id="pgPrev">‹</button><span class="pg-lbl" id="pgLbl"></span><button class="btn nav" id="pgNext">›</button><span class="sp"></span><span id="pgChips" style="display:flex;gap:8px;flex-wrap:wrap"></span></div>`;
 document.body.appendChild(proot);
 
@@ -404,7 +411,8 @@ function splitOff(){ const sp=$('bkSplit'); if(sp) sp.classList.add('nopg'); }
 function pagePanel(pack,book,pageNo){
   const list=(pack.pages||[]).filter(x=>x.b===book).sort((a,b)=>a.p[0]-b.p[0]);
   let i=list.findIndex(x=>x.p.includes(pageNo)); if(i<0) return false;
-  const pg=$('bkPg'); const draw=()=>{ const it=list[i]; pg.innerHTML=`<div class="r"><button class="btn" data-d="-1">‹</button><span>${book==='LB'?'Lehrbuch':'Arbeitsbuch'} · S. ${it.p.join('–')}</span><button class="btn" data-d="1">›</button><button class="btn" data-f="1" title="Seite ein-/ausklappen">▾</button></div><img src="${mediaUrl(pack,it.img)||''}" alt="">`;
+  const pg=$('bkPg'); const draw=()=>{ const it=list[i]; pg.innerHTML=`<div class="r"><button class="btn" data-d="-1">‹</button><span>${book==='LB'?'Lehrbuch':'Arbeitsbuch'} · S. ${it.p.join('–')}</span><button class="btn" data-d="1">›</button><button class="btn" data-f="1" title="Seite ein-/ausklappen">▾</button></div><div class="bk-hotw"><img src="${mediaUrl(pack,it.img)||''}" alt="">${hotHTML(it)}</div>${(it.hot||[]).length?'<div class="bk-hotn">Markierte Zeilen antippen: einzeln anhören</div>':''}`;
+    hotStop(); hotBind(pg,pack,it);
     pg.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{ const n=i+(+b.dataset.d); if(n>=0&&n<list.length){ i=n; draw(); } });
     pg.querySelector('[data-f]').onclick=()=>pg.classList.toggle('fold');
     pg.querySelector('img').onclick=()=>openPages(pack,book,0,list[i].p[0]); };
@@ -474,7 +482,22 @@ function showTests(){
 // ---------------------------------------------------------------- audio
 const ap=new Audio(); ap.preload='auto';
 let apOwner=null, apStop=null, raf=0;
-function stopAudio(){ try{ap.pause();}catch(e){} apStop=null; if(apOwner) apOwner.classList.remove('playing'); apOwner=null; document.querySelectorAll('.bk-line.on').forEach(x=>x.classList.remove('on')); }
+let hotEl=null, hotRaf=0;
+function hotStop(){ cancelAnimationFrame(hotRaf); if(hotEl){ hotEl.classList.remove('on'); hotEl=null; } }
+function hotHTML(pg){ return (pg.hot||[]).map((h,i)=>`<button class="bk-hot" data-h="${i}" aria-label="Zeile anhören" style="left:${(100*h.r[0]).toFixed(2)}%;top:${(100*h.r[1]).toFixed(2)}%;width:${(100*h.r[2]).toFixed(2)}%;height:${(100*h.r[3]).toFixed(2)}%"></button>`).join(''); }
+function hotBind(box,pack,pg){ box.querySelectorAll('.bk-hot').forEach(b=>b.onclick=e=>{ e.stopPropagation(); playHot(pack,pg.hot[+b.dataset.h],b); }); }
+function playHot(pack,h,el){
+  const u=mediaUrl(pack,'audio/'+h.a+'.mp3'); if(!u){ toast('Diese Aufnahme fehlt im Paket.'); return; }
+  if(hotEl===el){ try{ap.pause();}catch(e){} hotStop(); return; }
+  stopAudio(); ap.onended=null; document.querySelectorAll('#pgChips [data-tr].on').forEach(x=>{ x.classList.remove('on'); x.textContent='▶︎ Track '+x.dataset.tr.replace(/^(LB|AB)/,''); });
+  const t0=Math.max(0,h.t[0]-0.12), t1=h.t[1]+0.15; let started=false;
+  ap.src=u; const go=()=>{ ap.currentTime=t0; ap.play().then(()=>{ started=true; }).catch(()=>{ if(hotEl===el) hotStop(); }); };
+  if(ap.readyState>=1) go(); else ap.addEventListener('loadedmetadata',go,{once:true});
+  hotEl=el; el.classList.add('on');
+  const loop=()=>{ if(hotEl!==el) return; if(ap.currentTime>=t1 || ap.ended || (started&&ap.paused)){ try{ap.pause();}catch(e){} hotStop(); return; } hotRaf=requestAnimationFrame(loop); };
+  hotRaf=requestAnimationFrame(loop);
+}
+function stopAudio(){ hotStop(); try{ap.pause();}catch(e){} apStop=null; if(apOwner) apOwner.classList.remove('playing'); apOwner=null; document.querySelectorAll('.bk-line.on').forEach(x=>x.classList.remove('on')); }
 function fmt(t){ t=Math.max(0,t||0); return Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0'); }
 function tick(){ cancelAnimationFrame(raf); const loop=()=>{ if(apOwner){ const d=ap.duration||0; const bar=apOwner.querySelector('.tr i'); if(bar) bar.style.width=(d?100*ap.currentTime/d:0)+'%';
       const tm=apOwner.querySelector('.tm'); if(tm) tm.textContent=fmt(ap.currentTime)+' / '+fmt(d);
@@ -771,7 +794,7 @@ function showPage(){
   const {pack,book,list,i}=pv, pg=list[i];
   const lbl=pg.p.length>1?`S. ${pg.p[0]}–${pg.p[pg.p.length-1]}`:`S. ${pg.p[0]}`;
   $('pgTitle').textContent=`${pack.unit} · ${book==='LB'?'Lehrbuch':'Arbeitsbuch'}`; $('pgLbl').textContent=lbl;
-  $('pgImg').src=mediaUrl(pack,pg.img)||''; $('pgView').scrollTop=0; $('pgView').scrollLeft=0;
+  $('pgImg').src=mediaUrl(pack,pg.img)||''; $('pgView').scrollTop=0; $('pgView').scrollLeft=0; hotStop(); $('pgHot').innerHTML=hotHTML(pg); hotBind($('pgHot'),pack,pg); layHot();
   $('pgPrev').disabled=i===0; $('pgNext').disabled=i===list.length-1;
   $('pgPrev').style.opacity=i===0?.3:1; $('pgNext').style.opacity=i===list.length-1?.3:1;
   const secs=secsForPages(pack,book,pg.p);
@@ -785,8 +808,10 @@ function showPage(){
     ap.onended=()=>{ b.classList.remove('on'); b.textContent='▶︎ Track '+b.dataset.tr.replace(/^(LB|AB)/,''); }; });
   ch.querySelectorAll('[data-si]').forEach(b=>b.onclick=()=>{ stopAudio(); closePages(); root.classList.add('show'); applyView(); openSection(pack,+b.dataset.pi,+b.dataset.si); });
 }
-function closePages(){ try{ap.pause();}catch(e){} ap.onended=null; proot.classList.remove('show'); }
-function pgGo(d){ if(!pv) return; const n=pv.i+d; if(n<0||n>=pv.list.length) return; try{ap.pause();}catch(e){} pv.i=n; proot.classList.remove('zoom'); showPage(); }
+function layHot(){ const im=$('pgImg'), h=$('pgHot'); if(!im||!h) return; h.style.left=im.offsetLeft+'px'; h.style.top=im.offsetTop+'px'; h.style.width=im.offsetWidth+'px'; h.style.height=im.offsetHeight+'px'; }
+$('pgImg').addEventListener('load',layHot); window.addEventListener('resize',layHot); try{ new ResizeObserver(layHot).observe($('pgImg')); }catch(e){}
+function closePages(){ hotStop(); try{ap.pause();}catch(e){} ap.onended=null; proot.classList.remove('show'); }
+function pgGo(d){ if(!pv) return; const n=pv.i+d; if(n<0||n>=pv.list.length) return; hotStop(); try{ap.pause();}catch(e){} pv.i=n; proot.classList.remove('zoom'); showPage(); }
 $('pgPrev').onclick=()=>pgGo(-1); $('pgNext').onclick=()=>pgGo(1);
 $('pgClose').onclick=()=>{ closePages(); if(root.classList.contains('show')) showHome(); };
 $('pgZoom').onclick=()=>proot.classList.toggle('zoom');
@@ -794,6 +819,7 @@ $('pgZoom').onclick=()=>proot.classList.toggle('zoom');
   $('pgView').addEventListener('touchstart',e=>{ if(e.touches.length!==1) return; sx=e.touches[0].clientX; sy=e.touches[0].clientY; t0=Date.now(); },{passive:true});
   $('pgView').addEventListener('touchend',e=>{ const t=e.changedTouches[0]; const dx=t.clientX-sx, dy=t.clientY-sy;
     if(!proot.classList.contains('zoom') && Math.abs(dx)>70 && Math.abs(dx)>2*Math.abs(dy) && Date.now()-t0<700){ pgGo(dx<0?1:-1); return; }
+    if(e.target&&e.target.closest&&e.target.closest('.bk-hot')){ lastTap=0; return; }
     if(Math.abs(dx)<10&&Math.abs(dy)<10){ const now=Date.now(); if(now-lastTap<320){ proot.classList.toggle('zoom'); lastTap=0; } else lastTap=now; } },{passive:true});
   $('pgImg').addEventListener('dblclick',()=>proot.classList.toggle('zoom'));
   document.addEventListener('keydown',e=>{ if(!proot.classList.contains('show')) return; if(e.key==='ArrowRight') pgGo(1); if(e.key==='ArrowLeft') pgGo(-1); if(e.key==='Escape') $('pgClose').click(); });
