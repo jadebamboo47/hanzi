@@ -477,7 +477,10 @@ function statsHTML(d){
 function wordsHTML(d){
   return (d.w||[]).map(([k,q])=>{const x=BYW[k]; if(!x) return ''; return `<button data-k="${k}" class="${q===3?'f':''}" title="${x.m}">${x.w.replace('…','…')}</button>`;}).join('');
 }
-window.HZ={speak:t=>speak(t),sayWord:k=>sayWord(k),hasWord:k=>!!BYW[k],syl2dia:x=>syl2dia(x),parsePy:x=>parsePy(x),confetti:()=>confetti()};
+window.HZ={hasDeck:id=>S.settings.decks.includes(id),addDeck:id=>{ if(!DECK[id]||S.settings.decks.includes(id)) return false; S.settings.decks=DECKS.map(d=>d.id).filter(x=>S.settings.decks.includes(x)||x===id); S.settings._t=Date.now(); persist(); try{ buildQueue(); if(!card||phase==='pinyin'&&!$('pyin').value) next(); prefetchAudio(); }catch(e){} return true; },
+  removeDeck:id=>{ S.settings.decks=S.settings.decks.filter(x=>x!==id); if(!S.settings.decks.length) S.settings.decks=['ce2-1']; S.settings._t=Date.now(); persist(); try{ buildQueue(); }catch(e){} },
+  dueCount:()=>{ try{ return counts().due; }catch(e){ return 0; } },
+  speak:t=>speak(t),sayWord:k=>sayWord(k),hasWord:k=>!!BYW[k],syl2dia:x=>syl2dia(x),parsePy:x=>parsePy(x),confetti:()=>confetti()};
 function sayWord(k){ const x=BYW[k]; if(!x) return; const plan=audioPlan(x); const t=x.w.replace(/[…\.]/g,''); if(plan) playFiles(plan,t); else speak(t); }
 const STAMPS={3:['完美','perfekt'],2:['很好','sehr gut'],1:['不错','nicht schlecht'],0:['加油','weiter so']};
 function showStamp(q){
@@ -1329,6 +1332,31 @@ const css=`
 .bk-nav{display:flex;justify-content:space-between;gap:10px;margin-top:6px}
 .bk-toggles{display:flex;gap:8px}
 .bk-toggles .btn{height:38px;font-size:14px;padding:0 12px}
+.bk-today{background:var(--ink);color:var(--paper);border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.bk-today h3{margin:0;font:600 20px Fraunces,serif}
+.bk-today .row{display:flex;gap:10px;flex-wrap:wrap}
+.bk-today .btn{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.bk-today .btn.primary{background:var(--seal);color:#fff;border-color:var(--seal)}
+.bk-today small{opacity:.75;font-size:13.5px}
+.bk-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.bk-tools .btn{height:40px;font-size:14px}
+#bkPages{position:fixed;inset:0;z-index:16;background:#2a2622;display:none;flex-direction:column}
+#bkPages.show{display:flex}
+#bkPages .pg-top{display:flex;align-items:center;gap:10px;padding:10px 14px;color:#f5efe3}
+#bkPages .pg-top .btn{height:40px}
+#bkPages .pg-top h2{flex:1;margin:0;font:600 18px Fraunces,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#bkPages .pg-view{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;display:flex;align-items:flex-start;justify-content:center;touch-action:pan-x pan-y}
+#bkPages .pg-view img{max-width:100%;max-height:100%;object-fit:contain;display:block;margin:auto;user-select:none;-webkit-user-drag:none}
+#bkPages.zoom .pg-view{display:block}
+#bkPages.zoom .pg-view img{max-width:none;max-height:none;width:200%}
+#bkPages .pg-bar{display:flex;gap:8px;align-items:center;padding:10px 14px;flex-wrap:wrap;background:rgba(0,0,0,.35)}
+#bkPages .pg-bar .btn{height:42px}
+#bkPages .pg-bar .nav{min-width:54px;justify-content:center;font-size:20px}
+#bkPages .pg-bar .sp{flex:1}
+#bkPages .chip3{height:42px;padding:0 14px;border-radius:999px;background:var(--paper);color:var(--ink);font-weight:500;font-size:14px;display:inline-flex;align-items:center;gap:6px}
+#bkPages .chip3.on{background:var(--seal);color:#fff}
+#bkPages .chip3.ex{background:var(--jade-soft);color:#1f4d3a}
+#bkPages .pg-lbl{color:#f5efe3;font-size:14px;min-width:90px;text-align:center}
 #bkWrite{position:fixed;inset:0;z-index:25;background:rgba(31,27,22,.45);display:none;align-items:center;justify-content:center;padding:16px}
 #bkWrite.show{display:flex}
 #bkWrite .panel{max-width:560px;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
@@ -1350,6 +1378,12 @@ wroot.innerHTML=`<div class="panel"><div class="wh"><span class="zh" id="bkWzh" 
 <div id="bkWpad"><svg class="g" id="bkWgrid"></svg><div id="bkWhw"></div></div><div id="bkWmsg"></div>
 <div class="tools"><button class="btn" id="bkWshow">▶︎ Vorführen</button><button class="btn" id="bkWagain">↺ Nochmal</button><button class="btn primary" id="bkWclose">Fertig</button></div></div>`;
 document.body.appendChild(wroot);
+
+const proot=document.createElement('div'); proot.id='bkPages';
+proot.innerHTML=`<div class="pg-top"><button class="btn" id="pgClose">← Zurück</button><h2 id="pgTitle"></h2><button class="btn" id="pgZoom">🔍</button></div>
+<div class="pg-view" id="pgView"><img id="pgImg" alt=""></div>
+<div class="pg-bar"><button class="btn nav" id="pgPrev">‹</button><span class="pg-lbl" id="pgLbl"></span><button class="btn nav" id="pgNext">›</button><span class="sp"></span><span id="pgChips" style="display:flex;gap:8px;flex-wrap:wrap"></span></div>`;
+document.body.appendChild(proot);
 
 // header button
 const hb=document.createElement('button'); hb.className='icon-btn'; hb.id='btnBook'; hb.setAttribute('aria-label','Buch'); hb.textContent='📖';
@@ -1377,9 +1411,20 @@ function secProgress(s){ const g=s.ex.filter(exGraded); const d=g.filter(e=>P.ex
 let curPack=null;
 const key=e=>(curPack?curPack.id:'')+':'+e.id;
 
+function pageRange(str){ const m=String(str||'').match(/(\d+)(?:\s*[–-]\s*(\d+))?/); if(!m) return [0,-1]; return [+m[1], +(m[2]||m[1])]; }
+function secsForPages(pack,book,pages){ const out=[]; pack.parts.forEach((pt,pi)=>{ if(pt.id!==book) return; pt.sections.forEach((s,si)=>{ const [a,b]=pageRange(s.page); if(pages.some(p=>p>=a&&p<=b)) out.push({pi,si,s}); }); }); return out; }
+function allSecs(){ const out=[]; packs.forEach(p=>p.parts.forEach((pt,pi)=>pt.sections.forEach((s,si)=>out.push({p,pi,si,s,pt})))); return out; }
+function secDone(p,s){ curPack=p; const pr=secProgress(s); return pr.n===0 || pr.d>=pr.n; }
+function nextSection(){
+  if(P.last){ const p=packs.find(x=>x.id===P.last.id); const s=p&&p.parts[P.last.pi]&&p.parts[P.last.pi].sections[P.last.si]; if(s&&!secDone(p,s)) return {p,pi:P.last.pi,si:P.last.si,s,pt:p.parts[P.last.pi]}; }
+  const all=allSecs(); const li=P.last?all.findIndex(x=>x.p.id===P.last.id&&x.pi===P.last.pi&&x.si===P.last.si):-1;
+  for(let k=1;k<=all.length;k++){ const x=all[(li+k+all.length)%all.length]; if(!secDone(x.p,x.s)) return x; }
+  return null;
+}
+
 // ---------------------------------------------------------------- home
 async function showHome(){
-  view='home'; $('bkTitle').textContent='Buch'; $('bkToggles').style.display='none';
+  view='home'; $('bkTitle').textContent='Buch'; $('bkToggles').style.display='none'; { const old=$('bkPgBtn'); if(old) old.remove(); }
   try{ packs=await listPacks(); }catch(e){ packs=[]; }
   packs.sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true}));
   const w=$('bkWrap'); w.innerHTML='';
@@ -1389,6 +1434,13 @@ async function showHome(){
       <p><button class="btn primary" id="bkImp">Lektionspaket importieren</button></p></div>`;
     $('bkImp').onclick=()=>$('bkFile').click(); $('bkBody').scrollTop=0; return;
   }
+  { const nx=nextSection(); const due=HZ.dueCount?HZ.dueCount():0;
+    const t=document.createElement('div'); t.className='bk-today';
+    t.innerHTML=`<h3>Heute dran</h3>${nx?`<small>Weiter im Buch: ${esc(nx.p.unit)} · ${esc(nx.pt.title)} · ${esc(nx.s.title)} (S. ${esc(nx.s.page)})</small>`:'<small>Alle Übungen deiner Pakete sind erledigt. 很好！</small>'}
+      <div class="row">${nx?'<button class="btn primary" id="tdGo">Weiterlernen →</button>':''}<button class="btn" id="tdCards">✎ Schreibkarten${due?` · ${due} fällig`:''}</button></div>`;
+    w.appendChild(t);
+    if(nx) $('tdGo').onclick=()=>openSection(nx.p,nx.pi,nx.si);
+    $('tdCards').onclick=()=>closeBook(); }
   for(const p of packs){
     curPack=p;
     const el=document.createElement('div'); el.className='bk-pack';
@@ -1399,9 +1451,12 @@ async function showHome(){
         h+=`<button class="bk-sec${done?' done':''}" data-p="${pi}" data-s="${si}"><span class="t">${esc(s.title)}</span><span class="pg">S. ${esc(s.page)}</span>${pr.n?`<span class="bk-bar"><i style="width:${Math.round(100*pr.d/pr.n)}%"></i></span><span class="pr">${pr.d}/${pr.n}</span>`:''}</button>`; });
       h+='</div>';
     });
-    h+=`<div style="display:flex;gap:8px;margin-top:6px"><button class="btn" data-del="1" style="font-size:13px;height:36px">Paket entfernen</button></div>`;
+    const hasLB=(p.pages||[]).some(x=>x.b==='LB'), hasAB=(p.pages||[]).some(x=>x.b==='AB');
+    h+=`<div class="bk-tools">${hasLB?'<button class="btn" data-pg="LB">📄 Lehrbuch-Seiten</button>':''}${hasAB?'<button class="btn" data-pg="AB">📄 Arbeitsbuch-Seiten</button>':''}${p.deck?`<button class="btn" data-deck="1">${HZ.hasDeck(p.deck)?'✓ Vokabeln in den Schreibkarten':'+ Vokabeln in die Schreibkarten'}</button>`:''}<span style="flex:1"></span><button class="btn" data-del="1" style="font-size:13px">Paket entfernen</button></div>`;
     el.innerHTML=h;
     el.addEventListener('click',async e=>{ const b=e.target.closest('.bk-sec'); if(b){ openSection(p,+b.dataset.p,+b.dataset.s); return; }
+      const pg=e.target.closest('[data-pg]'); if(pg){ openPages(p,pg.dataset.pg,0); return; }
+      if(e.target.closest('[data-deck]')){ if(HZ.hasDeck(p.deck)){ HZ.removeDeck(p.deck); toast('Die Vokabeln dieser Einheit sind nicht mehr in den Schreibkarten.'); } else { HZ.addDeck(p.deck); toast(`Die Vokabeln von ${p.unit} sind jetzt in deinen Schreibkarten.`); } showHome(); return; }
       if(e.target.closest('[data-del]')){ if(confirm(`„${p.unit}“ von diesem Gerät entfernen? Dein Übungsfortschritt bleibt erhalten.`)){ await delPack(p.id); showHome(); } } });
     w.appendChild(el);
   }
@@ -1446,6 +1501,7 @@ function openSection(pack,pi,si){
   curPack=pack; view='sec'; secRef={pack,pi,si}; P.last={id:pack.id,pi,si}; saveP();
   const part=pack.parts[pi], s=part.sections[si];
   $('bkTitle').textContent=`${part.title} · ${s.title}`; $('bkToggles').style.display='';
+  { const old=$('bkPgBtn'); if(old) old.remove(); const b=pageButton(pack,pi,si); if(b){ b.id='bkPgBtn'; $('bkToggles').prepend(b); } }
   const w=$('bkWrap'); w.innerHTML='';
   s.ex.forEach(ex=>w.appendChild(renderEx(ex)));
   const nav=document.createElement('div'); nav.className='bk-nav';
@@ -1472,9 +1528,11 @@ function card(ex,inner,opts={}){
   const pr=P.ex[key(ex)]; if(pr&&pr.done) el.classList.add('ok');
   return el;
 }
+function autoDeck(){ const p=curPack; if(!p||!p.deck||HZ.hasDeck(p.deck)) return; P.autoDecks=P.autoDecks||{}; if(P.autoDecks[p.deck]) return; P.autoDecks[p.deck]=1; saveP();
+  if(HZ.addDeck(p.deck)) toast(`Die Vokabeln von ${p.unit} sind jetzt in deinen Schreibkarten.`); }
 function setDone(ex,el,ok,msg){
   const m=el.querySelector('.ft .msg'); el.classList.add('checked');
-  if(ok){ P.ex[key(ex)]={done:1,t:Date.now()}; saveP(); el.classList.add('ok'); if(m){m.className='msg ok'; m.textContent=msg||'Alles richtig! 很好！';} }
+  if(ok){ P.ex[key(ex)]={done:1,t:Date.now()}; saveP(); el.classList.add('ok'); autoDeck(); if(m){m.className='msg ok'; m.textContent=msg||'Alles richtig! 很好！';} }
   else { el.classList.remove('ok'); if(m){m.className='msg bad'; m.textContent=msg||'Noch nicht ganz – die roten Felder nochmal ansehen.';} }
 }
 function zhpy(s){ const [zh,py]=String(s).split('|'); return `<span class="zh">${esc(zh)}</span>${py?`<span class="py opt">${esc(py)}</span>`:''}`; }
@@ -1710,6 +1768,54 @@ function closeW(){ try{ww&&ww.cancelQuiz();}catch(e){} wq=null; $('bkWrite').cla
 $('bkWclose').onclick=closeW;
 $('bkWagain').onclick=()=>{ if(wq){ wq.round=0; startW(); } };
 $('bkWshow').onclick=()=>{ if(!ww) return; try{ ww.cancelQuiz(); }catch(e){} ww.animateCharacter({onComplete:()=>{ if(wq) startW(); }}); };
+
+// ---------------------------------------------------------------- page viewer
+let pv=null;
+function openPages(pack,book,idx,pageNo){
+  const list=(pack.pages||[]).filter(x=>x.b===book).sort((a,b)=>a.p[0]-b.p[0]);
+  if(!list.length) return;
+  if(pageNo!=null){ const k=list.findIndex(x=>x.p.includes(pageNo)); if(k>=0) idx=k; }
+  pv={pack,book,list,i:Math.max(0,Math.min(idx||0,list.length-1))}; curPack=pack;
+  proot.classList.add('show'); proot.classList.remove('zoom'); showPage();
+}
+function showPage(){
+  const {pack,book,list,i}=pv, pg=list[i];
+  const lbl=pg.p.length>1?`S. ${pg.p[0]}–${pg.p[pg.p.length-1]}`:`S. ${pg.p[0]}`;
+  $('pgTitle').textContent=`${pack.unit} · ${book==='LB'?'Lehrbuch':'Arbeitsbuch'}`; $('pgLbl').textContent=lbl;
+  $('pgImg').src=mediaUrl(pack,pg.img)||''; $('pgView').scrollTop=0; $('pgView').scrollLeft=0;
+  $('pgPrev').disabled=i===0; $('pgNext').disabled=i===list.length-1;
+  $('pgPrev').style.opacity=i===0?.3:1; $('pgNext').style.opacity=i===list.length-1?.3:1;
+  const secs=secsForPages(pack,book,pg.p);
+  const tracks=[]; secs.forEach(x=>x.s.ex.forEach(e=>{ if(e.audio&&!tracks.includes(e.audio)&&mediaUrl(pack,'audio/'+e.audio+'.mp3')) tracks.push(e.audio); }));
+  tracks.sort((a,b)=>(+a.replace(/\D/g,''))-(+b.replace(/\D/g,'')));
+  const ch=$('pgChips'); ch.innerHTML=tracks.map(t=>`<button class="chip3" data-tr="${t}">▶︎ Track ${t.replace(/^(LB|AB)/,'')}</button>`).join('')+secs.map(x=>`<button class="chip3 ex" data-pi="${x.pi}" data-si="${x.si}">✎ ${esc(x.s.title.replace(/^.*·\s*/,''))}</button>`).join('');
+  ch.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{ const u=mediaUrl(pack,'audio/'+b.dataset.tr+'.mp3');
+    if(b.classList.contains('on')){ ap.pause(); b.classList.remove('on'); b.textContent='▶︎ Track '+b.dataset.tr.replace(/^(LB|AB)/,''); return; }
+    stopAudio(); ch.querySelectorAll('[data-tr]').forEach(x=>{ x.classList.remove('on'); x.textContent='▶︎ Track '+x.dataset.tr.replace(/^(LB|AB)/,''); });
+    ap.src=u; ap.play().catch(()=>{}); b.classList.add('on'); b.textContent='❚❚ Track '+b.dataset.tr.replace(/^(LB|AB)/,'');
+    ap.onended=()=>{ b.classList.remove('on'); b.textContent='▶︎ Track '+b.dataset.tr.replace(/^(LB|AB)/,''); }; });
+  ch.querySelectorAll('[data-si]').forEach(b=>b.onclick=()=>{ stopAudio(); closePages(); root.classList.add('show'); applyView(); openSection(pack,+b.dataset.pi,+b.dataset.si); });
+}
+function closePages(){ try{ap.pause();}catch(e){} ap.onended=null; proot.classList.remove('show'); }
+function pgGo(d){ if(!pv) return; const n=pv.i+d; if(n<0||n>=pv.list.length) return; try{ap.pause();}catch(e){} pv.i=n; proot.classList.remove('zoom'); showPage(); }
+$('pgPrev').onclick=()=>pgGo(-1); $('pgNext').onclick=()=>pgGo(1);
+$('pgClose').onclick=()=>{ closePages(); if(root.classList.contains('show')) showHome(); };
+$('pgZoom').onclick=()=>proot.classList.toggle('zoom');
+{ let lastTap=0, sx=0, sy=0, t0=0;
+  $('pgView').addEventListener('touchstart',e=>{ if(e.touches.length!==1) return; sx=e.touches[0].clientX; sy=e.touches[0].clientY; t0=Date.now(); },{passive:true});
+  $('pgView').addEventListener('touchend',e=>{ const t=e.changedTouches[0]; const dx=t.clientX-sx, dy=t.clientY-sy;
+    if(!proot.classList.contains('zoom') && Math.abs(dx)>70 && Math.abs(dx)>2*Math.abs(dy) && Date.now()-t0<700){ pgGo(dx<0?1:-1); return; }
+    if(Math.abs(dx)<10&&Math.abs(dy)<10){ const now=Date.now(); if(now-lastTap<320){ proot.classList.toggle('zoom'); lastTap=0; } else lastTap=now; } },{passive:true});
+  $('pgImg').addEventListener('dblclick',()=>proot.classList.toggle('zoom'));
+  document.addEventListener('keydown',e=>{ if(!proot.classList.contains('show')) return; if(e.key==='ArrowRight') pgGo(1); if(e.key==='ArrowLeft') pgGo(-1); if(e.key==='Escape') $('pgClose').click(); });
+}
+// per section: button to the book pages
+function pageButton(pack,pi,si){ const s=pack.parts[pi].sections[si], book=pack.parts[pi].id; const [a]=pageRange(s.page);
+  if(!(pack.pages||[]).some(x=>x.b===book&&x.p.includes(a))) return null;
+  const b=document.createElement('button'); b.className='btn'; b.textContent='📄 Buchseite'; b.onclick=()=>{ stopAudio(); openPages(pack,book,0,a); }; return b; }
+
+// "Im Buch weiterlernen" on the flashcards' done screen
+{ const tools=document.querySelector('#empty .tools'); if(tools){ const b=document.createElement('button'); b.className='btn'; b.textContent='📖 Im Buch weiterlernen'; b.onclick=()=>openBook(); tools.appendChild(b); } }
 
 window.HZBook={open:openBook};
 })();
