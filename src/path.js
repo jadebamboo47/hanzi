@@ -86,9 +86,9 @@ function buildNodes(pack){
   const D=unitData(pack), nodes=[];
   const nums=[...new Set(D.words.map(w=>w.les).concat(D.lines.map(l=>l.les)))].sort((a,b)=>a-b);
   const addW=(ws,les)=>{ for(let i=0;i<ws.length;i+=7){ let part=ws.slice(i,i+7); if(part.length<3&&nodes.length&&nodes[nodes.length-1].kind==='words'){ nodes[nodes.length-1].words.push(...part); continue; }
-      nodes.push({id:'w'+les+'-'+i,kind:'words',les,words:part,label:part.slice(0,3).map(w=>clean(w.zh)).join(' · '),sub:les===99?'Mehr Wörter':(pack.virtual?'Wörter · Teil ':'Wörter · Lektion ')+les}); } };
+      nodes.push({id:'w'+les+'-'+i,kind:'words',les,words:part,label:part.slice(0,3).map(w=>clean(w.zh)).join(' · '),sub:les===99?'Mehr Wörter':(pack.virtual||(pack.companion&&!pack.wordOrder)?'Wörter · Teil ':'Wörter · Lektion ')+les}); } };
   for(const n of nums){ addW(n===99?D.words.filter(w=>w.les===99&&[...clean(w.zh)].length<=3).slice(0,14):D.words.filter(w=>w.les===n),n);
-    if(D.lines.filter(l=>l.les===n).length>=3) nodes.push({id:'d'+n,kind:'dialog',les:n,label:pack.companion?'Sätze bauen':n===99?'Sätze':'Sätze & Dialog',sub:n===99?'Hören und bauen':(pack.virtual?'Teil ':'Lektion ')+n});
+    if(D.lines.filter(l=>l.les===n).length>=3) nodes.push({id:'d'+n,kind:'dialog',les:n,label:pack.companion?'Sätze bauen':n===99?'Sätze':'Sätze & Dialog',sub:n===99?'Hören und bauen':(pack.virtual||(pack.companion&&!pack.wordOrder)?'Teil ':'Lektion ')+n});
     if(pack.companion) pack.parts.forEach((pt,pi)=>{ if(pt.id!=='LB'&&pt.id!=='AB') return; pt.sections.forEach((s,si)=>{ if(lesOf(pt,s)!==n||/Schriftzeichen schreiben/.test(s.title)) return; nodes.push({id:'b'+pt.id+si,kind:'book',ref:{pi,si},label:s.title.replace(/^(Einheit \d+|Lektion \d)\s*·\s*/,'').replace(/^Lektion \d$/,'Übungen'),sub:(pt.id==='LB'?'Lehrbuch':'Arbeitsbuch')+' · S. '+s.page}); }); }); }
   for(let i=0;i<D.chars.length;i+=8){ const cs=D.chars.slice(i,i+8); nodes.push({id:i?'wr'+i:'wr',kind:'write',chars:cs,label:cs.slice(0,4).map(c=>c.zh).join(' '),sub:'Schreiben'}); }
   if(VIDEOS[pack.id]) nodes.push({id:'vid',kind:'video',clip:0,label:'Echtes Leben',sub:'Video'});
@@ -297,7 +297,7 @@ function lpHome(){
   run=null; document.body.classList.remove('lp-run-on'); stopLp();
   const b1=UNITS.map(u=>packs.find(p=>p.id===u[0])).filter(Boolean);
   const b2=VPACKS.map(v=>packs.find(p=>p.deck===v.deck&&p.band===2)||v);
-  const ord=b1.concat(b2,packs.filter(p=>!b1.includes(p)&&!b2.includes(p)));
+  const ord=b1.concat(b2,packs.filter(p=>p.deck&&!b1.includes(p)&&!b2.includes(p)));
   { const m=/^v-ce2-(\d+)$/.exec(LS.unit||''); const rp=m&&packs.find(p=>p.band===2&&p.deck==='ce2-'+m[1]); if(rp){ LS.unit=rp.id; saveL(); } }
   if(!LS.b2){ LS.b2=1; LS.unit='v-ce2-3'; saveL(); }
   if(!ord.length){ lp.innerHTML=`<div class="lp-home"><div class="lp-empty">${BAO()}<h2>Noch keine Lektionspakete</h2>Importiere deine Pakete im Bereich <b>Buch</b>, dann entsteht hier dein Lernpfad.<br><br><button class="lp-main-btn" id="lpImp">Zum Buch</button></div></div>`; $('lpImp').onclick=()=>{ lp.classList.remove('show'); root.classList.add('show'); applyView(); showHome(); }; return; }

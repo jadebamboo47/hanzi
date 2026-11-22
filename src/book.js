@@ -73,6 +73,7 @@ const css=`
 .bk-ex .ft .msg{font-size:14px;color:var(--ink2);flex:1;min-width:160px}
 .bk-ex .ft .msg.ok{color:var(--jade);font-weight:600}.bk-ex .ft .msg.bad{color:var(--seal)}
 .bk-ex img.pic{max-width:100%;max-height:420px;border-radius:12px;display:block;margin:0 auto 12px}
+.bk-tracks{display:flex;flex-direction:column;gap:8px}
 .bk-ex img.pic.bkscan{max-height:none;width:100%;border:1px solid var(--line)}
 .bk-note{background:var(--paper2);border:0}
 .bk-note p{margin:8px 0;line-height:1.55;font-size:15.5px}
@@ -363,9 +364,11 @@ async function showHome(){
   }
   w.appendChild(g);
   const rest=packs.filter(pk=>!UNITS.some(u=>u[0]===pk.id));
-  if(rest.length){ const hd2=document.createElement('div'); hd2.className='cu-head'; hd2.innerHTML='<h2>Band 2</h2>'; w.appendChild(hd2);
+  const ord2=p=>{ const m=/-e(\d+)$/.exec(p.id); return m?+m[1]:100+['wdh','pruefung','anhang'].findIndex(x=>p.id.endsWith(x)); };
+  for(const [bd,ti] of [[1,'Band 1 · Extras'],[2,'Band 2']]){ const grp=rest.filter(pk=>(pk.band===2?2:1)===bd).sort((x,y)=>ord2(x)-ord2(y)); if(!grp.length) continue;
+    const hd2=document.createElement('div'); hd2.className='cu-head'; hd2.innerHTML=`<h2>${ti}</h2>`; w.appendChild(hd2);
     const g2=document.createElement('div'); g2.className='cu-grid';
-    for(const pk of rest){ const pr=unitProgress(pk); const b2=document.createElement('button'); b2.className='cu-unit'; if(nx&&nx.p.id===pk.id) b2.classList.add('cur'); if(pr.n&&pr.d>=pr.n) b2.classList.add('done');
+    for(const pk of grp){ const pr=unitProgress(pk); const b2=document.createElement('button'); b2.className='cu-unit'; if(nx&&nx.p.id===pk.id) b2.classList.add('cur'); if(pr.n&&pr.d>=pr.n) b2.classList.add('done');
       b2.innerHTML=`<span class="no">${esc(pk.unit)}</span><span class="zh">${esc(pk.zh||pk.title||'')}</span><span class="de">${esc(pk.de||pk.book||'')}</span><span class="bar"><i style="width:${pr.n?Math.round(100*pr.d/pr.n):0}%"></i></span><span class="st">${pr.d} von ${pr.n} Schritten</span>`;
       b2.onclick=()=>openUnit(pk); g2.appendChild(b2); }
     w.appendChild(g2); }
@@ -529,6 +532,7 @@ function renderEx(ex){
 const R={};
 
 R.note=ex=>card(ex,blocks(ex.blocks),{foot:false});
+R.tracks=ex=>card(ex,`<div class="bk-tracks">${(ex.tracks||[]).map(t=>playerHTML(t)).join('')}</div>`,{foot:false});
 function blocks(bs){ return (bs||[]).map(b=>b.p?`<p>${esc(b.p)}</p>`:b.rows?`<div class="bk-rows">${b.rows.map(r=>`<div class="bk-row"><span class="zh">${esc(r.zh)}</span>${r.py?`<span class="py">${esc(r.py)}</span>`:''}${r.de?`<span class="de">${esc(r.de)}</span>`:''}</div>`).join('')}</div>`:'').join(''); }
 R.goals=ex=>card({...ex,title:'Ziele'},`<ol class="bk-goals">${ex.items.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`,{foot:false});
 
