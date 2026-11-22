@@ -51,7 +51,7 @@ function stopLp(){ try{ lpA.pause(); }catch(e){} lpStopAt=0; }
 // ---------------------------------------------------------------- Band 2: Einheiten aus den Vokabeln der App (bis die Buchscans da sind)
 const VPACKS=Array.from({length:12},(_,i)=>({id:'v-ce2-'+(i+1),virtual:true,deck:'ce2-'+(i+1),unit:'Band 2 · Einheit '+(i+1),parts:[]}));
 const anyPack=id=>packs.find(p=>p.id===id)||VPACKS.find(p=>p.id===id);
-function vData(pack){ let ws=(HZ.deckWords?HZ.deckWords(pack.deck):[]).filter(w=>w.zh&&w.de); const words=[], lines=[], chars=[], seen=new Set();
+function vData(pack){ let ws=(pack.words?pack.words.map(w=>({zh:w[0],py:w[1]||'',de:w[2]})):(HZ.deckWords?HZ.deckWords(pack.deck):[])).filter(w=>w.zh&&w.de); const words=[], lines=[], chars=[], seen=new Set();
   const ord=new Map((pack.wordOrder||[]).map((x,i)=>[x[0],[x[1],i]]));
   if(ord.size){ ws=ws.map(w=>({...w,_o:ord.get(w.zh)||[3,999]}));
     // einzelne Restwörter nicht als eigenen Mini-Knoten zeigen: an die vorige Lektion hängen
