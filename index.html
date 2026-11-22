@@ -1587,9 +1587,10 @@ R.match=ex=>{
 
 R.choice=ex=>{
   const self=ex.items.every(it=>it.ans==null);
+  ex.items.forEach(it=>{ if(it.ans==null && !self) it.selfq=1; });
   const saved=(P.open[key(ex)]&&P.open[key(ex)].c)||ex.items.map(()=>[]);
   const h=ex.items.map((it,qi)=>`<div class="bk-q" data-q="${qi}">${it.q?`<div class="q">${/[一-鿿]/.test(it.q)?`<span class="zh">${esc(it.q)}</span>`:esc(it.q)}${it.qpy?`<div class="qpy py opt">${esc(it.qpy)}</div>`:''}</div>`:''}
-     <div class="bk-opts">${it.opts.map((o,oi)=>`<button class="chip2${/[一-鿿]/.test(o)?' zh':''}" data-o="${oi}">${esc(o)}</button>`).join('')}</div>${it.why?`<div class="bk-why">💡 ${esc(it.why)}</div>`:''}</div>`).join('')
+     <div class="bk-opts">${it.opts.map((o,oi)=>`<button class="chip2${/[一-鿿]/.test(o)?' zh':''}" data-o="${oi}">${esc(o)}</button>`).join('')}</div>${it.why?`<div class="bk-why">💡 ${esc(it.why)}</div>`:''}${it.ans==null&&!ex.items.every(x=>x.ans==null)?'<div class="bk-self">ℹ︎ Diese Teilaufgabe prüfst du selbst mit dem Audio.</div>':''}</div>`).join('')
     + (ex.items.some(it=>it.multi)?'<div class="bk-self">Mehrere Antworten möglich.</div>':'');
   const el=card(ex,h,{foot:self?'<button class="btn primary" data-a="self">Erledigt</button>':'<button class="btn primary" data-a="check">Prüfen</button>'});
   const sel=saved.map(a=>a.slice());
@@ -1600,7 +1601,7 @@ R.choice=ex=>{
       draw(); P.open[key(ex)]={c:sel}; saveP(); const t=it.opts[o]; if(/^[一-鿿]/.test(t)) sayZh(t.split(' ')[0]); }); });
   const btn=el.querySelector('[data-a]');
   btn.onclick=()=>{ if(self){ setDone(ex,el,true,'Erledigt.'); return; }
-    let ok=0; el.querySelectorAll('.bk-q').forEach(q=>{ const qi=+q.dataset.q, it=ex.items[qi]; const s=sel[qi].slice().sort().join(); const g=[it.ans||[],...(it.alts||[])].some(x=>x.slice().sort().join()===s); if(g) ok++;
+    let ok=0; el.querySelectorAll('.bk-q').forEach(q=>{ const qi=+q.dataset.q, it=ex.items[qi]; if(it.ans==null){ ok++; return; } const s=sel[qi].slice().sort().join(); const g=[it.ans||[],...(it.alts||[])].some(x=>x.slice().sort().join()===s); if(g) ok++;
       q.querySelectorAll('[data-o]').forEach(b=>{ const o=+b.dataset.o; b.classList.remove('good','bad'); if(sel[qi].includes(o)) b.classList.add((g||it.ans.includes(o))?'good':'bad'); else if(!g && it.ans.includes(o)) b.classList.add('good'); });
       q.querySelectorAll('.bk-why').forEach(w=>w.style.display='block'); });
     setDone(ex,el,ok===ex.items.length, ok===ex.items.length?null:`${ok} von ${ex.items.length} richtig. Grün markiert ist die richtige Lösung.`); };
@@ -1641,7 +1642,7 @@ R.order=ex=>{
   const sepd=ex.sep==='\n';
   const state=ex.items.map(()=>[]);
   const shuf=ex.items.map(it=>{ const a=it.chunks.map((c,i)=>i); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; });
-  const h=ex.items.map((it,ii)=>`<div class="bk-order" data-it="${ii}"><div class="bk-ans zh${sepd?' sep':''}"></div><div class="bk-opts"></div></div>`).join('');
+  const h=ex.items.map((it,ii)=>`<div class="bk-order" data-it="${ii}">${it.pre?`<div class="zh" style="font-size:19px;color:var(--ink2);margin-bottom:6px">${esc(it.pre)}</div>`:''}<div class="bk-ans zh${sepd?' sep':''}"></div><div class="bk-opts"></div></div>`).join('');
   const el=card(ex,h,{foot:'<button class="btn" data-a="reset">Zurücksetzen</button><button class="btn primary" data-a="check">Prüfen</button>'});
   const draw=()=>el.querySelectorAll('.bk-order').forEach(box=>{ const ii=+box.dataset.it, it=ex.items[ii];
     box.querySelector('.bk-ans').innerHTML=state[ii].map((c,pos)=>`<button class="chip2 zh" data-pos="${pos}" style="${sepd?'text-align:left':''}">${esc(it.chunks[c])}</button>`).join('')+(state[ii].length===it.chunks.length&&it.end?`<span>${esc(it.end)}</span>`:'');
