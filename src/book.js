@@ -174,7 +174,7 @@ const css=`
 .bk-tools .btn{height:40px;font-size:14px}
 #bkPages{position:fixed;inset:0;z-index:23;background:#2a2622;display:none;flex-direction:column}
 #bkPages.show{display:flex}
-#bkPages .pg-top{display:flex;align-items:center;gap:10px;padding:10px 14px;color:#f5efe3}
+#bkPages .pg-top{display:flex;align-items:center;gap:10px;padding:calc(18px + env(safe-area-inset-top)) 14px 10px;color:var(--ink);background:var(--paper)}
 #bkPages .pg-top .btn{height:40px}
 #bkPages .pg-top h2{flex:1;margin:0;font:600 18px var(--fh,Fraunces),serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #bkPages .pg-view{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;display:flex;align-items:flex-start;justify-content:center;touch-action:pan-x pan-y}
