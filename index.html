@@ -1244,6 +1244,7 @@ const css=`
 .bk-ex .ft .msg{font-size:14px;color:var(--ink2);flex:1;min-width:160px}
 .bk-ex .ft .msg.ok{color:var(--jade);font-weight:600}.bk-ex .ft .msg.bad{color:var(--seal)}
 .bk-ex img.pic{max-width:100%;max-height:420px;border-radius:12px;display:block;margin:0 auto 12px}
+.bk-ex img.pic.bkscan{max-height:none;width:100%;border:1px solid var(--line)}
 .bk-note{background:var(--paper2);border:0}
 .bk-note p{margin:8px 0;line-height:1.55;font-size:15.5px}
 .bk-why{margin-top:10px;font-size:14px;color:var(--ink2);background:var(--paper2);border-radius:10px;padding:8px 12px;display:none}
@@ -1503,7 +1504,8 @@ function stepDone(pack,st){ curPack=pack; if(st.s.test){ return !!(P.tests&&P.te
 function unitProgress(pack){ const p=unitPath(pack); const d=p.filter(x=>stepDone(pack,x)).length; return {d,n:p.length}; }
 function nextStep(pack){ const p=unitPath(pack); return p.find(x=>!stepDone(pack,x))||null; }
 function nextSection(){
-  for(const [id] of UNITS){ const pk=packs.find(x=>x.id===id); if(!pk) continue; const st=nextStep(pk); if(st) return {p:pk,pi:st.pi,si:st.si,s:st.s,pt:st.pt}; }
+  const ids=[]; if(P.last) ids.push(P.last.id); UNITS.forEach(u=>ids.push(u[0])); packs.forEach(p=>ids.push(p.id));
+  for(const id of [...new Set(ids)]){ const pk=packs.find(x=>x.id===id); if(!pk) continue; const st=nextStep(pk); if(st) return {p:pk,pi:st.pi,si:st.si,s:st.s,pt:st.pt}; }
   return null;
 }
 async function loadPacks(){ try{ packs=await listPacks(); }catch(e){ packs=[]; } packs.sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true})); }
@@ -1530,8 +1532,14 @@ async function showHome(){
       b.onclick=()=>openUnit(pk); }
     g.appendChild(b);
   }
-  for(const pk of packs) if(!UNITS.some(u=>u[0]===pk.id)){ const b=document.createElement('button'); b.className='cu-unit'; b.innerHTML=`<span class="no">${esc(pk.book)}</span><span class="zh">${esc(pk.title||'')}</span><span class="de">${esc(pk.unit)}</span>`; b.onclick=()=>openUnit(pk); g.appendChild(b); }
   w.appendChild(g);
+  const rest=packs.filter(pk=>!UNITS.some(u=>u[0]===pk.id));
+  if(rest.length){ const hd2=document.createElement('div'); hd2.className='cu-head'; hd2.innerHTML='<h2>Band 2</h2>'; w.appendChild(hd2);
+    const g2=document.createElement('div'); g2.className='cu-grid';
+    for(const pk of rest){ const pr=unitProgress(pk); const b2=document.createElement('button'); b2.className='cu-unit'; if(nx&&nx.p.id===pk.id) b2.classList.add('cur'); if(pr.n&&pr.d>=pr.n) b2.classList.add('done');
+      b2.innerHTML=`<span class="no">${esc(pk.unit)}</span><span class="zh">${esc(pk.zh||pk.title||'')}</span><span class="de">${esc(pk.de||pk.book||'')}</span><span class="bar"><i style="width:${pr.n?Math.round(100*pr.d/pr.n):0}%"></i></span><span class="st">${pr.d} von ${pr.n} Schritten</span>`;
+      b2.onclick=()=>openUnit(pk); g2.appendChild(b2); }
+    w.appendChild(g2); }
   $('bkImp').onclick=()=>$('bkFile').click();
   $('bkBody').scrollTop=0;
 }
@@ -1666,7 +1674,7 @@ function card(ex,inner,opts={}){
   const el=document.createElement('div'); el.className='bk-ex'+(ex.type==='note'?' bk-note':''); el.id='ex-'+ex.id;
   const no=ex.n?`<span class="no">${esc(String(ex.n).replace(/b$/,''))}</span>`:'';
   el.innerHTML=`<div class="hd">${no}<div class="ti">${esc(ex.title||'')}${ex.sub?`<small>${esc(ex.sub)}</small>`:''}</div></div>
-    ${ex.audio?playerHTML(ex.audio):''}<div class="bd">${ex.img?`<img class="pic" src="${mediaUrl(curPack,'img/'+ex.img)||''}" alt="">`:''}${inner}</div>
+    ${ex.audio?playerHTML(ex.audio):''}<div class="bd">${ex.img?`<img class="pic${/^(test|pinyin)/.test(ex.img)?' bkscan':''}" src="${mediaUrl(curPack,'img/'+ex.img)||''}" alt="">`:''}${inner}</div>
     ${ex.selfcheck?`<div class="bk-self">ℹ︎ ${esc(ex.selfcheck)}</div>`:''}${ex.after?`<div class="bk-self">${esc(ex.after)}</div>`:''}
     ${ex.why?`<div class="bk-why">💡 ${esc(ex.why)}</div>`:''}
     ${opts.foot===false?'':`<div class="ft"><span class="msg"></span>${opts.foot||''}</div>`}`;
@@ -2018,11 +2026,13 @@ function stopLp(){ try{ lpA.pause(); }catch(e){} lpStopAt=0; }
 // ---------------------------------------------------------------- Band 2: Einheiten aus den Vokabeln der App (bis die Buchscans da sind)
 const VPACKS=Array.from({length:12},(_,i)=>({id:'v-ce2-'+(i+1),virtual:true,deck:'ce2-'+(i+1),unit:'Band 2 · Einheit '+(i+1),parts:[]}));
 const anyPack=id=>packs.find(p=>p.id===id)||VPACKS.find(p=>p.id===id);
-function vData(pack){ const ws=(HZ.deckWords?HZ.deckWords(pack.deck):[]).filter(w=>w.zh&&w.de); const words=[], lines=[], chars=[], seen=new Set();
-  ws.forEach((w,i)=>{ const les=Math.floor(i/14)+1; words.push({zh:w.zh,py:w.py,de:w.de,les});
+function vData(pack){ let ws=(HZ.deckWords?HZ.deckWords(pack.deck):[]).filter(w=>w.zh&&w.de); const words=[], lines=[], chars=[], seen=new Set();
+  const ord=new Map((pack.wordOrder||[]).map((x,i)=>[x[0],[x[1],i]]));
+  if(ord.size) ws=ws.map(w=>({...w,_o:ord.get(w.zh)||[3,999]})).sort((a,b)=>a._o[0]-b._o[0]||a._o[1]-b._o[1]);
+  ws.forEach((w,i)=>{ const les=ord.size?w._o[0]:Math.floor(i/14)+1; words.push({zh:w.zh,py:w.py,de:w.de,les});
     if(w.s&&w.s[0]&&w.s[2]&&!seen.has(w.s[0])){ seen.add(w.s[0]); lines.push({zh:w.s[0],py:w.s[1]||'',de:w.s[2],sp:'',les,audio:null,t0:0,t1:0}); }
     [...w.zh].forEach(c=>{ if(/[\u4e00-\u9fff]/.test(c)&&window.CHARS&&window.CHARS[c]&&!chars.some(x=>x.zh===c)&&chars.length<16) chars.push({zh:c,py:[...w.zh].length===1?w.py:'',de:[...w.zh].length===1?w.de:'aus '+w.zh+' ('+w.de+')'}); }); });
-  chars.forEach(c=>{ if(!c.py){ const w=ws.find(x=>x.zh===c.zh); if(w){ c.py=w.py; c.de=w.de; } else { const src=ws.find(x=>x.zh.includes(c.zh)); const sy=sylls(src.py)[[...src.zh].indexOf(c.zh)]; c.py=sy||''; } } });
+  chars.forEach(c=>{ if(!c.py){ const w=ws.find(x=>x.zh===c.zh); if(w){ c.py=w.py; c.de=w.de; } else { const src=ws.find(x=>x.zh.includes(c.zh)); const sy=src&&sylls(src.py)[[...src.zh].indexOf(c.zh)]; c.py=sy||''; } } });
   return {words,lines,orders:[],chars,notes:[]}; }
 
 // ---------------------------------------------------------------- data from a pack
@@ -2032,14 +2042,16 @@ function unitData(pack){
   pack.parts.forEach((pt,pi)=>pt.sections.forEach((s,si)=>{
     let les=lesOf(pt,s); les=typeof les==='number'?les:99;
     s.ex.forEach(ex=>{
+      if(pack.companion&&(ex.type==='vocab'||ex.type==='text')) return;
       if(ex.type==='vocab'&&(pt.id==='LB'||pt.id==='AB')) (ex.words||[]).forEach(w=>{ const zh=String(w[0]||'').replace(/[…\.]/g,'').trim(); if(!zh||seen.has(zh)||/[A-Za-z]/.test(zh)||!w[2]) return; seen.add(zh); words.push({zh,py:w[1]||'',de:String(w[2]).replace(/\s*\((Pron|Adj|Verb|Nomen|Adv|Part|Konj|Präp|Num|ZEW|Fragew|N|V|MW|Interj|Suff|Pr|Eig)\.?\)/g,''),les}); });
       if(ex.type==='text'&&ex.lines&&pt.id==='LB') ex.lines.forEach((ln,i)=>{ if(!ln.zh||!ln.de||lseen.has(ln.zh)) return; lseen.add(ln.zh); const nx=ex.lines.slice(i+1).find(x=>typeof x.t==='number'); const hasT=typeof ln.t==='number'&&ex.audio;
         lines.push({zh:ln.zh,py:ln.py||'',de:ln.de,sp:ln.s||'',les,audio:hasT?ex.audio:null,t0:hasT?ln.t:0,t1:hasT?(nx?nx.t:ln.t+4):0}); });
       if(ex.type==='order') (ex.items||[]).forEach(it=>{ if(it.chunks&&it.ans&&it.ans[0]) orders.push({chunks:it.chunks,ans:it.ans,pre:it.pre||'',end:it.end||'',les}); });
       if(ex.type==='write') (ex.chars||[]).forEach(c=>{ if(window.CHARS&&window.CHARS[c[0]]&&!chars.some(x=>x.zh===c[0])) chars.push({zh:c[0],py:c[1]||'',de:c[2]||''}); });
-      if(ex.type==='note'&&/Grammatik/i.test(ex.title||'')&&ex.blocks) notes.push({title:ex.title,blocks:ex.blocks,les});
+      if(ex.type==='note'&&(ex.g||/Grammatik/i.test(ex.title||''))&&ex.blocks) notes.push({title:ex.title,blocks:ex.blocks,les});
     });
   }));
+  if(pack.companion){ const V=vData(pack); words.push(...V.words); lines.push(...V.lines); if(!chars.length) chars.push(...V.chars); }
   return {words,lines,orders,chars,notes};
 }
 function findTest(pack){ let r=null; pack.parts.forEach((pt,pi)=>pt.sections.forEach((s,si)=>{ if(s.test&&!r) r={pi,si}; })); return r; }
@@ -2051,7 +2063,8 @@ function buildNodes(pack){
   const addW=(ws,les)=>{ for(let i=0;i<ws.length;i+=7){ let part=ws.slice(i,i+7); if(part.length<3&&nodes.length&&nodes[nodes.length-1].kind==='words'){ nodes[nodes.length-1].words.push(...part); continue; }
       nodes.push({id:'w'+les+'-'+i,kind:'words',les,words:part,label:part.slice(0,3).map(w=>clean(w.zh)).join(' · '),sub:les===99?'Mehr Wörter':(pack.virtual?'Wörter · Teil ':'Wörter · Lektion ')+les}); } };
   for(const n of nums){ addW(n===99?D.words.filter(w=>w.les===99&&[...clean(w.zh)].length<=3).slice(0,14):D.words.filter(w=>w.les===n),n);
-    if(D.lines.filter(l=>l.les===n).length>=3) nodes.push({id:'d'+n,kind:'dialog',les:n,label:n===99?'Sätze':'Sätze & Dialog',sub:n===99?'Hören und bauen':(pack.virtual?'Teil ':'Lektion ')+n}); }
+    if(D.lines.filter(l=>l.les===n).length>=3) nodes.push({id:'d'+n,kind:'dialog',les:n,label:pack.companion?'Sätze bauen':n===99?'Sätze':'Sätze & Dialog',sub:n===99?'Hören und bauen':(pack.virtual?'Teil ':'Lektion ')+n});
+    if(pack.companion) pack.parts.forEach((pt,pi)=>{ if(pt.id!=='LB'&&pt.id!=='AB') return; pt.sections.forEach((s,si)=>{ if(lesOf(pt,s)!==n||/Schriftzeichen schreiben/.test(s.title)) return; nodes.push({id:'b'+pt.id+si,kind:'book',ref:{pi,si},label:s.title.replace(/^(Einheit \d+|Lektion \d)\s*·\s*/,'').replace(/^Lektion \d$/,'Übungen'),sub:(pt.id==='LB'?'Lehrbuch':'Arbeitsbuch')+' · S. '+s.page}); }); }); }
   for(let i=0;i<D.chars.length;i+=8){ const cs=D.chars.slice(i,i+8); nodes.push({id:i?'wr'+i:'wr',kind:'write',chars:cs,label:cs.slice(0,4).map(c=>c.zh).join(' '),sub:'Schreiben'}); }
   if(VIDEOS[pack.id]) nodes.push({id:'vid',kind:'video',clip:0,label:'Echtes Leben',sub:'Video'});
   nodes.push({id:'rev',kind:'review',label:'Wiederholung',sub:'Truhe'});
@@ -2059,7 +2072,7 @@ function buildNodes(pack){
   const r={nodes,D}; NCACHE.set(pack.id,r); return r;
 }
 const nkey=(pack,n)=>pack.id+':'+n.id;
-function nodeDone(pack,n){ if(n.kind==='test') return !!(P.tests&&P.tests[pack.id+':'+pack.parts[n.ref.pi].sections[n.ref.si].id]); return !!LS.done[nkey(pack,n)]; }
+function nodeDone(pack,n){ if(n.kind==='book') return secDone(pack,pack.parts[n.ref.pi].sections[n.ref.si]); if(n.kind==='test') return !!(P.tests&&P.tests[pack.id+':'+pack.parts[n.ref.pi].sections[n.ref.si].id]); return !!LS.done[nkey(pack,n)]; }
 
 // ---------------------------------------------------------------- item generation
 function segDict(D){ const s=new Set(D.words.map(w=>w.zh)); packs.forEach(p=>{ if(p.id!==curLpPack?.id) buildNodes(p).D.words.forEach(w=>s.add(w.zh)); }); return s; }
@@ -2150,6 +2163,7 @@ body{background:var(--paper)!important}
 .k-dialog .nb{background:linear-gradient(160deg,#ff7a59,#ff5a36);box-shadow:0 7px 0 #d93e1d}
 .k-write .nb{background:linear-gradient(160deg,#2fd69a,#10b97a);box-shadow:0 7px 0 #0b8a5c}
 .k-video .nb{background:linear-gradient(160deg,#ff5c93,#ff2d75);box-shadow:0 7px 0 #d1135a}
+.k-book .nb{border-radius:24px;background:linear-gradient(160deg,#5aa2ff,#2f80ff);box-shadow:0 7px 0 #1b5fd0}
 .k-review .nb{border-radius:28px;background:linear-gradient(160deg,#ffc34d,#ffb020);box-shadow:0 7px 0 #d98e00}
 .k-test .nb{border-radius:28px;background:linear-gradient(160deg,#3a3c5c,#14142b);box-shadow:0 7px 0 #000}
 .lp-card{background:#fff;border-radius:28px;padding:20px;box-shadow:0 10px 30px rgba(20,20,43,.06)}
@@ -2247,7 +2261,7 @@ body.lp-run-on #hzTabs{display:none}
 { const s2=document.createElement('style'); s2.textContent=lcss; document.head.appendChild(s2); }
 const lp=document.createElement('div'); lp.id='lp'; document.body.appendChild(lp);
 const BAO=(m='smile')=>`<svg viewBox="0 0 90 80" width="96" height="86" aria-hidden="true"><path d="M8 52c0-24 17-42 37-42s37 18 37 42c0 12-10 18-37 18S8 64 8 52z" fill="#FFF8EE" stroke="#14142B" stroke-width="3"/><path d="M45 12c-3 5-3 10 0 14M45 12c3 5 3 10 0 14M35 15c1 5 4 9 10 11M55 15c-1 5-4 9-10 11" fill="none" stroke="#14142B" stroke-width="2.4" stroke-linecap="round"/>${m==='happy'?'<path d="M28 47q5-6 10 0M52 47q5-6 10 0" fill="none" stroke="#14142B" stroke-width="3.2" stroke-linecap="round"/>':'<circle cx="33" cy="46" r="4" fill="#14142B"/><circle cx="57" cy="46" r="4" fill="#14142B"/>'}<ellipse cx="25" cy="55" rx="5" ry="3" fill="#FF9FB0"/><ellipse cx="65" cy="55" rx="5" ry="3" fill="#FF9FB0"/>${m==='happy'?'<path d="M37 53q8 11 16 0z" fill="#14142B"/>':'<path d="M39 54q6 6 12 0" fill="none" stroke="#14142B" stroke-width="3" stroke-linecap="round"/>'}</svg>`;
-const ICON={words:'字',dialog:'<svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-5 4z" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg>',write:'<svg viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg>',video:'<svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="#fff"/></svg>',review:'<svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="2" fill="none" stroke="#fff" stroke-width="2.4"/><path d="M3 12h18M12 11v3" stroke="#fff" stroke-width="2.4"/></svg>',test:'<svg viewBox="0 0 24 24"><path d="M12 3l2.4 5 5.6.6-4.2 3.8 1.2 5.6L12 15.2 7 18l1.2-5.6L4 8.6l5.6-.6z" fill="#fff"/></svg>'};
+const ICON={book:'<svg viewBox="0 0 24 24"><path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"/></svg>',words:'字',dialog:'<svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-5 4z" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg>',write:'<svg viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg>',video:'<svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="#fff"/></svg>',review:'<svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="2" fill="none" stroke="#fff" stroke-width="2.4"/><path d="M3 12h18M12 11v3" stroke="#fff" stroke-width="2.4"/></svg>',test:'<svg viewBox="0 0 24 24"><path d="M12 3l2.4 5 5.6.6-4.2 3.8 1.2 5.6L12 15.2 7 18l1.2-5.6L4 8.6l5.6-.6z" fill="#fff"/></svg>'};
 const CHECK='<svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 // ---------------------------------------------------------------- home
@@ -2256,14 +2270,16 @@ async function openLp(){ closePagesIfOpen(); stopAudio(); root.classList.remove(
 function closeLp(){ stopLp(); lp.classList.remove('show'); document.body.classList.remove('lp-run-on'); run=null; }
 function lpHome(){
   run=null; document.body.classList.remove('lp-run-on'); stopLp();
-  const real=UNITS.map(u=>packs.find(p=>p.id===u[0])).filter(Boolean).concat(packs.filter(p=>!UNITS.some(u=>u[0]===p.id)));
-  const ord=real.concat(VPACKS);
+  const b1=UNITS.map(u=>packs.find(p=>p.id===u[0])).filter(Boolean);
+  const b2=VPACKS.map(v=>packs.find(p=>p.deck===v.deck&&p.band===2)||v);
+  const ord=b1.concat(b2,packs.filter(p=>!b1.includes(p)&&!b2.includes(p)));
+  { const m=/^v-ce2-(\d+)$/.exec(LS.unit||''); const rp=m&&packs.find(p=>p.band===2&&p.deck==='ce2-'+m[1]); if(rp){ LS.unit=rp.id; saveL(); } }
   if(!LS.b2){ LS.b2=1; LS.unit='v-ce2-3'; saveL(); }
   if(!ord.length){ lp.innerHTML=`<div class="lp-home"><div class="lp-empty">${BAO()}<h2>Noch keine Lektionspakete</h2>Importiere deine Pakete im Bereich <b>Buch</b>, dann entsteht hier dein Lernpfad.<br><br><button class="lp-main-btn" id="lpImp">Zum Buch</button></div></div>`; $('lpImp').onclick=()=>{ lp.classList.remove('show'); root.classList.add('show'); applyView(); showHome(); }; return; }
   let pack=ord.find(p=>p.id===LS.unit)||ord.find(p=>buildNodes(p).nodes.some(n=>!nodeDone(p,n)))||ord[0]; curLpPack=pack;
   if(pack.virtual&&pack.deck&&!HZ.hasDeck(pack.deck)){ try{ HZ.addDeck(pack.deck); }catch(e){} }
   const off_=navigator.onLine===false;
-  const {nodes}=buildNodes(pack); const u=pack.virtual?[pack.id,'Einheit '+pack.deck.split('-')[1],nodes[0]&&nodes[0].words?nodes[0].words[0].zh:'',pack.unit]:(UNITS.find(x=>x[0]===pack.id)||[pack.id,pack.unit,pack.title||'','']);
+  const {nodes}=buildNodes(pack); const u=pack.virtual?[pack.id,'Einheit '+pack.deck.split('-')[1],nodes[0]&&nodes[0].words?nodes[0].words[0].zh:'',pack.unit]:(UNITS.find(x=>x[0]===pack.id)||[pack.id,pack.unit,pack.zh||pack.title||'',pack.de||'']);
   const dn=nodes.filter(n=>nodeDone(pack,n)).length; const nxt=nodes.findIndex(n=>!nodeDone(pack,n)&&!(off_&&n.kind==='video'));
   const off=[0,70,110,70,0,-70,-110,-70];
   const xp=xpToday(), pct=Math.min(100,Math.round(100*xp/XPGOAL)), sk=streakN();
@@ -2271,8 +2287,8 @@ function lpHome(){
   const mist=LS.mist.length, due=HZ.dueCount?HZ.dueCount():0;
   const vids=[]; Object.keys(VIDEOS).forEach(k=>VIDEOS[k].forEach((v,i)=>vids.push({k,i,v})));
   lp.innerHTML=`<div class="lp-home"><div class="lp-cols"><div class="lp-main">
-    <div class="lp-units">${ord.map(p=>`<button data-u="${esc(p.id)}" class="${p.id===pack.id?'on':''}">${p.virtual?'B2 · '+p.deck.split('-')[1]:'B1 · '+esc((UNITS.find(x=>x[0]===p.id)||[0,p.unit])[1]).replace('Einheit ','')}</button>`).join('')}</div>
-    <div class="lp-hero"><div class="big lz">${esc(String(u[2]).replace(/[！？。]/g,'').slice(0,3))}</div><small>${esc(u[1])} · ${pack.virtual?'Band 2':'Band 1'}</small><h2>${esc(pack.virtual?'Vokabeln & Sätze':(u[3]||u[2]))}</h2>${pack.virtual?'<div style="font-size:14px;font-weight:600;opacity:.9;margin:-8px 0 12px">Aus den Vokabeln deines Kurses · Buchübungen folgen mit den Scans</div>':''}
+    <div class="lp-units">${ord.map(p=>`<button data-u="${esc(p.id)}" class="${p.id===pack.id?'on':''}">${p.virtual||p.band===2?'B2 · '+p.deck.split('-')[1]+(p.band===2?' ●':''):'B1 · '+esc((UNITS.find(x=>x[0]===p.id)||[0,p.unit])[1]).replace('Einheit ','')}</button>`).join('')}</div>
+    <div class="lp-hero"><div class="big lz">${esc(String(u[2]).replace(/[！？。]/g,'').slice(0,3))}</div><small>${esc(u[1])} · ${pack.virtual||pack.band===2?'Band 2':'Band 1'}</small><h2>${esc(pack.virtual?'Vokabeln & Sätze':(u[3]||u[2]))}</h2>${pack.virtual?'<div style="font-size:14px;font-weight:600;opacity:.9;margin:-8px 0 12px">Aus den Vokabeln deines Kurses · Buchübungen folgen mit den Scans</div>':''}
       <div class="pb"><b><i style="width:${Math.round(100*dn/nodes.length)}%"></i></b>${dn} von ${nodes.length} Knoten · je ca. 10 Min.</div></div>
     <div class="lp-path">${nodes.map((n,i)=>{ const d=nodeDone(pack,n), c=i===nxt; return `<div class="lp-node k-${n.kind} ${d?'done':c?'cur':'todo'}" style="transform:translateX(${off[i%off.length]}px)">${c?'<span class="go">START</span>':''}<button class="nb" data-n="${i}" aria-label="${esc(n.sub+': '+n.label)}">${d?CHECK:(n.kind==='words'?`<span class="lz">${esc([...n.words[0].zh][0])}</span>`:ICON[n.kind])}</button><span class="nl ${n.kind==='words'||n.kind==='write'?'lz':''}">${esc(n.label)}</span><span class="ns">${esc(n.kind==='video'&&off_?'Video · nur online':n.sub)}</span></div>`; }).join('')}</div>
   </div><aside class="lp-side">
@@ -2297,7 +2313,7 @@ function lpHome(){
 // ---------------------------------------------------------------- run engine
 let run=null;
 function startNode(pack,node){
-  if(node.kind==='test'){ closeLp(); root.classList.add('show'); applyView(); prevView='home'; openSection(pack,node.ref.pi,node.ref.si); return; }
+  if(node.kind==='test'||node.kind==='book'){ closeLp(); root.classList.add('show'); applyView(); prevView='home'; openSection(pack,node.ref.pi,node.ref.si); return; }
   curLpPack=pack; curPack=pack;
   const items=genItems(pack,node); if(!items.length){ toast('Für diesen Knoten gibt es noch keine Übungen.'); return; }
   run={pack,node,items,i:0,ok:0,tot:0,combo:0,t0:Date.now(),seen:new Set()};

@@ -73,6 +73,7 @@ const css=`
 .bk-ex .ft .msg{font-size:14px;color:var(--ink2);flex:1;min-width:160px}
 .bk-ex .ft .msg.ok{color:var(--jade);font-weight:600}.bk-ex .ft .msg.bad{color:var(--seal)}
 .bk-ex img.pic{max-width:100%;max-height:420px;border-radius:12px;display:block;margin:0 auto 12px}
+.bk-ex img.pic.bkscan{max-height:none;width:100%;border:1px solid var(--line)}
 .bk-note{background:var(--paper2);border:0}
 .bk-note p{margin:8px 0;line-height:1.55;font-size:15.5px}
 .bk-why{margin-top:10px;font-size:14px;color:var(--ink2);background:var(--paper2);border-radius:10px;padding:8px 12px;display:none}
@@ -332,7 +333,8 @@ function stepDone(pack,st){ curPack=pack; if(st.s.test){ return !!(P.tests&&P.te
 function unitProgress(pack){ const p=unitPath(pack); const d=p.filter(x=>stepDone(pack,x)).length; return {d,n:p.length}; }
 function nextStep(pack){ const p=unitPath(pack); return p.find(x=>!stepDone(pack,x))||null; }
 function nextSection(){
-  for(const [id] of UNITS){ const pk=packs.find(x=>x.id===id); if(!pk) continue; const st=nextStep(pk); if(st) return {p:pk,pi:st.pi,si:st.si,s:st.s,pt:st.pt}; }
+  const ids=[]; if(P.last) ids.push(P.last.id); UNITS.forEach(u=>ids.push(u[0])); packs.forEach(p=>ids.push(p.id));
+  for(const id of [...new Set(ids)]){ const pk=packs.find(x=>x.id===id); if(!pk) continue; const st=nextStep(pk); if(st) return {p:pk,pi:st.pi,si:st.si,s:st.s,pt:st.pt}; }
   return null;
 }
 async function loadPacks(){ try{ packs=await listPacks(); }catch(e){ packs=[]; } packs.sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true})); }
@@ -359,8 +361,14 @@ async function showHome(){
       b.onclick=()=>openUnit(pk); }
     g.appendChild(b);
   }
-  for(const pk of packs) if(!UNITS.some(u=>u[0]===pk.id)){ const b=document.createElement('button'); b.className='cu-unit'; b.innerHTML=`<span class="no">${esc(pk.book)}</span><span class="zh">${esc(pk.title||'')}</span><span class="de">${esc(pk.unit)}</span>`; b.onclick=()=>openUnit(pk); g.appendChild(b); }
   w.appendChild(g);
+  const rest=packs.filter(pk=>!UNITS.some(u=>u[0]===pk.id));
+  if(rest.length){ const hd2=document.createElement('div'); hd2.className='cu-head'; hd2.innerHTML='<h2>Band 2</h2>'; w.appendChild(hd2);
+    const g2=document.createElement('div'); g2.className='cu-grid';
+    for(const pk of rest){ const pr=unitProgress(pk); const b2=document.createElement('button'); b2.className='cu-unit'; if(nx&&nx.p.id===pk.id) b2.classList.add('cur'); if(pr.n&&pr.d>=pr.n) b2.classList.add('done');
+      b2.innerHTML=`<span class="no">${esc(pk.unit)}</span><span class="zh">${esc(pk.zh||pk.title||'')}</span><span class="de">${esc(pk.de||pk.book||'')}</span><span class="bar"><i style="width:${pr.n?Math.round(100*pr.d/pr.n):0}%"></i></span><span class="st">${pr.d} von ${pr.n} Schritten</span>`;
+      b2.onclick=()=>openUnit(pk); g2.appendChild(b2); }
+    w.appendChild(g2); }
   $('bkImp').onclick=()=>$('bkFile').click();
   $('bkBody').scrollTop=0;
 }
@@ -495,7 +503,7 @@ function card(ex,inner,opts={}){
   const el=document.createElement('div'); el.className='bk-ex'+(ex.type==='note'?' bk-note':''); el.id='ex-'+ex.id;
   const no=ex.n?`<span class="no">${esc(String(ex.n).replace(/b$/,''))}</span>`:'';
   el.innerHTML=`<div class="hd">${no}<div class="ti">${esc(ex.title||'')}${ex.sub?`<small>${esc(ex.sub)}</small>`:''}</div></div>
-    ${ex.audio?playerHTML(ex.audio):''}<div class="bd">${ex.img?`<img class="pic" src="${mediaUrl(curPack,'img/'+ex.img)||''}" alt="">`:''}${inner}</div>
+    ${ex.audio?playerHTML(ex.audio):''}<div class="bd">${ex.img?`<img class="pic${/^(test|pinyin)/.test(ex.img)?' bkscan':''}" src="${mediaUrl(curPack,'img/'+ex.img)||''}" alt="">`:''}${inner}</div>
     ${ex.selfcheck?`<div class="bk-self">ℹ︎ ${esc(ex.selfcheck)}</div>`:''}${ex.after?`<div class="bk-self">${esc(ex.after)}</div>`:''}
     ${ex.why?`<div class="bk-why">💡 ${esc(ex.why)}</div>`:''}
     ${opts.foot===false?'':`<div class="ft"><span class="msg"></span>${opts.foot||''}</div>`}`;
